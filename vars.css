@@ -1,9 +1,8 @@
 :root{
-    
     /* Primary Colors */
-    --navy-blue: #0b1629;
+    --navy-blue: #0b1629; /* text color */
     --medium-blue: #3965fa;
-    --pale-blue: #e9ebff;
+    --pale-blue: #e9ebff; /* background color */
     --white: #ffffff;
     --light-gray: #ededed;
     --dark-gray: #202020;
@@ -34,5 +33,4 @@
     /* Borders */
     --radius-sm: 6px;
     --radius-md: 12px;
-
 }

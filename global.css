@@ -1,0 +1,14 @@
+@import url('./vars.css');
+
+body {
+  font-family: var(--font-en);
+  font-size: var(--font-size-base);
+  color: var(--navy-blue);
+  background: var(--pale-blue);
+  line-height: var(--line-height-body);
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-ar);
+  direction: rtl;
+}
