@@ -1,0 +1,38 @@
+:root{
+    
+    /* Primary Colors */
+    --navy-blue: #0b1629;
+    --medium-blue: #3965fa;
+    --pale-blue: #e9ebff;
+    --white: #ffffff;
+    --light-gray: #ededed;
+    --dark-gray: #202020;
+
+    /* Secondary Colors */
+    --dark-green: #215452;
+    --medium-green: #8cc63e;
+    --light-green: #e0ffb7;
+    --yellow: #ffd16b;
+    --cream: #fff2d6;
+    --orange: #ff6d47;
+    --dark-red: #6f3432;
+    
+    /* Fonts */
+    --font-en: "DM Sans", sans-serif;
+    --font-ar: "IBM Plex Sans Arabic", sans-serif;
+
+      /* Typography */
+    --font-size-base: 16px;
+    --font-size-heading: 28px;
+    --line-height-body: 1.6;
+
+    /* Spacing */
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+
+    /* Borders */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+
+}
