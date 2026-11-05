@@ -15,10 +15,17 @@
     --cream: #fff2d6;
     --orange: #ff6d47;
     --dark-red: #6f3432;
+    --pale-red: #ffe9e9;
     
     /* Fonts */
     --font-en: "DM Sans", sans-serif;
     --font-ar: "IBM Plex Sans Arabic", sans-serif;
+
+    /* Font weights */
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
 
       /* Typography */
     --font-size-base: 16px;
