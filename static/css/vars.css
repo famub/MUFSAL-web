@@ -5,6 +5,7 @@
     --pale-blue: #e9ebff; /* background color */
     --white: #ffffff;
     --light-gray: #ededed;
+    --medium-grey: #8A94A5;
     --dark-gray: #202020;
 
     /* Secondary Colors */
@@ -29,7 +30,8 @@
 
       /* Typography */
     --font-size-base: 16px;
-    --font-size-heading: 28px;
+    --font-size-h1: 28px;
+    --font-size-h2: 24px;
     --line-height-body: 1.6;
 
     /* Spacing */
@@ -38,6 +40,8 @@
     --spacing-lg: 24px;
 
     /* Borders */
+    --border: 3px;
+    --border-sm: 1px;
     --radius-sm: 6px;
     --radius-md: 12px;
 }

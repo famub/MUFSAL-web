@@ -16,3 +16,21 @@ html[lang="ar"] body {
   font-family: var(--font-ar);
   direction: rtl;
 }
+
+.icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  width: 38px;
+  background-color: var(--pale-blue);
+  color: var(--medium-blue);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.icon-box svg {
+  width: 22px;
+  height: 22px;
+}

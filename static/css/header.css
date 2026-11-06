@@ -1,6 +1,9 @@
+@import url('./vars.css');
+
 header {
   background-color: var(--white);
   border-bottom: 1px solid var(--light-gray);
+  margin-bottom: var(--spacing-lg);
 }
 
 .header-inner {
