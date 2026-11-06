@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>TEMP</title>
+
+  <link rel="stylesheet" href="static/css/global.css" />
+  <link rel="stylesheet" href="static/css/header.css" />
+  <link rel="stylesheet" href="static/css/profiles.css" />
+</head>
+
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div id="header-logo">
+        <a href="dashboard-patient.html" aria-label="MUFSAL home">
+          <img src="assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+      
+      <div class="header-actions">
+        <button type="button" id="lang-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          ع
+        </button>
+
+        <a href="profile-patient.html" class="profile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </a>
+
+        <span class="site-header__rule" aria-hidden="true"></span>
+
+        <a href="logout.html" class="logout-link">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="profile-container">
+
+    <section class="profile-banner">
+
+      <a href="dashboard-patient.html" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Dashboard
+      </a>
+
+      <h1>My Profile</h1>
+      <p class="subtitle">View and manage your personal information and medical history.</p>
+    </section>
+
+
+    <!-- 
+         Card 1: Personal Information
+         The inputs are disabled by default so the card looks like a
+         read-only view. The "Edit Profile" button turns them back on.
+    -->
+    <section class="card profile-card" id="personal-card">
+
+      <div class="card-head">
+        <h2>Personal Information</h2>
+
+        <button type="button" class="btn-edit" data-edit="personal-card">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Profile
+        </button>
+      </div>
+
+      <form class="card-body" novalidate>
+
+        <div class="field-grid">
+
+          <div class="field">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" value="Sarah Ahmed" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+          <div class="field">
+            <label for="health-id">Health ID</label>
+            <div class="field-with-icon">
+              <input type="text" id="health-id" class="input-locked" value="MUF-10842" readonly disabled />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email address</label>
+            <input type="text" inputmode="email" data-check="email" id="email"
+              value="sarah.ahmed@example.com" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <input type="tel" data-check="phone" id="phone" value="+966 50 123 4567" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+          <div class="field">
+            <label for="date-of-birth">Date of Birth</label>
+            <input type="text" id="date-of-birth" data-date-field data-min-age="18" value="1990-06-14" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+          <div class="field">
+            <label for="gender">Gender</label>
+            <select id="gender" required disabled>
+              <option value="">Select gender</option>
+              <option value="Female" selected>Female</option>
+              <option value="Male">Male</option>
+            </select>
+            <p class="error-message"></p>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Changes</button>
+          <button type="button" class="btn-secondary" data-cancel="personal-card">Cancel</button>
+        </div>
+
+      </form>
+    </section>
+
+
+    <!-- 
+         Card 2: Medical History
+         Works exactly like the card above, just with different fields.
+    -->
+    <section class="card profile-card" id="medical-card">
+
+      <div class="card-head">
+        <div class="card-head-title">
+          <div class="icon-box">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-3-3v6" />
+            </svg>
+          </div>
+          <div>
+            <h2>Medical History</h2>
+            <p class="subtitle">Review the health information shared during registration.</p>
+            <!-- Tells the doctor how old these answers are -->
+            <p class="last-updated">Last updated: <span class="last-updated-date">2026-03-18</span></p>
+          </div>
+        </div>
+
+        <button type="button" class="btn-edit" data-edit="medical-card">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Medical History
+        </button>
+      </div>
+
+      <form class="card-body" novalidate>
+
+        <div class="info-banner">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Changes to your medical history will apply to future X-ray cases and will not affect cases already submitted.</span>
+        </div>
+
+        <div class="medical-grid">
+
+          <div class="sub-card">
+            <div class="sub-card-head">
+              <div class="icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-3-3v6" />
+                </svg>
+              </div>
+              <h3>Symptoms</h3>
+            </div>
+
+            <div class="sub-card-body">
+              <div class="field">
+                <label for="symptoms">Reported symptoms</label>
+                <textarea id="symptoms" rows="3" placeholder="No symptoms reported." disabled></textarea>
+                <p class="error-message"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-card">
+            <div class="sub-card-head">
+              <div class="icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </div>
+              <h3>Medications</h3>
+            </div>
+
+            <div class="sub-card-body">
+              <div class="field">
+                <label for="medications">Reported medications</label>
+                <textarea id="medications" rows="3" placeholder="No medications reported." disabled></textarea>
+                <p class="error-message"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-card sub-card--wide">
+            <div class="sub-card-head">
+              <div class="icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3>Medical Questionnaire</h3>
+            </div>
+
+            <div class="sub-card-body">
+              <p class="empty-title">No questionnaire responses are available in this profile.</p>
+              <p class="subtitle">Questions and answer choices will appear here exactly as completed during registration.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Changes</button>
+          <button type="button" class="btn-secondary" data-cancel="medical-card">Cancel</button>
+        </div>
+
+      </form>
+    </section>
+
+  </main>
+
+  <script src="static/js/profiles.js"></script>
+
+</body>
+
+</html>
