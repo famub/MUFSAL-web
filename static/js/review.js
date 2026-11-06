@@ -97,19 +97,10 @@
     document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
   }
 
-  /* ---------------- Mock data (TODO(backend): replace with API calls) ---------------- */
+  /* ---------------- Mock data: static/js/mock-cases.js (TODO(backend): replace with API calls) ---------------- */
   // priority = derived by the backend from predicted grade + confidence (Case.priorityLevel)
-  const CASES = [
-    { id: 101, name: { en: "Noura Alharbi", ar: "نورة الحربي" }, healthId: "HID-100234", source: "patient", date: "2026-11-05", lang: "ar", priority: "high", grade: 3, conf: 0.91, probs: [0.01, 0.02, 0.06, 0.91, 0.00],
-      history: { symptoms: { en: "Pain when climbing stairs, swelling after walking.", ar: "ألم عند صعود الدرج وتورّم بعد المشي." }, meds: { en: "Ibuprofen 400 mg when needed.", ar: "إيبوبروفين 400 ملغ عند الحاجة." }, q: { pain: "7", stiff: "20 min", stairs: "yes", swell: "yes" } } },
-    { id: 102, name: { en: "Abdullah Alotaibi", ar: "عبدالله العتيبي" }, healthId: "HID-100871", source: "radiologist", date: "2026-11-04", lang: "en", priority: "high", grade: 4, conf: 0.88, probs: [0.00, 0.00, 0.02, 0.10, 0.88],
-      history: { symptoms: { en: "Constant pain, limited bending.", ar: "ألم مستمر وصعوبة في ثني الركبة." }, meds: { en: "Paracetamol, topical diclofenac.", ar: "باراسيتامول وديكلوفيناك موضعي." }, q: { pain: "9", stiff: "45 min", stairs: "yes", swell: "yes" } } },
-    { id: 103, name: { en: "Laila Alsaleh", ar: "ليلى الصالح" }, healthId: "HID-100455", source: "patient", date: "2026-11-05", lang: "en", priority: "medium", grade: 2, conf: 0.62, probs: [0.08, 0.24, 0.62, 0.06, 0.00],
-      history: { symptoms: { en: "Occasional pain in the evening.", ar: "ألم متقطع في المساء." }, meds: { en: "None.", ar: "لا يوجد." }, q: { pain: "4", stiff: "10 min", stairs: "no", swell: "no" } } },
-    { id: 104, name: { en: "Faisal Aldosari", ar: "فيصل الدوسري" }, healthId: "HID-100992", source: "radiologist", date: "2026-11-03", lang: "ar", priority: "low", grade: 1, conf: 0.55, probs: [0.30, 0.55, 0.13, 0.02, 0.00], history: null },
-    { id: 105, name: { en: "Maha Alqahtani", ar: "مها القحطاني" }, healthId: "HID-100318", source: "patient", date: "2026-11-02", lang: "en", priority: "low", grade: 0, conf: 0.93, probs: [0.93, 0.05, 0.02, 0.00, 0.00],
-      history: { symptoms: { en: "Mild discomfort after running.", ar: "انزعاج خفيف بعد الجري." }, meds: { en: "None.", ar: "لا يوجد." }, q: { pain: "2", stiff: "0 min", stairs: "no", swell: "no" } } }
-  ];
+  const ALL = window.MUFSAL_MOCK_CASES;
+  const CASES = ALL.filter((c) => c.status === "under_review");   // doctor list = only cases waiting for review
   const RANK = { high: 3, medium: 2, low: 1 };
 
   /* ---------------- Helpers ---------------- */
@@ -158,8 +149,9 @@
 
   /* ================= DETAIL PAGE ================= */
   function initDetail() {
-    const id = Number(new URLSearchParams(location.search).get("id")) || CASES[0].id; // TODO(backend): GET /cases/<id>
-    const c = CASES.find((x) => x.id === id) || CASES[0];
+    const id = new URLSearchParams(location.search).get("id");                          // e.g. C-204817
+    const c = ALL.find((x) => x.id === id) || CASES[0];                                  // TODO(backend): GET /cases/<id>
+    if (c.status === "approved") { location.replace(`view-report.html?id=${c.id}&role=doctor`); return function () {}; }
     let finalGrade = c.grade, edited = false, confirmed = false;
 
     const el = {
@@ -172,8 +164,8 @@
     };
 
     function renderStatic() {
-      document.title = `MUFSAL - ${t("caseNo")} #${c.id}`;
-      $("case-title").textContent = `${t("caseNo")} #${c.id}`;
+      document.title = `MUFSAL - ${t("caseNo")} ${c.id}`;
+      $("case-title").textContent = `${t("caseNo")} ${c.id}`;
       $("case-name").textContent = c.name[lang];
       $("case-prio").innerHTML = prioBadge(c.priority);
       $("conf").textContent = pct(c.conf);
