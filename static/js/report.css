@@ -1,0 +1,48 @@
+/* ==========================================================
+   MUFSAL - View report page (view-report.html). Loaded AFTER review.css (re-uses cards, badges, buttons).
+   ========================================================== */
+
+.report-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
+.grid-report { display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-lg); align-items: start; }
+
+/* the report card follows the report language (dir comes from the element itself) */
+.report { display: flex; flex-direction: column; gap: var(--spacing-lg); font-size: 17px; }
+.report[lang="ar"] { font-family: var(--font-ar); }
+.report[lang="en"] { font-family: var(--font-en); }
+.report-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--spacing-sm); align-items: baseline; }
+.report-head h2 { font-size: var(--font-size-h2); margin: 0; }
+.report h3 { font-size: 16px; font-weight: var(--font-semibold); margin: 0 0 6px; }
+.report-grade { display: flex; align-items: center; gap: var(--spacing-md); background: var(--pale-blue); border-radius: var(--radius-md); padding: var(--spacing-md); }
+.report-grade .grade-circle { background: var(--white); width: 96px; height: 96px; }
+.report-meaning { color: var(--navy-blue); font-size: 17px; }
+.report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }
+.xray-box.small { aspect-ratio: 4 / 3; }
+.advice { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; }
+.words { margin: 0; display: grid; gap: 8px; }
+.words div { background: var(--pale-blue); border-radius: var(--radius-sm); padding: 8px 12px; }
+.words dt { font-weight: var(--font-semibold); }
+.words dd { margin: 0; }
+.disclaimer.left { text-align: start; margin: 0; }
+
+.wait { text-align: center; padding: 56px var(--spacing-lg); }
+.wait h2 { justify-content: center; font-size: 22px; margin: var(--spacing-md) 0 4px; }
+.wait p { margin: 0 0 var(--spacing-md); color: var(--medium-grey); }
+.wait .icon-box { height: 56px; width: 56px; }
+.wait .icon-box svg { width: 28px; height: 28px; }
+
+.clinical h2 { flex-wrap: wrap; }
+.notes-text { margin: 0; background: var(--pale-blue); border-radius: var(--radius-sm); padding: 10px 12px; }
+
+@media (max-width: 900px) {
+  .grid-report, .report-grid { grid-template-columns: 1fr; }
+  .report-grade { flex-direction: column; text-align: center; }
+}
+
+/* ---------- Print / "Download PDF" (demo): only the report is printed ---------- */
+@media print {
+  header, .back-link, .page-head, .clinical, .report-actions, footer { display: none !important; }
+  body { background: var(--white); }
+  .review-main { padding: 0; max-width: none; }
+  .card { border: 0; padding: 0; }
+  .report-grade, .words div { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
