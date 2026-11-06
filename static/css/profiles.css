@@ -1,0 +1,411 @@
+@import url('./vars.css');
+
+/* Styles for the profile pages (patient / doctor / radiologist).
+   The three pages share the same layout, so they share this file. */
+
+
+:root {
+  /* Soft fill used for the read-only fields and the sub-card headers.
+     It is not in vars.css yet, so I keep it here for now. */
+  --field-bg: #f8f9fc;
+}
+
+
+/* ===== Page layout ===== */
+
+.profile-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* The banner stacks its lines, so the back link sits on its own row
+   and only takes the width of its text. */
+.profile-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  color: var(--medium-grey);
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--medium-blue);
+}
+
+.back-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The arrow has to point the other way in Arabic */
+html[lang="ar"] .back-link svg {
+  transform: scaleX(-1);
+}
+
+.profile-banner h1 {
+  margin: 4px 0 0;
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-bold);
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--medium-grey);
+}
+
+
+/* ===== Cards ===== */
+
+.card {
+  background-color: var(--white);
+  border: var(--border-sm) solid var(--light-gray);
+  border-radius: var(--radius-md);
+}
+
+/* A card holding details the admin checked and the user cannot edit */
+.card--verified {
+  border-top: var(--border) solid var(--medium-blue);
+}
+
+/* The head holds the title and the Edit button.
+   The side margin keeps the divider line away from the card edges. */
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin: 0 var(--spacing-lg);
+  padding: var(--spacing-lg) 0;
+  border-bottom: var(--border-sm) solid var(--light-gray);
+}
+
+/* The date of the last save, shown under the card title */
+.last-updated {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  color: var(--medium-grey);
+}
+
+.card-head-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.card-head .subtitle {
+  font-size: 0.875rem;
+}
+
+.profile-card h2 {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-bold);
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+
+/* ===== Buttons ===== */
+
+.btn-edit,
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-edit,
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--navy-blue);
+  border: var(--border-sm) solid var(--light-gray);
+}
+
+.btn-edit:hover,
+.btn-secondary:hover {
+  background-color: var(--pale-blue);
+}
+
+.btn-primary {
+  background-color: var(--medium-blue);
+  color: var(--white);
+  border: var(--border-sm) solid var(--medium-blue);
+  padding-inline: var(--spacing-lg);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-edit svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Save and Cancel are hidden until the patient clicks Edit,
+   and the Edit button hides itself while editing. */
+.form-actions {
+  display: none;
+}
+
+.profile-card.is-editing .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.profile-card.is-editing .btn-edit {
+  display: none;
+}
+
+
+/* ===== Fields ===== */
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md) var(--spacing-lg);
+}
+
+.field label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  color: var(--medium-grey);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px var(--spacing-md);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color: var(--navy-blue);
+  background-color: var(--white);
+  border: var(--border-sm) solid var(--light-gray);
+  border-radius: var(--radius-sm);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--medium-blue);
+}
+
+/* Disabled fields are the normal "view" state of the page, so they
+   keep the normal text colour instead of looking greyed out. */
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+  background-color: var(--field-bg);
+  color: var(--navy-blue);
+  opacity: 1;
+  cursor: default;
+}
+
+/* Hides the dropdown arrow while the gender field is not editable */
+.field select:disabled {
+  appearance: none;
+}
+
+/* Fields the user can never change, like Health ID or the doctor's
+   licence details. They stay locked in both modes. */
+.input-locked:disabled {
+  color: var(--medium-grey);
+}
+
+/* The main credential of the card, such as the SCFHS licence number.
+   Written as .field .input-highlight so it beats the plain
+   ".field input:disabled" rule above, which also sets a background. */
+.field .input-highlight:disabled {
+  background-color: var(--pale-blue);
+  color: var(--medium-blue);
+  font-weight: var(--font-semibold);
+}
+
+.field-with-icon {
+  position: relative;
+}
+
+.field-with-icon input {
+  padding-inline-end: 44px;
+}
+
+/* Only the icon placed directly in the wrapper is pinned to the side.
+   An icon inside .field-note stays in the normal flow next to its text. */
+/* inset-inline-end puts the icon on the correct side in Arabic too */
+.field-with-icon > svg {
+  position: absolute;
+  inset-inline-end: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--medium-blue);
+}
+
+/* A short label inside the field, such as "Protected identifier" */
+.field-note {
+  position: absolute;
+  inset-inline-end: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: var(--font-semibold);
+  color: var(--medium-blue);
+  pointer-events: none;
+}
+
+.field-note svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Keeps the value from running under the note */
+.input-with-note {
+  padding-inline-end: 160px;
+}
+
+
+/* ===== Error messages ===== */
+
+.error-message {
+  display: none;
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  color: var(--orange);
+}
+
+.field.has-error .error-message {
+  display: block;
+}
+
+.field.has-error input,
+.field.has-error select,
+.field.has-error textarea {
+  border-color: var(--orange);
+}
+
+
+/* ===== Medical history ===== */
+
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--pale-blue);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.info-banner svg {
+  width: 18px;
+  height: 18px;
+  color: var(--medium-blue);
+  flex-shrink: 0;
+}
+
+.medical-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+/* The questionnaire card takes the full width of the grid */
+.sub-card--wide {
+  grid-column: 1 / -1;
+}
+
+.sub-card {
+  border: var(--border-sm) solid var(--light-gray);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sub-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--field-bg);
+  border-bottom: var(--border-sm) solid var(--light-gray);
+}
+
+.sub-card h3 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-semibold);
+}
+
+.sub-card-body {
+  padding: var(--spacing-md);
+}
+
+.sub-card .subtitle {
+  font-size: 0.875rem;
+}
+
+/* While viewing, the text areas should read as plain text,
+   so the box around them is removed until editing starts. */
+.sub-card-body textarea:disabled {
+  background-color: transparent;
+  border-color: transparent;
+  padding-inline-start: 0;
+  resize: none;
+}
+
+.empty-title {
+  margin: 0;
+  font-weight: var(--font-bold);
+}
+
+
+/* ===== Small screens ===== */
+
+@media (max-width: 720px) {
+
+  .field-grid,
+  .medical-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
