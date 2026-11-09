@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<!-- lang="{{ lang }}" dir="{{ direction }} -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>radiologist dashboard</title>
+  <!-- <title>{% block title %}{% endblock %}</title> -->
+
+  <link rel="stylesheet" href="static/css/global.css" />
+  <link rel="stylesheet" href="static/css/header.css" />
+  <link rel="stylesheet" href="static/css/dashboards.css" /> <!--{% block extra_css %}{% endblock %}-->
+</head>
+
+  <!-- TO BE DELETED (JUST TESTING CASES!!!) -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchBtn = document.querySelector('.btn-search');
+    const searchInput = document.querySelector('.search-bar');
+
+    const states = {
+      default: document.getElementById('state-default'),
+      review: document.getElementById('state-review'),
+      eligible: document.getElementById('state-eligible'),
+      notFound: document.getElementById('state-not-found')
+    };
+
+    function handleSearch() {
+      const val = searchInput.value.trim().toUpperCase();
+
+      // Hide all state blocks that exist in the HTML
+      Object.values(states).forEach(el => {
+        if (el) el.classList.add('is-hidden');
+      });
+
+      if (!val) {
+        if (states.default) states.default.classList.remove('is-hidden');
+      } else if (val === 'MUF-10842' || val === 'C-240318') {
+        // State 2: Registered + Case already under review
+        if (states.review) states.review.classList.remove('is-hidden');
+      } else if (val === 'MUF-30751' || val === 'MUF-42163' || val === 'C-231104') {
+        // State 3: Registered + Eligible to upload
+        if (states.eligible) {
+          const badgeStrong = states.eligible.querySelector('.selected-patient-box strong');
+          if (badgeStrong) badgeStrong.textContent = val;
+          states.eligible.classList.remove('is-hidden');
+        }
+      } else {
+        // State 4: Unregistered / Not found
+        if (states.notFound) {
+          const notFoundId = states.notFound.querySelector('.not-found-id');
+          if (notFoundId) notFoundId.textContent = val;
+          states.notFound.classList.remove('is-hidden');
+        }
+      }
+    }
+
+    if (searchBtn && searchInput) {
+      // Trigger on button click
+      searchBtn.addEventListener('click', handleSearch);
+
+      // Trigger when pressing "Enter" inside the input box
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSearch();
+        }
+      });
+    }
+  });
+</script>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <div id="header-logo-">
+        <a href="dashboard.html" aria-label="MUFSAL home">
+          <img src="assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="lang-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          ع
+        </button>
+
+        <a href="profile-patient.html" class="profile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+            class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </a>
+
+        <span class="site-header__rule" aria-hidden="true"></span>
+
+        <a href="logout.html" class="logout-link">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <!-- Top Banner -->
+    <section class="dashboard-banner">
+      <div class="banner-text">
+        <span id="dashboard">radiologist dashboard</span>
+        <h1>welcome back, Dr.Nouf Alharbi</h1>
+        <p class="subtitle">Search for registered patients, upload knee X-rays, and track every case you have linked.
+        </p>
+      </div>
+    </section>
+
+    <!-- Card 1: Upload a New X-ray -->
+    <section class="card upload-card">
+      <div class="upload-card-top">
+        <div class="upload-card-header">
+          <h2>Find a patient & upload a new X-ray</h2>
+          <p class="subtitle">Start by confirming the patient is registered with MUFSAL.</p>
+        </div>
+
+        <div class="search-section">
+          <div class="dropzone-info">
+            <div class="icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-person-check" viewBox="0 0 16 16" stroke-width="2">
+                <path
+                  d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m1.679-4.493-1.335 2.226a.75.75 0 0 1-1.174.144l-.774-.773a.5.5 0 0 1 .708-.708l.547.548 1.17-1.951a.5.5 0 1 1 .858.514M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+                <path
+                  d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
+              </svg>
+            </div>
+            <div class="search-input-group">
+              <label for="patient-id-input">Find a patient by their Health ID</label>
+              <input type="text" id="patient-id-input" class="search-bar" placeholder="Enter patient's Health ID"/>
+            </div>
+          </div>
+
+          <button type="button" class="btn-search"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+              viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd" />
+            </svg> search patient</button>
+        </div>
+      </div>
+
+      <!--  =========================================================
+            STATE 1: Registered Patient + Already Has Case Under Review
+            ========================================================= -->
+
+      <div id="state-review" class="workflow-state is-hidden">
+        <div class="patient-found-banner">
+          <div class="found-info">
+            <div class="icon-box icon-box--success">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h3>Registered patient found</h3>
+              <p class="subtitle">The X-ray you upload will be securely linked to this patient.</p>
+            </div>
+          </div>
+
+          <div class="selected-patient-box">
+            <span class="selected-label">Selected patient</span>
+            <strong>MUF-10842</strong>
+            <span class="registered-indicator">Registered</span>
+          </div>
+        </div>
+
+        <div class="state-body">
+          <div class="review-warning-box">
+            <div class="warning-info">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3>An X-ray is already awaiting doctor approval</h3>
+                <p class="subtitle">This patient already has a case under review. A new X-ray can be uploaded after the current case
+                  is approved.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--  =========================================================
+            STATE 2: Registered Patient + Eligible for New Upload
+            ========================================================= -->
+
+      <div id="state-eligible" class="workflow-state is-hidden">
+        <div class="patient-found-banner">
+          <div class="found-info">
+            <div class="icon-box icon-box--success">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h3>Registered patient found</h3>
+              <p class="subtitle">The X-ray you upload will be securely linked to this patient.</p>
+            </div>
+          </div>
+
+          <div class="selected-patient-box">
+            <span class="selected-label">Selected patient</span>
+            <strong>MUF-20417</strong>
+            <span class="registered-indicator"><span class="dot"></span> Registered</span>
+          </div>
+        </div>
+
+        <div class="state-body">
+          <div class="upload-dropzone upload-dropzone--active">
+            <div class="dropzone-info">
+              <div class="icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                </svg>
+              </div>
+              <div>
+                <h3>Upload Knee X-ray</h3>
+                <p class="subtitle">Select a clear knee X-ray file to link to this patient for AI assessment.</p>
+              </div>
+            </div>
+
+            <label class="btn-choose-file btn-choose-file--active">
+              Choose File
+              <input type="file" accept=".jpg,.jpeg,.png,.dcm" hidden />
+            </label>
+          </div>
+
+          <div class="upload-meta">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+            </svg>
+            <span>Accepted formats: JPG, PNG, or DICOM · Maximum file size 20 MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!--  =========================================================
+            STATE 3: Unregistered / Patient Not Found
+            ========================================================= -->
+      <div id="state-not-found" class="workflow-state state-not-found is-hidden">
+        <div class="icon-box icon-box--error">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <div class="not-found-text">
+          <h3>Patient not found</h3>
+          <p class="subtitle">No registered patient was found with this Health ID. The patient must register with MUFSAL before you can upload an X-ray.</p>
+          <strong class="not-found-id">MUF-2000</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card 2: My Cases -->
+    <section class="card cases-card">
+      <div class="cases-card-header">
+        <h2>My linked cases</h2>
+        <p class="subtitle">Your prevouis submissions and assessment reports</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="cases-table">
+          <thead>
+            <tr>
+              <th>Patient Health ID</th>
+              <th>Case id</th>
+              <th>Submission date</th>
+              <th>Status</th>
+              <th>KL grade</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1: Under Review -->
+            <tr>
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                      class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                  </div>
+                  <strong>MUF-10842</strong>
+                </div>
+              </td>
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <strong>C-240318</strong>
+                </div>
+              </td>
+              <td>
+                <div class="date-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Mar 18, 2025</span>
+                </div>
+              </td>
+              <td>
+                <div class="status-cell">
+                  <span class="status-pill status-review">
+                    under review
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="grade-cell">
+                  <span class="grade-pill">
+                    -
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <span>
+                    -
+                    </span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 2: Approved -->
+            <tr>
+              <td>
+                <div class="patient-id-cell">
+                  <div class="icon-box icon-box--sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                      class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                  </div>
+                  <strong>MUF-20417</strong>
+                </div>
+              </td>
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <strong>C-259111</strong>
+                </div>
+              </td>
+              <td>
+                <div class="date-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Jun 29, 2023</span>
+                </div>
+              </td>
+              <td>
+                <div class="status-cell">
+                  <span class="status-pill status-approved">
+                    approved
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="grade-cell">
+                  <span class="grade-pill grade-2">
+                    KL 2
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <span class="view-report">
+                    view report
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</body>
