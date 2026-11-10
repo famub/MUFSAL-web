@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<!-- lang="{{ lang }}" dir="{{ direction }} -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>MUFSAL - Log in</title>
+
+  <link rel="stylesheet" href="static/css/global.css" />
+  <link rel="stylesheet" href="static/css/header.css" />
+  <link rel="stylesheet" href="static/css/profiles.css" />
+  <link rel="stylesheet" href="static/css/auth.css" />
+</head>
+
+<body data-page="login" data-title="loginTitle">
+
+  <header>
+    <div class="header-inner">
+      <div id="header-logo">
+        <a href="login.html" aria-label="MUFSAL home">
+          <img src="assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="lang-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          <span id="lang-label">ع</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-main">
+
+    <section class="auth-head">
+      <h1 data-i18n="loginTitle">Log in to MUFSAL</h1>
+      <p class="subtitle" data-i18n="loginSub">Welcome back. Enter your email and password.</p>
+    </section>
+
+    <section class="card auth-card">
+      <form class="card-body auth-stack" id="login-form" novalidate>
+
+        <div class="alert" id="form-alert" role="alert"></div>
+
+        <div class="field">
+          <label for="email" data-i18n="email">Email address</label>
+          <input type="text" inputmode="email" id="email" autocomplete="username" required />
+          <p class="error-message"></p>
+        </div>
+
+        <div class="field">
+        <label for="password" data-i18n="password">Password</label>
+        <div class="field-with-icon">
+          <input type="password" id="password" autocomplete="current-password"  required />
+          <button type="button" class="pw-toggle" data-target="password" data-i18n-label="showHidePw" aria-label="Show or hide password" aria-pressed="false">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+        <p class="error-message"></p>
+      </div>
+
+        <a class="link link-end" href="forgot-password.html" data-i18n="forgotLink">Forgot password?</a>
+
+        <button type="submit" class="btn-primary btn-block" data-i18n="loginBtn">Log in</button>
+
+        <p class="auth-links">
+          <span data-i18n="noAccount">New to MUFSAL?</span>
+          <a class="link" href="register.html" data-i18n="createAccount">Create an account</a>
+        </p>
+
+      </form>
+    </section>
+
+    <!-- TODO: delete this box before the final version. It only helps the team test every login path. -->
+    <details class="demo-box">
+      <summary data-i18n="demoTitle">Demo accounts (for testing only)</summary>
+      <ul>
+        <li><span data-i18n="demoPatient">Patient</span>: <code>patient@mufsal.test</code></li>
+        <li><span data-i18n="demoRadiologist">Radiologist</span>: <code>radiologist@mufsal.test</code></li>
+        <li><span data-i18n="demoDoctor">Doctor</span>: <code>doctor@mufsal.test</code></li>
+        <li><span data-i18n="demoAdmin">Admin</span>: <code>admin@mufsal.test</code></li>
+        <li><span data-i18n="demoPending">Doctor, pending approval</span>: <code>pending.doctor@mufsal.test</code></li>
+        <li><span data-i18n="demoRejected">Radiologist, rejected</span>: <code>rejected.radiologist@mufsal.test</code></li>
+      </ul>
+      <p data-i18n="demoNote">Password for all of them: Mufsal@123</p>
+    </details>
+
+  </main>
+
+  <script src="static/js/mock-users.js"></script>
+  <script src="static/js/auth.js"></script>
+
+</body>
+
+</html>

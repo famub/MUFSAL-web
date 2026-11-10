@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<!-- lang="{{ lang }}" dir="{{ direction }} -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>MUFSAL - Patient registration</title>
+
+  <link rel="stylesheet" href="static/css/global.css" />
+  <link rel="stylesheet" href="static/css/header.css" />
+  <link rel="stylesheet" href="static/css/profiles.css" />
+  <link rel="stylesheet" href="static/css/auth.css" />
+</head>
+
+<body data-page="register-patient" data-title="patTitle">
+
+  <header>
+    <div class="header-inner">
+      <div id="header-logo">
+        <a href="login.html" aria-label="MUFSAL home">
+          <img src="assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="lang-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          <span id="lang-label">ع</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-main auth-main--wide">
+
+    <section class="auth-head">
+      <h1 data-i18n="patTitle">Patient registration</h1>
+      <p class="subtitle" data-i18n="patSub">Create your account and complete your medical history. Your doctor will see it when reviewing your X-ray.</p>
+    </section>
+
+    <section class="card" id="form-card">
+      <form class="card-body" id="register-form" novalidate>
+
+        <div class="alert" id="form-alert" role="alert" style="margin-bottom: var(--spacing-md)"></div>
+
+        <div class="form-section">
+          <h2 data-i18n="secPersonal">Personal information</h2>
+          <div class="field-grid">
+
+            <div class="field">
+              <label for="full-name" data-i18n="fullName">Full name</label>
+              <input type="text" id="full-name" autocomplete="name" required />
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+              <label for="health-id" data-i18n="healthId">Health ID</label>
+              <input type="text" inputmode="numeric" id="health-id" data-check="healthId" required />
+              <p class="field-hint" data-i18n="healthIdHint">Your Sehhaty health ID (10 digits).</p>
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+              <label for="phone" data-i18n="phone">Phone number</label>
+              <input type="tel" id="phone" autocomplete="tel" data-check="phone" />
+              <p class="field-hint" data-i18n="optionalHint">Optional. You can add it later from your profile.</p>
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+              <label for="dob" data-i18n="dob">Date of birth</label>
+              <input type="date" id="dob" data-check="dob" />
+              <p class="field-hint" data-i18n="optionalHint">Optional. You can add it later from your profile.</p>
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+              <label for="gender" data-i18n="gender">Gender</label>
+              <select id="gender">
+                <option value="" data-i18n="genderSelect">Select gender</option>
+                <option value="Female" data-i18n="female">Female</option>
+                <option value="Male" data-i18n="male">Male</option>
+              </select>
+              <p class="field-hint" data-i18n="optionalHint">Optional. You can add it later from your profile.</p>
+              <p class="error-message"></p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 data-i18n="secAccount">Account</h2>
+          <div class="field-grid">
+
+            <div class="field field--full">
+              <label for="email" data-i18n="email">Email address</label>
+              <input type="text" inputmode="email" id="email" autocomplete="username" data-check="email" required />
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+        <label for="password" data-i18n="password">Password</label>
+        <div class="field-with-icon">
+          <input type="password" id="password" autocomplete="new-password" data-check="password" required />
+          <button type="button" class="pw-toggle" data-target="password" data-i18n-label="showHidePw" aria-label="Show or hide password" aria-pressed="false">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+        <p class="field-hint" data-i18n="pwHint">8 to 20 characters, with an uppercase letter, a lowercase letter, a number and a special character.</p>
+        <p class="error-message"></p>
+      </div>
+
+            <div class="field">
+        <label for="confirm-password" data-i18n="confirmPassword">Confirm password</label>
+        <div class="field-with-icon">
+          <input type="password" id="confirm-password" autocomplete="new-password" data-check="confirm" data-match="password" required />
+          <button type="button" class="pw-toggle" data-target="confirm-password" data-i18n-label="showHidePw" aria-label="Show or hide password" aria-pressed="false">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+        <p class="error-message"></p>
+      </div>
+
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 data-i18n="secMedical">Medical history</h2>
+
+          <div class="info-banner">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span data-i18n="editLater">You can edit your medical history later from your profile.</span>
+          </div>
+
+          <div class="field-grid">
+
+            <div class="field">
+              <label for="symptoms" data-i18n="symptoms">Symptoms</label>
+              <textarea id="symptoms" rows="3" data-i18n-ph="symptomsPh" placeholder="Describe your knee symptoms, or write None." required></textarea>
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+              <label for="medications" data-i18n="medications">Medications</label>
+              <textarea id="medications" rows="3" data-i18n-ph="medicationsPh" placeholder="List the medicines you take, or write None." required></textarea>
+              <p class="error-message"></p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 data-i18n="questionnaireTitle">Medical questionnaire</h2>
+          <p class="subtitle" data-i18n="questionnaireSub">All questions are required. They help your doctor understand your condition together with your X-ray.</p>
+
+          <!-- The questions are built by auth.js from static/js/questionnaire.js -->
+          <div id="questionnaire"></div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="btn-primary" data-i18n="createBtn">Create account</button>
+        </div>
+
+        <p class="auth-links" style="margin-top: var(--spacing-md)">
+          <span data-i18n="haveAccount">Already have an account?</span>
+          <a class="link" href="login.html" data-i18n="loginLink">Log in</a>
+        </p>
+
+      </form>
+    </section>
+
+    <!-- Shown after the account is created -->
+    <section class="card success-card" id="done-card" hidden>
+      <div class="success-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 data-i18n="doneTitle">Account created</h2>
+      <p data-i18n="doneBody">Your account is ready. You can now log in.</p>
+      <a class="btn-primary" href="login.html" data-i18n="goLogin">Go to log in</a>
+    </section>
+
+  </main>
+
+  <script src="static/js/mock-users.js"></script>
+  <script src="static/js/questionnaire.js"></script>
+  <script src="static/js/auth.js"></script>
+
+</body>
+
+</html>
