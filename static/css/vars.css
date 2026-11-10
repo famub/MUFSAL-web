@@ -14,6 +14,7 @@
     --light-green: #e0ffb7;
     --yellow: #ffd16b;
     --cream: #fff2d6;
+    --brown: #7a5a00;
     --orange: #ff6d47;
     --dark-red: #6f3432;
     --pale-red: #ffe9e9;
@@ -41,7 +42,6 @@
 
     /* Borders */
     --border: 3px;
-    --border-sm: 1px;
     --radius-sm: 6px;
     --radius-md: 12px;
 }
