@@ -14,6 +14,7 @@
 }
 
 #dashboard {
+  text-transform: uppercase;
   font-weight: var(--font-bold);
   letter-spacing: 0.08em;
   color: var(--medium-blue);
@@ -222,6 +223,33 @@ html[lang="ar"] .view-report svg {
 .icon-box--sm svg {
   width: 18px;
   height: 18px;
+}
+
+/* 0, 1 => low grade(green) 2, 3 => medium grade(cream/ yellow) 4 => high grade(red)*/
+
+.grade-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: var(--font-bold);
+}
+
+.grade-0, .grade-1 {
+  background-color: var(--light-green);
+  color: var(--dark-green);
+}
+
+.grade-2, .grade-3 {
+  background-color: var(--cream);
+  color: var(--brown);
+}
+
+.grade-4 {
+  background-color: var(--pale-red);
+  color: var(--dark-red);
 }
 
 /* RADIOLOGIST SECTION */
@@ -462,4 +490,192 @@ html[lang="ar"] .view-report svg {
   font-size: 0.875rem;
   color: var(--dark-red);
   margin-top: 4px;
+}
+
+/* DOCTOR SECTION */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+.stat-card .icon-box svg {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-box--warning {
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-bold);
+  line-height: var(--line-height-body);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: var(--font-medium);
+  color: var(--medium-grey);
+}
+
+.pending-cases-card {
+  border-top: var(--border) solid var(--medium-blue);
+}
+
+.view-report a {
+  color: var(--medium-blue);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+}
+
+/* Card Footer for "View All" Navigation */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.footer-note {
+  font-size: 0.8125rem;
+  font-weight: var(--font-medium);
+  color: var(--medium-grey);
+}
+
+.btn-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--pale-blue);
+  color: var(--medium-blue);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+}
+
+.btn-view-all:hover {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+.btn-view-all svg {
+  width: 14px;
+  height: 14px;
+}
+
+html[lang="ar"] .btn-view-all svg {
+  transform: scaleX(-1);
+}
+
+/* CASES */
+.subtitle {
+  margin: 0;
+  color: var(--medium-grey);
+}
+
+/* Filter & Search Toolbar inside Card Header */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.chip {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--pale-blue);
+  color: var(--navy-blue);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"],
+.chip:hover {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+.toolbar-search {
+  max-width: 320px;
+  border: var(--border) solid var(--light-gray);
+}
+
+/* Priority Pills & Confidence Value */
+.confidence-val {
+  color: var(--medium-blue);
+  font-weight: var(--font-bold);
+}
+
+.status-pill {
+  gap: 6px;
+  font-size: 0.8125rem;
+}
+
+.status-pill svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.priority-high {
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+}
+
+.priority-medium {
+  background-color: var(--cream);
+  color: var(--brown);
+}
+
+.priority-low {
+  background-color: var(--light-green);
+  color: var(--dark-green);
+}
+
+/* Empty State inside Card */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--medium-grey);
+  font-weight: var(--font-medium);
+}
+
+.empty-state p {
+  margin: 0;
 }
