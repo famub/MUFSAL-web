@@ -1,0 +1,423 @@
+@import url('./vars.css');
+
+/* Styles for the login, registration and password pages.
+   These pages also load profiles.css, because they reuse its card, field, button and error styles. */
+
+
+/* The hidden attribute must always win, even over rules like display: flex */
+[hidden] {
+  display: none !important;
+}
+
+
+/* ===== Page layout ===== */
+
+.auth-main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* The registration pages have more fields, so they are wider */
+.auth-main--wide {
+  max-width: 860px;
+}
+
+.auth-head {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.auth-head h1 {
+  margin: 0;
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-bold);
+}
+
+.auth-head .subtitle {
+  margin: 8px 0 0;
+}
+
+.auth-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* The language button of the header: the icon needs a size here, because the header has no rule for it */
+#lang-toggle {
+  align-items: center;
+}
+
+#lang-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+/* ===== Links and buttons ===== */
+
+.link {
+  color: var(--medium-blue);
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link-end {
+  align-self: flex-end;
+  font-size: 0.875rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  text-decoration: none;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.auth-links {
+  margin: 0;
+  text-align: center;
+  color: var(--medium-grey);
+  font-size: 0.9375rem;
+}
+
+.auth-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+
+/* ===== Message box at the top of a form ===== */
+
+.alert {
+  display: none;
+  padding: 12px var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.alert.is-visible {
+  display: block;
+}
+
+.alert--error {
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+}
+
+.alert--warn {
+  background-color: var(--cream);
+  color: var(--navy-blue);
+  border: var(--border-sm) solid var(--yellow);
+}
+
+.alert--ok {
+  background-color: var(--light-green);
+  color: var(--dark-green);
+}
+
+
+/* ===== Password field with the eye button ===== */
+
+.pw-toggle {
+  position: absolute;
+  inset-inline-end: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  padding: 6px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--medium-grey);
+  cursor: pointer;
+}
+
+.pw-toggle:hover,
+.pw-toggle[aria-pressed="true"] {
+  color: var(--medium-blue);
+}
+
+.pw-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.field-hint {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  color: var(--medium-grey);
+}
+
+
+/* ===== Choosing the account type ===== */
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background-color: var(--white);
+  border: var(--border-sm) solid var(--light-gray);
+  border-radius: var(--radius-md);
+  color: var(--navy-blue);
+  text-decoration: none;
+}
+
+.role-card:hover {
+  border-color: var(--medium-blue);
+}
+
+.role-card h2 {
+  margin: var(--spacing-sm) 0 0;
+  font-size: 1.25rem;
+  font-weight: var(--font-bold);
+}
+
+.role-card p {
+  margin: 0;
+  color: var(--medium-grey);
+  font-size: 0.9375rem;
+}
+
+
+/* ===== Sections of the registration form ===== */
+
+.form-section + .form-section {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: var(--border-sm) solid var(--light-gray);
+}
+
+.form-section > h2 {
+  margin: 0 0 var(--spacing-md);
+  font-size: 1.125rem;
+  font-weight: var(--font-bold);
+}
+
+.form-section > .subtitle {
+  margin: calc(var(--spacing-sm) * -1) 0 var(--spacing-md);
+  font-size: 0.875rem;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+
+/* ===== Medical questionnaire ===== */
+
+.q-section + .q-section {
+  margin-top: var(--spacing-lg);
+}
+
+.q-section h3 {
+  margin: 0 0 var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--field-bg);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: var(--font-semibold);
+}
+
+.q-item {
+  padding: 12px 0;
+  border-bottom: var(--border-sm) solid var(--light-gray);
+}
+
+.q-item:last-child {
+  border-bottom: none;
+}
+
+.q-question {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 0.9375rem;
+  font-weight: var(--font-semibold);
+}
+
+.q-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+/* Each answer is a button-like label. The real radio/checkbox is hidden but stays clickable. */
+.q-option {
+  position: relative;
+}
+
+.q-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.q-option span {
+  display: inline-block;
+  padding: 8px 14px;
+  background-color: var(--white);
+  border: var(--border-sm) solid var(--light-gray);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+}
+
+.q-option:hover span {
+  border-color: var(--medium-blue);
+}
+
+.q-option input:checked + span {
+  background-color: var(--pale-blue);
+  border-color: var(--medium-blue);
+  color: var(--medium-blue);
+  font-weight: var(--font-semibold);
+}
+
+.q-option input:focus-visible + span {
+  outline: 2px solid var(--medium-blue);
+  outline-offset: 2px;
+}
+
+.q-item.has-error .error-message {
+  display: block;
+}
+
+.q-item.has-error .q-question {
+  color: var(--orange);
+}
+
+.bmi-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md) var(--spacing-lg);
+}
+
+.bmi-text {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  color: var(--medium-blue);
+}
+
+/* Urgent-care notice, shown only when a serious warning sign is ticked */
+.notice {
+  display: none;
+  margin: var(--spacing-sm) 0 0;
+  padding: 10px var(--spacing-md);
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+}
+
+.notice.is-visible {
+  display: block;
+}
+
+
+/* ===== Finished (success) card ===== */
+
+.success-card {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--spacing-md);
+  background-color: var(--light-green);
+  color: var(--dark-green);
+  border-radius: 50%;
+}
+
+.success-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.success-card h2 {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-bold);
+}
+
+.success-card p {
+  margin: var(--spacing-sm) 0 var(--spacing-lg);
+  color: var(--medium-grey);
+}
+
+
+/* ===== Demo accounts box (remove before the final version) ===== */
+
+.demo-box {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--white);
+  border: var(--border-sm) dashed var(--medium-grey);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.demo-box summary {
+  cursor: pointer;
+  font-weight: var(--font-semibold);
+  color: var(--medium-grey);
+}
+
+.demo-box ul {
+  margin: var(--spacing-sm) 0;
+  padding-inline-start: 20px;
+}
+
+.demo-box code {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+
+/* ===== Small screens ===== */
+
+@media (max-width: 720px) {
+
+  .role-grid,
+  .bmi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-actions {
+    flex-direction: column-reverse;
+  }
+
+  .auth-actions .btn-primary,
+  .auth-actions .btn-secondary {
+    width: 100%;
+  }
+}
