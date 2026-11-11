@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<!-- lang="{{ lang }}" dir="{{ direction }} -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>TEMP</title>
+  <!-- <title>{% block title %}{% endblock %}</title> -->
+
+  <link rel="stylesheet" href="static/css/global.css" />
+  <link rel="stylesheet" href="static/css/header.css" />
+  <link rel="stylesheet" href="static/css/profiles.css" /> <!--{% block extra_css %}{% endblock %}-->
+</head>
+
+<body>
+
+  <!-- Shared header, same one used in the dashboard pages -->
+  <header>
+    <div class="header-inner">
+      <div id="header-logo">
+        <a href="dashboard-admin.html" aria-label="MUFSAL home">
+          <img src="assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="lang-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          ع
+        </button>
+
+        <a href="profile-admin.html" class="profile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </a>
+
+        <span class="site-header__rule" aria-hidden="true"></span>
+
+        <a href="logout.html" class="logout-link">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="profile-container">
+
+    <!-- Page title -->
+    <section class="profile-banner">
+
+      <!-- Takes the admin back without using the browser back button -->
+      <a href="dashboard-admin.html" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Dashboard
+      </a>
+
+      <h1>My Profile</h1>
+      <p class="subtitle">Manage your account details and the security of this administrator account.</p>
+    </section>
+
+
+    <!-- ============================================================
+         Card 1: Account Information
+         MUFSAL has one administrator, so the role itself is fixed.
+         Only the contact details can be edited.
+         ============================================================ -->
+    <section class="card profile-card card--verified" id="account-card">
+
+      <div class="card-head">
+        <h2>Account Information</h2>
+
+        <button type="button" class="btn-edit" data-edit="account-card">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Profile
+        </button>
+      </div>
+
+      <form class="card-body" novalidate>
+
+        <div class="field-grid">
+
+          <!-- Full name -->
+          <div class="field">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" value="Maha Alshehri" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+          <!-- The system has a single administrator, so the role never changes -->
+          <div class="field">
+            <label for="role">Account Role</label>
+            <input type="text" id="role" class="input-locked input-highlight"
+              value="Administrator" readonly disabled />
+          </div>
+
+          <!-- Email. It is a text box and not type="email" on purpose:
+               a real email box lets the browser rewrite an Arabic domain
+               by itself, so the Arabic check in the script never sees it.
+               inputmode keeps the email keyboard on phones. -->
+          <div class="field">
+            <label for="email">Email Address</label>
+            <input type="text" inputmode="email" data-check="email" id="email"
+              value="maha.alshehri@mufsal.sa" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+          <!-- Phone number -->
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <input type="tel" data-check="phone" id="phone" value="+966 50 123 4567" required disabled />
+            <p class="error-message"></p>
+          </div>
+
+        </div>
+
+        <!-- These two buttons only show up while the card is in edit mode -->
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Changes</button>
+          <button type="button" class="btn-secondary" data-cancel="account-card">Cancel</button>
+        </div>
+
+      </form>
+    </section>
+
+
+    <!-- ============================================================
+         Card 2: Security
+         This account can approve professionals and delete any user,
+         so its password matters more than anyone else's. The card has
+         no Edit button, so the script skips it.
+         ============================================================ -->
+    <section class="card profile-card" id="security-card">
+
+      <div class="card-head">
+        <div class="card-head-title">
+          <div class="icon-box">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <div>
+            <h2>Security</h2>
+            <p class="subtitle">This account can approve professionals and remove users, so keep its password strong.</p>
+          </div>
+        </div>
+
+        <!-- TODO(backend): point this at the real change-password page -->
+        <a href="reset-password.html" class="btn-edit">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
+          Change Password
+        </a>
+      </div>
+
+      <div class="card-body">
+        <div class="field-grid">
+
+          <!-- The real password is never written into the page -->
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="text" id="password" class="input-locked" value="••••••••••••" readonly disabled />
+          </div>
+
+          <!-- Lets the admin notice a sign-in that was not theirs -->
+          <div class="field">
+            <label for="last-sign-in">Last Sign-in</label>
+            <input type="text" id="last-sign-in" class="input-locked" value="2026-11-11, 09:14" readonly disabled />
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="static/js/profiles.js"></script>
+
+</body>
+
+</html>

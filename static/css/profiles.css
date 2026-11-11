@@ -136,6 +136,8 @@ html[lang="ar"] .back-link svg {
   font-weight: var(--font-semibold);
   cursor: pointer;
   white-space: nowrap;
+  /* Some of these are links, like Change Password on the admin page */
+  text-decoration: none;
 }
 
 .btn-edit,
