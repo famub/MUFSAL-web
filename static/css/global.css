@@ -34,3 +34,11 @@ html[lang="ar"] body {
   width: 40px;
   height: 40px;
 }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--medium-blue); text-decoration: none;
+  font-weight: var(--font-medium); margin-bottom: var(--spacing-md);
+}
+.back-link:hover { text-decoration: underline; }
+html[dir="rtl"] .back-link svg, html[lang="ar"] .back-link svg { transform: scaleX(-1); }
