@@ -89,7 +89,15 @@
               { v: "rapid",      en: "Pain has worsened quickly over recent weeks",  ar: "ازداد الألم بسرعة خلال الأسابيع الأخيرة" },
               { v: "night",      en: "Pain wakes you at night, or unexplained weight loss", ar: "الألم يوقظك ليلًا، أو نقص وزن غير مفسَّر" },
               { v: "none",       en: "None of these",                                ar: "لا شيء مما سبق" }
-            ] }
+            ],
+            // A free text box under the list, for anything it does not cover.
+            // The profile page shows it; the registration form still has to.
+            other: {
+              label: { en: "If you have other symptoms, write them here",
+                       ar: "إذا كانت لديك أعراض أخرى، اكتبها هنا" },
+              placeholder: { en: "No other symptoms reported.",
+                             ar: "لا توجد أعراض أخرى." }
+            } }
         ]
       },
       {
