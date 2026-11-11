@@ -12,6 +12,12 @@
 .report-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--spacing-sm); align-items: baseline; }
 .report-head h2 { font-size: var(--font-size-h2); margin: 0; }
 .report h3 { font-size: 16px; font-weight: var(--font-semibold); margin: 0 0 6px; }
+/* Arabic / English tabs of the report */
+.report-tabs { display: inline-flex; gap: 4px; background: var(--pale-blue); border-radius: var(--radius-md); padding: 4px; margin-bottom: var(--spacing-md); }
+.report-tab { border: 0; background: transparent; padding: 8px 18px; border-radius: var(--radius-sm); font: inherit; font-weight: var(--font-semibold); color: var(--navy-blue); cursor: pointer; }
+.report-tab[aria-selected="true"] { background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.report-tab:focus-visible { outline: 2px solid var(--navy-blue); outline-offset: 2px; }
+
 .report-grade { display: flex; align-items: center; gap: var(--spacing-md); background: var(--pale-blue); border-radius: var(--radius-md); padding: var(--spacing-md); }
 .report-grade .grade-circle { background: var(--white); width: 96px; height: 96px; }
 .report-meaning { color: var(--navy-blue); font-size: 17px; }
@@ -40,7 +46,7 @@
 
 /* ---------- Print / "Download PDF" (demo): only the report is printed ---------- */
 @media print {
-  header, .back-link, .page-head, .clinical, .report-actions, footer { display: none !important; }
+  header, .back-link, .report-tabs, .page-head, .clinical, .report-actions, footer { display: none !important; }
   body { background: var(--white); }
   .review-main { padding: 0; max-width: none; }
   .card { border: 0; padding: 0; }
