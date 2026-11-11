@@ -4,8 +4,7 @@
    - patient / radiologist ("receivers"): the simplified report, only after the doctor approved.
      Before approval: only the status "Under Review" (no grade, no heatmap - NFR-R1).
    - doctor: the same report + a read-only clinical summary (AI vs final grade, clinical notes).
-   The REPORT is available in Arabic AND English (two tabs on the report card). It opens in the language chosen
-   by whoever submitted the case (case.lang); the rest of the page follows the header's language button.
+   The whole page, including the report, follows the header's language button (default: English).
    MOCK data now (static/js/mock-cases.js). Backend hooks are marked TODO(backend).
    ========================================================== */
 (function () {
@@ -17,7 +16,7 @@
       back: "Back to dashboard", caseNo: "Case", approved: "Approved", underReview: "Under review",
       download: "Download PDF", patient: "Patient", healthId: "Health ID", source: "Source",
       srcPatient: "Patient-submitted", srcRadiologist: "Radiologist-linked", submitted: "Submitted",
-      approvedOn: "Approved on", doctor: "Reviewed by", reportLang: "Submitted in",
+      approvedOn: "Approved on", doctor: "Reviewed by",
       langName: { ar: "Arabic", en: "English" },
       waitTitle: "Your report is not ready yet",
       waitText: "A doctor is reviewing this case. The report will appear here as soon as it is approved.",
@@ -27,13 +26,13 @@
       clinical: "Clinical summary", aiGrade: "AI predicted grade", finalGrade: "Final grade (doctor)",
       confidence: "AI confidence", edited: "Edited by doctor", same: "Same as AI", notes: "Clinical notes",
       doctorOnly: "Visible to doctors only", notFound: "Case not found.",
-      printHint: "The PDF is created in the report language you have selected.", reportTabs: "Report language"
+      printHint: "The PDF is created in the current language."
     },
     ar: {
       back: "العودة إلى لوحة التحكم", caseNo: "الحالة", approved: "معتمدة", underReview: "قيد المراجعة",
       download: "تنزيل PDF", patient: "المريض", healthId: "الرقم الصحي", source: "المصدر",
       srcPatient: "مرفوعة من المريض", srcRadiologist: "مرفوعة من الأخصائي", submitted: "تاريخ الإرسال",
-      approvedOn: "تاريخ الاعتماد", doctor: "راجعها", reportLang: "لغة الإرسال",
+      approvedOn: "تاريخ الاعتماد", doctor: "راجعها",
       langName: { ar: "العربية", en: "الإنجليزية" },
       waitTitle: "تقريرك ليس جاهزاً بعد",
       waitText: "يقوم طبيب بمراجعة هذه الحالة. سيظهر التقرير هنا فور اعتماده.",
@@ -43,7 +42,7 @@
       clinical: "الملخص السريري", aiGrade: "الدرجة المتوقعة بالذكاء الاصطناعي", finalGrade: "الدرجة النهائية (الطبيب)",
       confidence: "ثقة الذكاء الاصطناعي", edited: "عدّلها الطبيب", same: "مطابقة للذكاء الاصطناعي", notes: "الملاحظات السريرية",
       doctorOnly: "تظهر للأطباء فقط", notFound: "الحالة غير موجودة.",
-      printHint: "يُنشأ ملف PDF بلغة التقرير المختارة.", reportTabs: "لغة التقرير"
+      printHint: "يُنشأ ملف PDF باللغة الحالية."
     }
   };
 
@@ -93,7 +92,6 @@
   const role = ["patient", "doctor", "radiologist"].includes(params.get("role")) ? params.get("role") : "patient";
   const c = ALL.find((x) => x.id === params.get("id")) || ALL.find((x) => x.status === "approved");
 
-  let repLang = null;                 // language of the report card (tabs); starts as the case language
   let lang = "en";
   try { lang = localStorage.getItem("mufsal-lang") || document.documentElement.lang || "en"; } catch (e) {}
   if (lang !== "ar") lang = "en";
@@ -140,13 +138,8 @@
     }
 
     /* ---- approved: the simplified report (in the case language) ---- */
-    if (!repLang) repLang = c.lang;
-    const L = repLang, r = R[L], g = c.finalGrade;
-    const tabsHtml = `
-      <div class="report-tabs" role="tablist" aria-label="${esc(t("reportTabs"))}">
-        ${["ar", "en"].map((l) => `<button type="button" role="tab" class="report-tab" data-rl="${l}" aria-selected="${l === L}">${l === "ar" ? "العربية" : "English"}</button>`).join("")}
-      </div>`;
-    const reportHtml = tabsHtml + `
+    const L = lang, r = R[L], g = c.finalGrade;
+    const reportHtml = `
       <article class="card report" lang="${L}" dir="${L === "ar" ? "rtl" : "ltr"}">
         <div class="report-head">
           <h2>${esc(r.title)}</h2>
@@ -198,14 +191,12 @@
           <div class="kv"><dt>${esc(t("submitted"))}</dt><dd>${esc(fmtDate(c.date, lang))}</dd></div>
           <div class="kv"><dt>${esc(t("approvedOn"))}</dt><dd>${esc(fmtDate(c.approvedAt, lang))}</dd></div>
           <div class="kv"><dt>${esc(t("doctor"))}</dt><dd>${esc(c.doctor[lang])}</dd></div>
-          <div class="kv"><dt>${esc(t("reportLang"))}</dt><dd>${esc(T[lang].langName[c.lang])}</dd></div>
         </dl>
         <h3 class="hint" style="margin-top:16px">${esc(t("notes"))}</h3>
         <p class="notes-text">${esc(c.notes[lang])}</p>
       </aside>`;
 
-    view.innerHTML = role === "doctor" ? `<div class="grid-report"><div>${reportHtml}</div>${doctorHtml}</div>` : reportHtml;
-    view.querySelectorAll(".report-tab").forEach((b) => b.addEventListener("click", () => { repLang = b.dataset.rl; render(); }));
+    view.innerHTML = role === "doctor" ? `<div class="grid-report">${reportHtml}${doctorHtml}</div>` : reportHtml;
   }
 
   $("download-btn").addEventListener("click", () => window.print());   // demo only: prints just the report
