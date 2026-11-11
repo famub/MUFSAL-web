@@ -24,7 +24,7 @@
       errGrade: "Please enter a whole number from 0 to 4.",
       caseInfo: "Case information", patient: "Patient", healthId: "Health ID", source: "Source",
       submitted: "Submitted", reportLang: "Report language", priority: "Priority",
-      history: "Medical history", symptoms: "Symptoms", medications: "Medications",
+      history: "Medical history", medications: "Medications",
       questionnaire: "Questionnaire answers", noHistory: "The patient did not provide medical history.",
       decision: "Doctor decision", notes: "Clinical notes", notesPh: "Write your clinical notes about this case...",
       notesHint: "Clinical notes are required before you can confirm the result.",
@@ -61,7 +61,7 @@
       errGrade: "الرجاء إدخال رقم صحيح من 0 إلى 4.",
       caseInfo: "معلومات الحالة", patient: "المريض", healthId: "الرقم الصحي", source: "المصدر",
       submitted: "تاريخ الإرسال", reportLang: "لغة التقرير", priority: "الأولوية",
-      history: "التاريخ الطبي", symptoms: "الأعراض", medications: "الأدوية",
+      history: "التاريخ الطبي", medications: "الأدوية",
       questionnaire: "إجابات الاستبيان", noHistory: "لم يقدّم المريض تاريخاً طبياً.",
       decision: "قرار الطبيب", notes: "الملاحظات السريرية", notesPh: "اكتب ملاحظاتك السريرية عن هذه الحالة...",
       notesHint: "الملاحظات السريرية مطلوبة قبل اعتماد النتيجة.",
@@ -149,7 +149,7 @@
 
   /* ================= DETAIL PAGE ================= */
   function initDetail() {
-    const id = new URLSearchParams(location.search).get("id");                          // e.g. C-204817
+    const id = new URLSearchParams(location.search).get("id");                          // e.g. 204817
     const c = ALL.find((x) => x.id === id) || CASES[0];                                  // TODO(backend): GET /cases/<id>
     if (c.status === "approved") { location.replace(`view-report.html?id=${c.id}&role=doctor`); return function () {}; }
     let finalGrade = c.grade, edited = false, confirmed = false;
@@ -177,7 +177,6 @@
 
       const h = c.history;
       $("history").innerHTML = !h ? `<p class="muted">${esc(t("noHistory"))}</p>` : `
-        <div class="history-block"><h3>${esc(t("symptoms"))}</h3><p>${esc(h.symptoms[lang])}</p></div>
         <div class="history-block"><h3>${esc(t("medications"))}</h3><p>${esc(h.meds[lang])}</p></div>
         <div class="history-block"><h3>${esc(t("questionnaire"))}</h3><ul class="qa">${
           Object.entries(h.q).map(([k, v]) => {
