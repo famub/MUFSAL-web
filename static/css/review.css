@@ -168,7 +168,8 @@ textarea.field { min-height: 130px; resize: vertical; }
 .history-block p { margin: 0; }
 .qa { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .qa li { display: flex; justify-content: space-between; gap: var(--spacing-md); background: var(--pale-blue); border-radius: var(--radius-sm); padding: 8px 12px; }
-.qa li span:last-child { font-weight: var(--font-semibold); text-align: end; }
+.qa li span:first-child { flex: 1; }
+.qa li span:last-child { max-width: 55%; font-weight: var(--font-semibold); text-align: end; }
 .muted { color: var(--medium-grey); }
 
 /* Decision */
