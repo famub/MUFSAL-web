@@ -24,8 +24,8 @@
       errGrade: "Please enter a whole number from 0 to 4.",
       caseInfo: "Case information", patient: "Patient", healthId: "Health ID", source: "Source",
       submitted: "Submitted", reportLang: "Report language", priority: "Priority",
-      history: "Medical history", medications: "Medications",
-      questionnaire: "Questionnaire answers", noHistory: "The patient did not provide medical history.",
+      history: "Medical history",
+      noHistory: "The patient did not provide medical history.",
       decision: "Doctor decision", notes: "Clinical notes", notesPh: "Write your clinical notes about this case...",
       notesHint: "Clinical notes are required before you can confirm the result.",
       errNotes: "Please enter clinical notes before confirming.",
@@ -42,7 +42,24 @@
         "Multiple osteophytes, definite joint space narrowing, mild sclerosis.",
         "Large osteophytes, significant joint narrowing, severe sclerosis."
       ],
-      qs: { pain: "Pain level (0-10)", stiff: "Morning stiffness", stairs: "Difficulty with stairs", swell: "Knee swelling" },
+      qn: {
+        sections: [
+          { title: "About your knee", rows: [{ k: "knee", q: "Which knee is bothering you?", o: { right: "Right", left: "Left", both: "Both" } }] },
+          { title: "Clinical screening", rows: [
+            { k: "movement", q: "Does your knee pain get worse with movement or use, and ease with rest?", o: { yes: "Yes", no: "No" } },
+            { k: "stiffness", q: "When you wake up, how long does knee stiffness last?", o: { none: "No stiffness", le30: "30 minutes or less", gt30: "More than 30 minutes" } }] },
+          { title: "Symptom severity (last week)", rows: [
+            { k: "stairs", q: "Pain going up or down stairs", o: { none: "None", mild: "Mild", moderate: "Moderate", severe: "Severe", extreme: "Extreme" } },
+            { k: "rising", q: "Difficulty rising from sitting", o: { none: "None", mild: "Mild", moderate: "Moderate", severe: "Severe", extreme: "Extreme" } }] },
+          { title: "Warning signs", rows: [{ k: "warnings", q: "Do any of these apply to you now?", multi: true, o: {
+            injury: "Knee injury or accident in the last 6 weeks", hot: "Knee is hot, red or very swollen", fever: "Fever along with the knee pain",
+            worsened: "Pain has worsened quickly over recent weeks", night: "Pain wakes you at night, or unexplained weight loss" } }] },
+          { title: "Risk factors", rows: [
+            { k: "body", q: "Height and weight" },
+            { k: "prior", q: "Have you ever injured this knee or had knee surgery?", o: { yes: "Yes", no: "No" } }] }
+        ],
+        none: "None of these", cm: "cm", kg: "kg", bmi: "BMI"
+      },
       yes: "Yes", no: "No", min: "min"
     },
     ar: {
@@ -61,8 +78,8 @@
       errGrade: "الرجاء إدخال رقم صحيح من 0 إلى 4.",
       caseInfo: "معلومات الحالة", patient: "المريض", healthId: "الرقم الصحي", source: "المصدر",
       submitted: "تاريخ الإرسال", reportLang: "لغة التقرير", priority: "الأولوية",
-      history: "التاريخ الطبي", medications: "الأدوية",
-      questionnaire: "إجابات الاستبيان", noHistory: "لم يقدّم المريض تاريخاً طبياً.",
+      history: "التاريخ الطبي",
+      noHistory: "لم يقدّم المريض تاريخاً طبياً.",
       decision: "قرار الطبيب", notes: "الملاحظات السريرية", notesPh: "اكتب ملاحظاتك السريرية عن هذه الحالة...",
       notesHint: "الملاحظات السريرية مطلوبة قبل اعتماد النتيجة.",
       errNotes: "الرجاء كتابة الملاحظات السريرية قبل الاعتماد.",
@@ -79,7 +96,24 @@
         "نتوءات عظمية متعددة وتضيّق مؤكد في المفصل وتصلّب خفيف.",
         "نتوءات عظمية كبيرة وتضيّق واضح في المفصل وتصلّب شديد."
       ],
-      qs: { pain: "مستوى الألم (0-10)", stiff: "تيبّس الصباح", stairs: "صعوبة في الدرج", swell: "تورّم الركبة" },
+      qn: {
+        sections: [
+          { title: "عن ركبتك", rows: [{ k: "knee", q: "أي ركبة تزعجك؟", o: { right: "اليمنى", left: "اليسرى", both: "الاثنتان" } }] },
+          { title: "الفحص السريري", rows: [
+            { k: "movement", q: "هل يزداد ألم ركبتك مع الحركة أو الاستخدام ويخف مع الراحة؟", o: { yes: "نعم", no: "لا" } },
+            { k: "stiffness", q: "عند الاستيقاظ، كم يدوم تيبّس الركبة؟", o: { none: "لا يوجد تيبّس", le30: "30 دقيقة أو أقل", gt30: "أكثر من 30 دقيقة" } }] },
+          { title: "شدة الأعراض (الأسبوع الماضي)", rows: [
+            { k: "stairs", q: "الألم عند صعود الدرج أو نزوله", o: { none: "لا يوجد", mild: "خفيف", moderate: "متوسط", severe: "شديد", extreme: "شديد جداً" } },
+            { k: "rising", q: "صعوبة النهوض من الجلوس", o: { none: "لا يوجد", mild: "خفيف", moderate: "متوسط", severe: "شديد", extreme: "شديد جداً" } }] },
+          { title: "علامات التحذير", rows: [{ k: "warnings", q: "هل ينطبق عليك أي مما يلي الآن؟", multi: true, o: {
+            injury: "إصابة أو حادث في الركبة خلال آخر 6 أسابيع", hot: "الركبة ساخنة أو حمراء أو متورمة جداً", fever: "حمّى مع ألم الركبة",
+            worsened: "ازداد الألم بسرعة خلال الأسابيع الأخيرة", night: "الألم يوقظك ليلاً أو نقص وزن غير مبرر" } }] },
+          { title: "عوامل الخطر", rows: [
+            { k: "body", q: "الطول والوزن" },
+            { k: "prior", q: "هل سبق أن أصبت هذه الركبة أو أجريت لها جراحة؟", o: { yes: "نعم", no: "لا" } }] }
+        ],
+        none: "لا شيء مما سبق", cm: "سم", kg: "كجم", bmi: "مؤشر كتلة الجسم"
+      },
       yes: "نعم", no: "لا", min: "دقيقة"
     }
   };
@@ -175,14 +209,19 @@
         [t("submitted"), esc(fmtDate(c.date))], [t("reportLang"), esc(T[lang].langName[c.lang])], [t("priority"), prioBadge(c.priority)]
       ].map(([k, v]) => `<div class="kv"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("");
 
-      const h = c.history;
-      $("history").innerHTML = !h ? `<p class="muted">${esc(t("noHistory"))}</p>` : `
-        <div class="history-block"><h3>${esc(t("medications"))}</h3><p>${esc(h.meds[lang])}</p></div>
-        <div class="history-block"><h3>${esc(t("questionnaire"))}</h3><ul class="qa">${
-          Object.entries(h.q).map(([k, v]) => {
-            const val = v === "yes" ? t("yes") : v === "no" ? t("no") : v.replace("min", t("min"));
-            return `<li><span>${esc(t("qs")[k])}</span><span>${esc(val)}</span></li>`;
-          }).join("")}</ul></div>`;
+      const h = c.history, Q = t("qn");
+      const answer = (r) => {
+        if (r.k === "body") {
+          const bmi = (h.weight / Math.pow(h.height / 100, 2)).toFixed(1);
+          return `${h.height} ${Q.cm} / ${h.weight} ${Q.kg} - ${Q.bmi} ${bmi}`;
+        }
+        if (r.multi) return h[r.k].length ? h[r.k].map((x) => r.o[x]).join(lang === "ar" ? "، " : ", ") : Q.none;
+        return r.o[h[r.k]];
+      };
+      // same questions and answers as the patient's registration questionnaire
+      $("history").innerHTML = !h ? `<p class="muted">${esc(t("noHistory"))}</p>` : Q.sections.map((sec) => `
+        <div class="history-block"><h3>${esc(sec.title)}</h3><ul class="qa">${
+          sec.rows.map((r) => `<li><span>${esc(r.q)}</span><span>${esc(answer(r))}</span></li>`).join("")}</ul></div>`).join("");
 
       $("probs").innerHTML = c.probs.map((p, i) => `
         <li class="prob ${i === c.grade ? "top" : ""}">
