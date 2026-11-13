@@ -1,33 +1,227 @@
 /* ==========================================================
-   MUFSAL - MOCK case data shared by review.js and report.js
+   MUFSAL - MOCK case data shared by review.js, report.js and dashboard-cases.js
    TODO(backend): delete this file once the pages read real cases from the API.
-   Case ID format: 6 digits (e.g. 204817). Validate with /^\d{6}$/.
+
+   Case ID: a simple running number that starts at 1 (1, 2, 3 ...), oldest case first.
+   TODO(backend): the server generates the number (auto-increment).
    status: "under_review" (waiting for the doctor) | "approved" (doctor confirmed)
    grade      = grade predicted by the AI
    finalGrade = grade confirmed by the doctor (only when approved; can differ from grade)
+   source     = "patient" (the patient uploaded the X-ray) | "radiologist" (a radiologist uploaded it)
+   healthId   = the patient's Health ID. Cases of the demo patient account (Sarah Ahmed, 1098765432)
+                show up on the patient dashboard; "radiologist" cases show up on the radiologist dashboard;
+                the doctor sees all cases.
+   history    = the answers of the patient's registration questionnaire (same questions as register-patient.html)
    ========================================================== */
 window.MUFSAL_MOCK_CASES = [
-  /* ---------- waiting for the doctor ----------
-     history = the answers of the patient's registration questionnaire (same questions as register-patient.html) */
-  { id: "204817", status: "under_review", name: { en: "Noura Alharbi", ar: "نورة الحربي" }, healthId: "HID-100234", source: "patient", date: "2026-11-05", lang: "ar", priority: "high", grade: 3, conf: 0.91, probs: [0.01, 0.02, 0.06, 0.91, 0.00],
-    history: { knee: "right", movement: "yes", stiffness: "le30", stairs: "severe", rising: "moderate", warnings: ["hot"], height: 162, weight: 78, prior: "no" } },
-  { id: "381052", status: "under_review", name: { en: "Abdullah Alotaibi", ar: "عبدالله العتيبي" }, healthId: "HID-100871", source: "radiologist", date: "2026-11-04", lang: "en", priority: "high", grade: 4, conf: 0.88, probs: [0.00, 0.00, 0.02, 0.10, 0.88],
-    history: { knee: "both", movement: "yes", stiffness: "gt30", stairs: "extreme", rising: "severe", warnings: ["worsened", "night"], height: 175, weight: 96, prior: "yes" } },
-  { id: "517326", status: "under_review", name: { en: "Laila Alsaleh", ar: "ليلى الصالح" }, healthId: "HID-100455", source: "patient", date: "2026-11-05", lang: "en", priority: "medium", grade: 2, conf: 0.62, probs: [0.08, 0.24, 0.62, 0.06, 0.00],
-    history: { knee: "left", movement: "yes", stiffness: "le30", stairs: "mild", rising: "none", warnings: [], height: 158, weight: 64, prior: "no" } },
-  { id: "640293", status: "under_review", name: { en: "Faisal Aldosari", ar: "فيصل الدوسري" }, healthId: "HID-100992", source: "radiologist", date: "2026-11-03", lang: "ar", priority: "low", grade: 1, conf: 0.55, probs: [0.30, 0.55, 0.13, 0.02, 0.00], history: null },
-  { id: "729418", status: "under_review", name: { en: "Maha Alqahtani", ar: "مها القحطاني" }, healthId: "HID-100318", source: "patient", date: "2026-11-02", lang: "en", priority: "low", grade: 0, conf: 0.93, probs: [0.93, 0.05, 0.02, 0.00, 0.00],
-    history: { knee: "right", movement: "no", stiffness: "none", stairs: "none", rising: "none", warnings: [], height: 165, weight: 58, prior: "no" } },
-
-  /* ---------- approved by the doctor (report available) ---------- */
-  { id: "118604", status: "approved", name: { en: "Reem Alshehri", ar: "ريم الشهري" }, healthId: "HID-100640", source: "patient", date: "2026-10-28", approvedAt: "2026-10-29",
-    lang: "ar", priority: "high", grade: 3, finalGrade: 2, conf: 0.71, probs: [0.02, 0.10, 0.17, 0.71, 0.00],
-    doctor: { en: "Dr. Huda Alghamdi", ar: "د. هدى الغامدي" },
-    notes: { en: "Joint space narrowing is mild; osteophytes are present but do not match grade 3. Edited to KL2. Advise weight management and physiotherapy; follow-up in 6 months.", ar: "تضيّق المفصل بسيط والنتوءات العظمية موجودة لكنها لا تطابق الدرجة 3. تم التعديل إلى KL2. ننصح بإدارة الوزن والعلاج الطبيعي مع متابعة بعد 6 أشهر." },
-    advice: { en: ["Try low-impact exercise such as walking or swimming.", "Keep a healthy weight to reduce pressure on your knee.", "Book a follow-up visit in about 6 months."], ar: ["جرّبي الرياضة الخفيفة على المفاصل مثل المشي أو السباحة.", "حافظي على وزن صحي لتقليل الضغط على الركبة.", "احجزي موعد متابعة بعد 6 أشهر تقريباً."] } },
-  { id: "295771", status: "approved", name: { en: "Khalid Almutairi", ar: "خالد المطيري" }, healthId: "HID-100127", source: "radiologist", date: "2026-10-25", approvedAt: "2026-10-26",
-    lang: "en", priority: "low", grade: 1, finalGrade: 1, conf: 0.74, probs: [0.20, 0.74, 0.05, 0.01, 0.00],
-    doctor: { en: "Dr. Omar Alzahrani", ar: "د. عمر الزهراني" },
-    notes: { en: "Doubtful changes only. No treatment needed; recheck if symptoms increase.", ar: "تغيّرات مشكوك فيها فقط. لا حاجة لعلاج، ويُعاد الفحص إذا زادت الأعراض." },
-    advice: { en: ["No treatment is needed right now.", "Stay active and keep your leg muscles strong.", "Come back for a check if the pain increases."], ar: ["لا حاجة لعلاج حالياً.", "حافظ على نشاطك وقوّ عضلات الساق.", "راجع الطبيب إذا زاد الألم."] } }
+  {
+    id: "1",
+    status: "approved",
+    name: {"en": "Sarah Ahmed", "ar": "سارة أحمد"},
+    healthId: "1098765432",
+    source: "patient",
+    date: "2026-08-04",
+    approvedAt: "2026-08-05",
+    lang: "en",
+    priority: "low",
+    grade: 1,
+    finalGrade: 1,
+    conf: 0.81,
+    probs: [0.14, 0.81, 0.04, 0.01, 0.0],
+    doctor: {"en": "Dr. Omar Alzahrani", "ar": "د. عمر الزهراني"},
+    notes: {"en": "Doubtful narrowing only; no definite osteophytes. No treatment needed; recheck if symptoms increase.", "ar": "تضيّق مشكوك فيه فقط دون نتوءات عظمية واضحة. لا حاجة لعلاج، ويُعاد الفحص إذا زادت الأعراض."},
+    advice: {"en": ["No treatment is needed right now.", "Stay active and keep your leg muscles strong.", "Come back for a check if the pain increases."], "ar": ["لا حاجة لعلاج حالياً.", "حافظي على نشاطك وقوّي عضلات الساق.", "راجعي الطبيب إذا زاد الألم."]}
+  },
+  {
+    id: "2",
+    status: "approved",
+    name: {"en": "Sarah Ahmed", "ar": "سارة أحمد"},
+    healthId: "1098765432",
+    source: "patient",
+    date: "2026-09-12",
+    approvedAt: "2026-09-13",
+    lang: "en",
+    priority: "medium",
+    grade: 2,
+    finalGrade: 2,
+    conf: 0.83,
+    probs: [0.03, 0.11, 0.83, 0.03, 0.0],
+    doctor: {"en": "Dr. Huda Alghamdi", "ar": "د. هدى الغامدي"},
+    notes: {"en": "Mild joint space narrowing with small osteophytes, consistent with KL2. Advise low-impact exercise and weight management; follow-up in 6 months.", "ar": "تضيّق بسيط في المفصل مع نتوءات عظمية صغيرة، بما يتوافق مع الدرجة 2. يُنصح بالرياضة الخفيفة وإدارة الوزن، ومتابعة بعد 6 أشهر."},
+    advice: {"en": ["Try low-impact exercise such as walking or swimming.", "Keep a healthy weight to reduce pressure on your knee.", "Book a follow-up visit in about 6 months."], "ar": ["جرّبي الرياضة الخفيفة على المفاصل مثل المشي أو السباحة.", "حافظي على وزن صحي لتقليل الضغط على الركبة.", "احجزي موعد متابعة بعد 6 أشهر تقريباً."]}
+  },
+  {
+    id: "3",
+    status: "approved",
+    name: {"en": "Sarah Ahmed", "ar": "سارة أحمد"},
+    healthId: "1098765432",
+    source: "patient",
+    date: "2026-10-10",
+    approvedAt: "2026-10-12",
+    lang: "en",
+    priority: "medium",
+    grade: 2,
+    finalGrade: 2,
+    conf: 0.76,
+    probs: [0.04, 0.15, 0.76, 0.05, 0.0],
+    doctor: {"en": "Dr. Omar Alzahrani", "ar": "د. عمر الزهراني"},
+    notes: {"en": "Stable compared with the previous study; no new osteophytes. Continue physiotherapy and weight management.", "ar": "مستقرة مقارنةً بالفحص السابق ولا توجد نتوءات عظمية جديدة. يُنصح بمواصلة العلاج الطبيعي وإدارة الوزن."},
+    advice: {"en": ["Continue your physiotherapy exercises.", "Keep a healthy weight to reduce pressure on your knee.", "Book your next check in about 6 months."], "ar": ["واصلي تمارين العلاج الطبيعي.", "حافظي على وزن صحي لتقليل الضغط على الركبة.", "احجزي الفحص القادم بعد 6 أشهر تقريباً."]}
+  },
+  {
+    id: "4",
+    status: "approved",
+    name: {"en": "Hessa Almarri", "ar": "حصة المري"},
+    healthId: "1028456731",
+    source: "radiologist",
+    date: "2026-10-18",
+    approvedAt: "2026-10-19",
+    lang: "ar",
+    priority: "high",
+    grade: 4,
+    finalGrade: 4,
+    conf: 0.9,
+    probs: [0.0, 0.0, 0.02, 0.08, 0.9],
+    doctor: {"en": "Dr. Huda Alghamdi", "ar": "د. هدى الغامدي"},
+    notes: {"en": "Marked joint space loss with large osteophytes and bone deformity, consistent with KL4. Refer to orthopaedics to discuss treatment options.", "ar": "فقدان واضح في الفراغ المفصلي مع نتوءات عظمية كبيرة وتشوّه في العظم، بما يتوافق مع الدرجة 4. يُحال إلى جراحة العظام لمناقشة خيارات العلاج."},
+    advice: {"en": ["Book an appointment with an orthopaedic specialist soon.", "Avoid activities that put heavy load on the knee.", "Ask your doctor about pain relief and treatment options."], "ar": ["احجزي موعداً مع أخصائي عظام في أقرب وقت.", "تجنّبي الأنشطة التي تضع حملاً كبيراً على الركبة.", "اسألي طبيبك عن تسكين الألم وخيارات العلاج."]}
+  },
+  {
+    id: "5",
+    status: "approved",
+    name: {"en": "Khalid Almutairi", "ar": "خالد المطيري"},
+    healthId: "1019873456",
+    source: "radiologist",
+    date: "2026-10-25",
+    approvedAt: "2026-10-26",
+    lang: "en",
+    priority: "low",
+    grade: 1,
+    finalGrade: 1,
+    conf: 0.74,
+    probs: [0.2, 0.74, 0.05, 0.01, 0],
+    doctor: {"en": "Dr. Omar Alzahrani", "ar": "د. عمر الزهراني"},
+    notes: {"en": "Doubtful changes only. No treatment needed; recheck if symptoms increase.", "ar": "تغيّرات مشكوك فيها فقط. لا حاجة لعلاج، ويُعاد الفحص إذا زادت الأعراض."},
+    advice: {"en": ["No treatment is needed right now.", "Stay active and keep your leg muscles strong.", "Come back for a check if the pain increases."], "ar": ["لا حاجة لعلاج حالياً.", "حافظ على نشاطك وقوّ عضلات الساق.", "راجع الطبيب إذا زاد الألم."]}
+  },
+  {
+    id: "6",
+    status: "approved",
+    name: {"en": "Reem Alshehri", "ar": "ريم الشهري"},
+    healthId: "1052367894",
+    source: "patient",
+    date: "2026-10-28",
+    approvedAt: "2026-10-29",
+    lang: "ar",
+    priority: "high",
+    grade: 3,
+    finalGrade: 2,
+    conf: 0.71,
+    probs: [0.02, 0.1, 0.17, 0.71, 0],
+    doctor: {"en": "Dr. Huda Alghamdi", "ar": "د. هدى الغامدي"},
+    notes: {"en": "Joint space narrowing is mild; osteophytes are present but do not match grade 3. Edited to KL2. Advise weight management and physiotherapy; follow-up in 6 months.", "ar": "تضيّق المفصل بسيط والنتوءات العظمية موجودة لكنها لا تطابق الدرجة 3. تم التعديل إلى KL2. ننصح بإدارة الوزن والعلاج الطبيعي مع متابعة بعد 6 أشهر."},
+    advice: {"en": ["Try low-impact exercise such as walking or swimming.", "Keep a healthy weight to reduce pressure on your knee.", "Book a follow-up visit in about 6 months."], "ar": ["جرّبي الرياضة الخفيفة على المفاصل مثل المشي أو السباحة.", "حافظي على وزن صحي لتقليل الضغط على الركبة.", "احجزي موعد متابعة بعد 6 أشهر تقريباً."]}
+  },
+  {
+    id: "7",
+    status: "approved",
+    name: {"en": "Turki Alsubaie", "ar": "تركي السبيعي"},
+    healthId: "1091234567",
+    source: "radiologist",
+    date: "2026-10-30",
+    approvedAt: "2026-10-31",
+    lang: "en",
+    priority: "low",
+    grade: 0,
+    finalGrade: 0,
+    conf: 0.94,
+    probs: [0.94, 0.05, 0.01, 0.0, 0.0],
+    doctor: {"en": "Dr. Omar Alzahrani", "ar": "د. عمر الزهراني"},
+    notes: {"en": "No signs of osteoarthritis. Normal joint space and no osteophytes.", "ar": "لا توجد علامات خشونة. الفراغ المفصلي طبيعي ولا توجد نتوءات عظمية."},
+    advice: {"en": ["No treatment is needed.", "Stay active to keep your knees healthy.", "Come back for a check only if symptoms appear."], "ar": ["لا حاجة لعلاج.", "حافظ على نشاطك لصحة ركبتيك.", "راجع الطبيب فقط إذا ظهرت أعراض."]}
+  },
+  {
+    id: "8",
+    status: "under_review",
+    name: {"en": "Maha Alqahtani", "ar": "مها القحطاني"},
+    healthId: "1043218765",
+    source: "patient",
+    date: "2026-11-02",
+    lang: "en",
+    priority: "low",
+    grade: 0,
+    conf: 0.93,
+    probs: [0.93, 0.05, 0.02, 0, 0],
+    history: {"knee": "right", "movement": "no", "stiffness": "none", "stairs": "none", "rising": "none", "warnings": [], "height": 165, "weight": 58, "prior": "no"}
+  },
+  {
+    id: "9",
+    status: "under_review",
+    name: {"en": "Faisal Aldosari", "ar": "فيصل الدوسري"},
+    healthId: "1065478230",
+    source: "radiologist",
+    date: "2026-11-03",
+    lang: "ar",
+    priority: "low",
+    grade: 1,
+    conf: 0.55,
+    probs: [0.3, 0.55, 0.13, 0.02, 0],
+    history: null
+  },
+  {
+    id: "10",
+    status: "under_review",
+    name: {"en": "Abdullah Alotaibi", "ar": "عبدالله العتيبي"},
+    healthId: "1087412365",
+    source: "radiologist",
+    date: "2026-11-04",
+    lang: "en",
+    priority: "high",
+    grade: 4,
+    conf: 0.88,
+    probs: [0, 0, 0.02, 0.1, 0.88],
+    history: {"knee": "both", "movement": "yes", "stiffness": "gt30", "stairs": "extreme", "rising": "severe", "warnings": ["worsened", "night"], "height": 175, "weight": 96, "prior": "yes"}
+  },
+  {
+    id: "11",
+    status: "under_review",
+    name: {"en": "Noura Alharbi", "ar": "نورة الحربي"},
+    healthId: "1034521987",
+    source: "patient",
+    date: "2026-11-05",
+    lang: "ar",
+    priority: "high",
+    grade: 3,
+    conf: 0.91,
+    probs: [0.01, 0.02, 0.06, 0.91, 0],
+    history: {"knee": "right", "movement": "yes", "stiffness": "le30", "stairs": "severe", "rising": "moderate", "warnings": ["hot"], "height": 162, "weight": 78, "prior": "no"}
+  },
+  {
+    id: "12",
+    status: "under_review",
+    name: {"en": "Laila Alsaleh", "ar": "ليلى الصالح"},
+    healthId: "1076523419",
+    source: "patient",
+    date: "2026-11-05",
+    lang: "en",
+    priority: "medium",
+    grade: 2,
+    conf: 0.62,
+    probs: [0.08, 0.24, 0.62, 0.06, 0],
+    history: {"knee": "left", "movement": "yes", "stiffness": "le30", "stairs": "mild", "rising": "none", "warnings": [], "height": 158, "weight": 64, "prior": "no"}
+  },
+  {
+    id: "13",
+    status: "under_review",
+    name: {"en": "Sarah Ahmed", "ar": "سارة أحمد"},
+    healthId: "1098765432",
+    source: "patient",
+    date: "2026-11-08",
+    lang: "en",
+    priority: "medium",
+    grade: 2,
+    conf: 0.58,
+    probs: [0.07, 0.27, 0.58, 0.08, 0.0],
+    history: {"knee": "right", "movement": "yes", "stiffness": "le30", "stairs": "moderate", "rising": "mild", "warnings": [], "height": 163, "weight": 70, "prior": "no"}
+  }
 ];
