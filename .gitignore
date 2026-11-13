@@ -1,0 +1,10 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Secrets - never commit the database password
+.env
+
+# Uploaded files (X-rays, Grad-CAM images, licence files)
+uploads/
