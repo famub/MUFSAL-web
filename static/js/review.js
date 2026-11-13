@@ -1,296 +1,194 @@
 /* ==========================================================
-   MUFSAL - Doctor case review (shared script for review-cases.html and review-case.html)
-   - Works with MOCK data now. Every place that needs the backend is marked TODO(backend).
-   - Bilingual (EN / AR) with the header's #lang-toggle button.
+   MUFSAL - Doctor case review pages (review-case.html, view-report.html)
+   Uses only the shared tokens from vars.css. Logical properties (inline-start/end)
+   are used so the layout flips automatically in Arabic (RTL).
    ========================================================== */
-(function () {
-  "use strict";
 
-  /* ---------------- Language (EN / AR) ---------------- */
-  const T = {
-    en: {
-      reviewCases: "Case review", reviewSub: "Cases waiting for your review, highest priority first.",
-      all: "All", high: "High", medium: "Medium", low: "Low",
-      search: "Search by patient name", colPatient: "Patient", colSource: "Source", colDate: "Submitted",
-      colPriority: "Priority", review: "Review",
-      srcPatient: "Patient-submitted", srcRadiologist: "Radiologist-linked",
-      noCases: "There are no pending cases.", noMatch: "No cases match your search.",
-      back: "Back to cases", caseNo: "Case", pending: "Pending review", approved: "Approved",
-      xray: "X-ray image", showHeat: "Show heatmap", noImage: "X-ray image will appear here",
-      heatHint: "The highlighted areas are the regions that influenced the AI prediction most.",
-      aiResult: "AI result", klGrade: "KL grade", confidence: "Confidence score",
-      probs: "Probability for each grade", editAi: "Edit AI result", editedBy: "Edited by doctor. AI predicted KL",
-      newGrade: "New KL grade (0 to 4)", save: "Save", cancel: "Cancel",
-      errGrade: "Please enter a whole number from 0 to 4.",
-      caseInfo: "Case information", patient: "Patient", healthId: "Health ID", source: "Source",
-      submitted: "Submitted", reportLang: "Report language", priority: "Priority",
-      history: "Medical history",
-      noHistory: "The patient did not provide medical history.",
-      decision: "Doctor decision", notes: "Clinical notes", notesPh: "Write your clinical notes about this case...",
-      notesHint: "Clinical notes are required before you can confirm the result.",
-      errNotes: "Please enter clinical notes before confirming.",
-      finalGrade: "Final KL grade", confirm: "Confirm result",
-      confirmedMsg: "Result confirmed. The simplified report was generated and is now available to the patient",
-      andRad: " and the radiologist", pendingNote: "Until you confirm, the case stays pending.",
-      disclaimer: "MUFSAL supports clinical decision-making and does not replace the doctor's judgment.",
-      langName: { ar: "Arabic", en: "English" },
-      kl: ["Healthy knee", "Doubtful", "Minimal", "Moderate", "Severe"],
-      klDesc: [
-        "No signs of osteoarthritis.",
-        "Doubtful joint narrowing with possible osteophytic lipping.",
-        "Definite osteophytes and possible joint space narrowing.",
-        "Multiple osteophytes, definite joint space narrowing, mild sclerosis.",
-        "Large osteophytes, significant joint narrowing, severe sclerosis."
-      ],
-      qn: {
-        sections: [
-          { title: "About your knee", rows: [{ k: "knee", q: "Which knee is bothering you?", o: { right: "Right", left: "Left", both: "Both" } }] },
-          { title: "Clinical screening", rows: [
-            { k: "movement", q: "Does your knee pain get worse with movement or use, and ease with rest?", o: { yes: "Yes", no: "No" } },
-            { k: "stiffness", q: "When you wake up, how long does knee stiffness last?", o: { none: "No stiffness", le30: "30 minutes or less", gt30: "More than 30 minutes" } }] },
-          { title: "Symptom severity (last week)", rows: [
-            { k: "stairs", q: "Pain going up or down stairs", o: { none: "None", mild: "Mild", moderate: "Moderate", severe: "Severe", extreme: "Extreme" } },
-            { k: "rising", q: "Difficulty rising from sitting", o: { none: "None", mild: "Mild", moderate: "Moderate", severe: "Severe", extreme: "Extreme" } }] },
-          { title: "Warning signs", rows: [{ k: "warnings", q: "Do any of these apply to you now?", multi: true, o: {
-            injury: "Knee injury or accident in the last 6 weeks", hot: "Knee is hot, red or very swollen", fever: "Fever along with the knee pain",
-            worsened: "Pain has worsened quickly over recent weeks", night: "Pain wakes you at night, or unexplained weight loss" } }] },
-          { title: "Risk factors", rows: [
-            { k: "body", q: "Height and weight" },
-            { k: "prior", q: "Have you ever injured this knee or had knee surgery?", o: { yes: "Yes", no: "No" } }] }
-        ],
-        none: "None of these", cm: "cm", kg: "kg", bmi: "BMI"
-      },
-      yes: "Yes", no: "No", min: "min"
-    },
-    ar: {
-      reviewCases: "مراجعة الحالات", reviewSub: "الحالات بانتظار مراجعتك، الأعلى أولوية أولاً.",
-      all: "الكل", high: "عالية", medium: "متوسطة", low: "منخفضة",
-      search: "ابحث باسم المريض", colPatient: "المريض", colSource: "المصدر", colDate: "تاريخ الإرسال",
-      colPriority: "الأولوية", review: "مراجعة",
-      srcPatient: "مرفوعة من المريض", srcRadiologist: "مرفوعة من الأخصائي",
-      noCases: "لا توجد حالات بانتظار المراجعة.", noMatch: "لا توجد حالات مطابقة للبحث.",
-      back: "العودة إلى الحالات", caseNo: "الحالة", pending: "بانتظار المراجعة", approved: "معتمدة",
-      xray: "صورة الأشعة", showHeat: "إظهار الخريطة الحرارية", noImage: "ستظهر صورة الأشعة هنا",
-      heatHint: "المناطق المظللة هي الأجزاء التي أثّرت أكثر في تنبؤ الذكاء الاصطناعي.",
-      aiResult: "نتيجة الذكاء الاصطناعي", klGrade: "درجة KL", confidence: "درجة الثقة",
-      probs: "احتمال كل درجة", editAi: "تعديل النتيجة", editedBy: "عدّلها الطبيب. تنبؤ الذكاء الاصطناعي: KL",
-      newGrade: "درجة KL الجديدة (من 0 إلى 4)", save: "حفظ", cancel: "إلغاء",
-      errGrade: "الرجاء إدخال رقم صحيح من 0 إلى 4.",
-      caseInfo: "معلومات الحالة", patient: "المريض", healthId: "الرقم الصحي", source: "المصدر",
-      submitted: "تاريخ الإرسال", reportLang: "لغة التقرير", priority: "الأولوية",
-      history: "التاريخ الطبي",
-      noHistory: "لم يقدّم المريض تاريخاً طبياً.",
-      decision: "قرار الطبيب", notes: "الملاحظات السريرية", notesPh: "اكتب ملاحظاتك السريرية عن هذه الحالة...",
-      notesHint: "الملاحظات السريرية مطلوبة قبل اعتماد النتيجة.",
-      errNotes: "الرجاء كتابة الملاحظات السريرية قبل الاعتماد.",
-      finalGrade: "الدرجة النهائية (KL)", confirm: "اعتماد النتيجة",
-      confirmedMsg: "تم اعتماد النتيجة. تم إنشاء التقرير المبسّط وأصبح متاحاً للمريض",
-      andRad: " والأخصائي", pendingNote: "تبقى الحالة قيد الانتظار حتى تعتمد النتيجة.",
-      disclaimer: "مُفصّل أداة لدعم القرار السريري ولا يغني عن تقدير الطبيب.",
-      langName: { ar: "العربية", en: "الإنجليزية" },
-      kl: ["ركبة سليمة", "مشكوك فيه", "بسيط", "متوسط", "شديد"],
-      klDesc: [
-        "لا توجد علامات خشونة.",
-        "تضيّق مشكوك فيه في المفصل مع احتمال وجود نتوءات عظمية.",
-        "وجود نتوءات عظمية مؤكد مع احتمال تضيّق في المفصل.",
-        "نتوءات عظمية متعددة وتضيّق مؤكد في المفصل وتصلّب خفيف.",
-        "نتوءات عظمية كبيرة وتضيّق واضح في المفصل وتصلّب شديد."
-      ],
-      qn: {
-        sections: [
-          { title: "عن ركبتك", rows: [{ k: "knee", q: "أي ركبة تزعجك؟", o: { right: "اليمنى", left: "اليسرى", both: "الاثنتان" } }] },
-          { title: "الفحص السريري", rows: [
-            { k: "movement", q: "هل يزداد ألم ركبتك مع الحركة أو الاستخدام ويخف مع الراحة؟", o: { yes: "نعم", no: "لا" } },
-            { k: "stiffness", q: "عند الاستيقاظ، كم يدوم تيبّس الركبة؟", o: { none: "لا يوجد تيبّس", le30: "30 دقيقة أو أقل", gt30: "أكثر من 30 دقيقة" } }] },
-          { title: "شدة الأعراض (الأسبوع الماضي)", rows: [
-            { k: "stairs", q: "الألم عند صعود الدرج أو نزوله", o: { none: "لا يوجد", mild: "خفيف", moderate: "متوسط", severe: "شديد", extreme: "شديد جداً" } },
-            { k: "rising", q: "صعوبة النهوض من الجلوس", o: { none: "لا يوجد", mild: "خفيف", moderate: "متوسط", severe: "شديد", extreme: "شديد جداً" } }] },
-          { title: "علامات التحذير", rows: [{ k: "warnings", q: "هل ينطبق عليك أي مما يلي الآن؟", multi: true, o: {
-            injury: "إصابة أو حادث في الركبة خلال آخر 6 أسابيع", hot: "الركبة ساخنة أو حمراء أو متورمة جداً", fever: "حمّى مع ألم الركبة",
-            worsened: "ازداد الألم بسرعة خلال الأسابيع الأخيرة", night: "الألم يوقظك ليلاً أو نقص وزن غير مبرر" } }] },
-          { title: "عوامل الخطر", rows: [
-            { k: "body", q: "الطول والوزن" },
-            { k: "prior", q: "هل سبق أن أصبت هذه الركبة أو أجريت لها جراحة؟", o: { yes: "نعم", no: "لا" } }] }
-        ],
-        none: "لا شيء مما سبق", cm: "سم", kg: "كجم", bmi: "مؤشر كتلة الجسم"
-      },
-      yes: "نعم", no: "لا", min: "دقيقة"
-    }
-  };
+.review-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md) 48px;
+}
 
-  let lang = "en";
-  try { lang = localStorage.getItem("mufsal-lang") || document.documentElement.lang || "en"; } catch (e) {}
-  if (lang !== "ar") lang = "en";
-  const t = (k) => T[lang][k];
+.page-head { margin-bottom: var(--spacing-lg); }
+.page-head h1 { font-size: var(--font-size-h1); font-weight: var(--font-bold); margin: 0 0 4px; }
+.page-head p  { margin: 0; color: var(--medium-grey); }
 
-  function applyLang() {
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    try { localStorage.setItem("mufsal-lang", lang); } catch (e) {}
-    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
-    document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
-  }
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--medium-blue); text-decoration: none;
+  font-weight: var(--font-medium); margin-bottom: var(--spacing-md);
+}
+.back-link:hover { text-decoration: underline; }
+html[dir="rtl"] .back-link svg, html[lang="ar"] .back-link svg { transform: scaleX(-1); }
 
-  /* ---------------- Mock data: static/js/mock-cases.js (TODO(backend): replace with API calls) ---------------- */
-  // priority = derived by the backend from predicted grade + confidence (Case.priorityLevel)
-  const ALL = window.MUFSAL_MOCK_CASES;
-  const CASES = ALL.filter((c) => c.status === "under_review");   // doctor list = only cases waiting for review
-  const RANK = { high: 3, medium: 2, low: 1 };
+/* ---------- Cards ---------- */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: var(--border-sm) solid var(--light-gray);
+}
+.card h2 {
+  font-size: 18px; font-weight: var(--font-semibold);
+  margin: 0 0 var(--spacing-md);
+  display: flex; align-items: center; gap: var(--spacing-sm);
+}
+.card h2 .icon-box { height: 32px; width: 32px; }
+.card h2 .icon-box svg { width: 18px; height: 18px; }
 
-  /* ---------------- Helpers ---------------- */
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const $ = (id) => document.getElementById(id);
-  const locale = () => (lang === "ar" ? "ar-SA-u-ca-gregory-nu-latn" : "en-GB");
-  const fmtDate = (d) => new Date(d + "T00:00:00").toLocaleDateString(locale(), { day: "numeric", month: "short", year: "numeric" });
-  const pct = (x) => Math.round(x * 100) + "%";
-  const srcLabel = (s) => (s === "patient" ? t("srcPatient") : t("srcRadiologist"));
-  const prioBadge = (p) => `<span class="badge badge-${p}">${t(p)}</span>`;
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-block; padding: 2px 12px; border-radius: 999px;
+  font-size: 14px; font-weight: var(--font-semibold); white-space: nowrap;
+}
+.badge-high   { background: var(--pale-red);    color: var(--dark-red); }
+.badge-medium { background: var(--cream);       color: #7a5a00; }
+.badge-low    { background: var(--light-green); color: var(--dark-green); }
+.badge-pending  { background: var(--cream);       color: #7a5a00; }
+.badge-approved { background: var(--light-green); color: var(--dark-green); }
+.badge-source   { background: var(--pale-blue);   color: var(--medium-blue); }
 
-  /* ================= LIST PAGE ================= */
-  function initList() {
-    let filter = "all", query = "";
-    const body = $("cases-body"), empty = $("empty-state"), table = $("table-card"), emptyText = $("empty-text");
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  font: inherit; font-weight: var(--font-semibold); cursor: pointer;
+  border: var(--border-sm) solid transparent; text-decoration: none;
+}
+.btn-primary { background: var(--medium-blue); color: var(--white); }
+.btn-primary:hover { filter: brightness(0.92); }
+.btn-outline { background: var(--white); color: var(--medium-blue); border-color: var(--medium-blue); }
+.btn-outline:hover { background: var(--pale-blue); }
+.btn-ghost { background: transparent; color: var(--navy-blue); border-color: var(--light-gray); }
+.btn-ghost:hover { background: var(--light-gray); }
+.btn:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: var(--border) solid var(--medium-blue); outline-offset: 2px;
+}
 
-    function render() {
-      // TODO(backend): GET the cases with status UNDER_REVIEW, already sorted by priority
-      const rows = CASES
-        .filter((c) => filter === "all" || c.priority === filter)
-        .filter((c) => c.name[lang].toLowerCase().includes(query.trim().toLowerCase()))
-        .sort((a, b) => RANK[b.priority] - RANK[a.priority] || b.grade - a.grade || b.conf - a.conf || (a.date < b.date ? 1 : -1));
+/* ================= LIST PAGE ================= */
+.toolbar {
+  display: flex; flex-wrap: wrap; gap: var(--spacing-md);
+  align-items: center; justify-content: space-between; margin-bottom: var(--spacing-md);
+}
+.chips { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+.chip {
+  padding: 6px 16px; border-radius: 999px; cursor: pointer; font: inherit;
+  background: var(--white); color: var(--navy-blue);
+  border: var(--border-sm) solid var(--light-gray);
+}
+.chip[aria-pressed="true"] { background: var(--medium-blue); color: var(--white); border-color: var(--medium-blue); }
+.search {
+  min-width: 240px; padding: 9px 14px; border-radius: var(--radius-sm);
+  border: var(--border-sm) solid var(--light-gray); font: inherit; background: var(--white);
+}
 
-      table.classList.toggle("hidden", rows.length === 0);
-      empty.classList.toggle("hidden", rows.length !== 0);
-      emptyText.textContent = CASES.length === 0 ? t("noCases") : t("noMatch");
+.cases-table { width: 100%; border-collapse: collapse; }
+.cases-table th {
+  text-align: start; font-size: 14px; font-weight: var(--font-semibold);
+  color: var(--medium-grey); padding: 12px 16px;
+  border-bottom: var(--border-sm) solid var(--light-gray);
+}
+.cases-table td { padding: 16px; border-bottom: var(--border-sm) solid var(--light-gray); vertical-align: middle; }
+.cases-table tbody tr:last-child td { border-bottom: 0; }
+.cases-table tbody tr:hover { background: var(--pale-blue); }
+.patient-name { font-weight: var(--font-semibold); }
+.table-card { padding: 0; overflow: hidden; }
 
-      body.innerHTML = rows.map((c) => `
-        <tr>
-          <td data-label="${esc(t("colPatient"))}"><span class="patient-name">${esc(c.name[lang])}</span></td>
-          <td data-label="${esc(t("colSource"))}"><span class="badge badge-source">${esc(srcLabel(c.source))}</span></td>
-          <td data-label="${esc(t("colDate"))}">${esc(fmtDate(c.date))}</td>
-          <td data-label="${esc(t("colPriority"))}">${prioBadge(c.priority)}</td>
-          <td><a class="btn btn-outline" href="review-case.html?id=${c.id}">${esc(t("review"))}</a></td>
-        </tr>`).join("");
-    }
+.empty-state { text-align: center; padding: 64px var(--spacing-lg); color: var(--medium-grey); }
+.empty-state .icon-box { height: 56px; width: 56px; margin-bottom: var(--spacing-md); }
+.empty-state .icon-box svg { width: 28px; height: 28px; }
+.empty-state p { margin: 0; font-size: 18px; color: var(--navy-blue); }
 
-    document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
-      filter = b.dataset.filter;
-      document.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      render();
-    }));
-    $("search").addEventListener("input", (e) => { query = e.target.value; render(); });
-    return render;
-  }
+/* ================= DETAIL PAGE ================= */
+.case-title { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: center; justify-content: space-between; }
+.case-title .meta { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
 
-  /* ================= DETAIL PAGE ================= */
-  function initDetail() {
-    const id = new URLSearchParams(location.search).get("id");                          // e.g. 204817
-    const c = ALL.find((x) => x.id === id) || CASES[0];                                  // TODO(backend): GET /cases/<id>
-    if (c.status === "approved") { location.replace(`view-report.html?id=${c.id}&role=doctor`); return function () {}; }
-    let finalGrade = c.grade, edited = false, confirmed = false;
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-top: var(--spacing-lg); }
+.stack { display: flex; flex-direction: column; gap: var(--spacing-lg); }
 
-    const el = {
-      circle: $("grade-circle"), num: $("grade-num"), name: $("grade-name"), desc: $("grade-desc"),
-      editedNote: $("edited-note"), editBtn: $("edit-btn"), editBox: $("edit-box"), gradeInput: $("grade-input"),
-      gradeErr: $("grade-err"), save: $("save-grade"), cancel: $("cancel-grade"),
-      notes: $("notes"), notesErr: $("notes-err"), confirm: $("confirm-btn"), banner: $("success-banner"),
-      status: $("status-badge"), heat: $("heat-toggle"), box: $("xray-box"), pendingNote: $("pending-note"),
-      finalGrade: $("final-grade")
-    };
+/* X-ray viewer */
+.xray-box {
+  position: relative; background: var(--dark-gray); border-radius: var(--radius-md);
+  aspect-ratio: 4 / 3; overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
+.xray-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.xray-box .heat { opacity: 0; transition: opacity .2s; mix-blend-mode: screen; }
+.xray-box.show-heat .heat { opacity: .75; }
+.xray-placeholder { color: var(--medium-grey); font-size: 14px; text-align: center; padding: var(--spacing-md); }
+.viewer-controls { display: flex; align-items: center; justify-content: space-between; margin-top: var(--spacing-md); gap: var(--spacing-md); flex-wrap: wrap; }
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: var(--font-medium); }
+.switch input { width: 18px; height: 18px; accent-color: var(--medium-blue); }
+.hint { font-size: 14px; color: var(--medium-grey); margin: var(--spacing-sm) 0 0; }
 
-    function renderStatic() {
-      document.title = `MUFSAL - ${t("caseNo")} ${c.id}`;
-      $("case-title").textContent = `${t("caseNo")} ${c.id}`;
-      $("case-name").textContent = c.name[lang];
-      $("case-prio").innerHTML = prioBadge(c.priority);
-      $("conf").textContent = pct(c.conf);
+/* AI result */
+.grade-row { display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.grade-circle {
+  width: 84px; height: 84px; border-radius: 50%; flex-shrink: 0;
+  background: var(--pale-blue); color: var(--medium-blue);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1;
+}
+.grade-circle small { font-size: 12px; font-weight: var(--font-medium); }
+.grade-circle strong { font-size: 34px; font-weight: var(--font-bold); }
+.grade-circle.edited { background: var(--cream); color: #7a5a00; }
+.grade-name { font-size: 20px; font-weight: var(--font-semibold); margin: 0; }
+.grade-desc { margin: 2px 0 0; color: var(--medium-grey); font-size: 15px; }
+.edited-note { margin: var(--spacing-sm) 0 0; font-size: 14px; color: #7a5a00; background: var(--cream); border-radius: var(--radius-sm); padding: 6px 12px; }
 
-      $("info").innerHTML = [
-        [t("patient"), esc(c.name[lang])], [t("healthId"), esc(c.healthId)], [t("source"), esc(srcLabel(c.source))],
-        [t("submitted"), esc(fmtDate(c.date))], [t("reportLang"), esc(T[lang].langName[c.lang])], [t("priority"), prioBadge(c.priority)]
-      ].map(([k, v]) => `<div class="kv"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("");
+.kv { display: flex; justify-content: space-between; gap: var(--spacing-md); padding: 10px 0; border-bottom: var(--border-sm) solid var(--light-gray); }
+.kv:last-child { border-bottom: 0; }
+.kv dt { color: var(--medium-grey); }
+.kv dd { margin: 0; font-weight: var(--font-semibold); text-align: end; }
+dl.kv-list { margin: 0; }
 
-      const h = c.history, Q = t("qn");
-      const answer = (r) => {
-        if (r.k === "body") {
-          const bmi = (h.weight / Math.pow(h.height / 100, 2)).toFixed(1);
-          return `${h.height} ${Q.cm} / ${h.weight} ${Q.kg} - ${Q.bmi} ${bmi}`;
-        }
-        if (r.multi) return h[r.k].length ? h[r.k].map((x) => r.o[x]).join(lang === "ar" ? "، " : ", ") : Q.none;
-        return r.o[h[r.k]];
-      };
-      // same questions and answers as the patient's registration questionnaire
-      $("history").innerHTML = !h ? `<p class="muted">${esc(t("noHistory"))}</p>` : Q.sections.map((sec) => `
-        <div class="history-block"><h3>${esc(sec.title)}</h3><ul class="qa">${
-          sec.rows.map((r) => `<li><span>${esc(r.q)}</span><span>${esc(answer(r))}</span></li>`).join("")}</ul></div>`).join("");
+.prob-list { margin: var(--spacing-md) 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.prob { display: grid; grid-template-columns: 56px 1fr 52px; gap: 10px; align-items: center; font-size: 14px; }
+.prob .bar { height: 10px; background: var(--light-gray); border-radius: 999px; overflow: hidden; }
+.prob .bar i { display: block; height: 100%; background: var(--medium-grey); border-radius: 999px; }
+.prob.top .bar i { background: var(--medium-blue); }
+.prob .pct { text-align: end; font-variant-numeric: tabular-nums; }
 
-      $("probs").innerHTML = c.probs.map((p, i) => `
-        <li class="prob ${i === c.grade ? "top" : ""}">
-          <span>KL${i}</span><span class="bar"><i style="width:${Math.round(p * 100)}%"></i></span><span class="pct">${pct(p)}</span>
-        </li>`).join("");
-      renderGrade();
-    }
+.edit-box { margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--pale-blue); border-radius: var(--radius-sm); }
+.edit-box label { display: block; font-weight: var(--font-medium); margin-bottom: 6px; }
+.edit-actions { display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-md); flex-wrap: wrap; }
+.field {
+  width: 100%; padding: 10px 14px; font: inherit; color: var(--navy-blue);
+  border: var(--border-sm) solid var(--medium-grey); border-radius: var(--radius-sm); background: var(--white);
+  box-sizing: border-box;
+}
+.field.small { width: 120px; }
+textarea.field { min-height: 130px; resize: vertical; }
+.field.invalid { border-color: var(--orange); }
+.error-msg { color: var(--dark-red); background: var(--pale-red); border-radius: var(--radius-sm); padding: 6px 12px; margin-top: 8px; font-size: 14px; }
 
-    function renderGrade() {
-      el.num.textContent = finalGrade;
-      el.name.textContent = `KL${finalGrade} - ${t("kl")[finalGrade]}`;
-      el.desc.textContent = t("klDesc")[finalGrade];
-      el.circle.classList.toggle("edited", edited);
-      el.editedNote.classList.toggle("hidden", !edited);
-      el.editedNote.textContent = `${t("editedBy")}${c.grade}`;
-      el.finalGrade.textContent = `KL${finalGrade} - ${t("kl")[finalGrade]}`;
-      el.status.className = "badge " + (confirmed ? "badge-approved" : "badge-pending");
-      el.status.textContent = confirmed ? t("approved") : t("pending");
-      if (confirmed) {
-        el.banner.textContent = t("confirmedMsg") + (c.source === "radiologist" ? t("andRad") : "") + ".";
-      }
-    }
+/* Medical history */
+.history-block + .history-block { margin-top: var(--spacing-md); }
+.history-block h3 { font-size: 15px; font-weight: var(--font-semibold); color: var(--medium-grey); margin: 0 0 6px; }
+.history-block p { margin: 0; }
+.qa { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.qa li { display: flex; justify-content: space-between; gap: var(--spacing-md); background: var(--pale-blue); border-radius: var(--radius-sm); padding: 8px 12px; }
+.qa li span:first-child { flex: 1; }
+.qa li span:last-child { max-width: 55%; font-weight: var(--font-semibold); text-align: end; }
+.muted { color: var(--medium-grey); }
 
-    /* ---- edit AI result ---- */
-    function openEdit() {
-      el.gradeInput.value = finalGrade; el.gradeErr.classList.add("hidden"); el.gradeInput.classList.remove("invalid");
-      el.editBox.classList.remove("hidden"); el.editBtn.classList.add("hidden"); el.gradeInput.focus();
-    }
-    function closeEdit() { el.editBox.classList.add("hidden"); el.editBtn.classList.remove("hidden"); }
-    el.editBtn.addEventListener("click", openEdit);
-    el.cancel.addEventListener("click", closeEdit);                    // cancel: original result stays unchanged
-    el.save.addEventListener("click", () => {
-      const v = el.gradeInput.value.trim();
-      if (!/^[0-4]$/.test(v)) {                                         // only an integer from 0 to 4 is valid
-        el.gradeErr.textContent = t("errGrade"); el.gradeErr.classList.remove("hidden"); el.gradeInput.classList.add("invalid");
-        el.gradeInput.focus(); return;
-      }
-      finalGrade = Number(v); edited = finalGrade !== c.grade;
-      closeEdit(); renderGrade();
-    });
-    el.gradeInput.addEventListener("keydown", (e) => { if (e.key === "Enter") el.save.click(); });
+/* Decision */
+.decision { margin-top: var(--spacing-lg); }
+.decision-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); flex-wrap: wrap; margin-top: var(--spacing-md); }
+.success-banner { background: var(--light-green); color: var(--dark-green); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: var(--spacing-md); font-weight: var(--font-medium); }
+.disclaimer { margin-top: var(--spacing-lg); font-size: 14px; color: var(--medium-grey); text-align: center; }
 
-    /* ---- heatmap toggle ---- */
-    el.heat.addEventListener("change", () => el.box.classList.toggle("show-heat", el.heat.checked));
-    // TODO(backend): set the two <img> sources: #xray-img (original) and #heat-img (PredictionResult.heatmapPath)
+.hidden { display: none !important; }
 
-    /* ---- confirm ---- */
-    el.notes.addEventListener("input", () => { el.notesErr.classList.add("hidden"); el.notes.classList.remove("invalid"); });
-    el.confirm.addEventListener("click", () => {
-      if (!el.notes.value.trim()) {                                      // notes are required before confirming
-        el.notesErr.textContent = t("errNotes"); el.notesErr.classList.remove("hidden"); el.notes.classList.add("invalid");
-        el.notes.focus(); return;
-      }
-      // TODO(backend): POST finalGrade + clinical notes -> case becomes APPROVED, report is generated (Gemini)
-      confirmed = true;
-      [el.notes, el.confirm, el.editBtn].forEach((x) => (x.disabled = true));
-      closeEdit(); el.editBtn.classList.add("hidden");
-      el.banner.classList.remove("hidden"); el.pendingNote.classList.add("hidden");
-      renderGrade();
-    });
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .cases-table thead { display: none; }
+  .cases-table, .cases-table tbody, .cases-table tr, .cases-table td { display: block; width: 100%; box-sizing: border-box; }
+  .cases-table tr { padding: var(--spacing-sm) 0; border-bottom: var(--border-sm) solid var(--light-gray); }
+  .cases-table td { border: 0; padding: 6px 16px; display: flex; justify-content: space-between; gap: 12px; }
+  .cases-table td::before { content: attr(data-label); color: var(--medium-grey); }
+  .search { min-width: 0; width: 100%; }
+}
 
-    return function render() { renderStatic(); };
-  }
-
-  /* ---------------- Boot ---------------- */
-  const page = document.body.dataset.page;
-  const render = page === "list" ? initList() : initDetail();
-  function refresh() { applyLang(); render(); }
-  const toggle = $("lang-toggle");
-  if (toggle) toggle.addEventListener("click", () => { lang = lang === "ar" ? "en" : "ar"; refresh(); });
-  refresh();
-})();
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
