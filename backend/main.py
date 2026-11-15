@@ -2,12 +2,14 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 
+from pathlib import Path
+
 from db import get_connection
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="templets")
-
+BASE_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/db-test")
 def db_test():
@@ -25,6 +27,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 import routes_review
+import routes_dashboard
+app.include_router(routes_dashboard.router)
 
 load_dotenv()
 
@@ -45,3 +49,7 @@ app.mount("/assets", StaticFiles(directory=PROJECT_DIR / "assets"), name="assets
 
 # Pages
 app.include_router(routes_review.router)   # review-case + view-report
+
+@app.get("/dashboard-patient", include_in_schema=False)
+def dashboard(req: Request):
+    return templates.TemplateResponse(req, "dashboard-patient.html")
