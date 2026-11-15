@@ -22,8 +22,8 @@
       // titles
       loginTitle: "Log in to MUFSAL", loginSub: "Welcome back. Enter your email and password.",
       regTitle: "Create your account", regSub: "Choose how you will use MUFSAL.",
-      patTitle: "Patient registration", patSub: "Create your account. You will add your X-ray and medical details when you upload a case.",
-      proTitle: "Healthcare professional registration", proSub: "An admin verifies your SCFHS licence before you can log in.",
+      patTitle: "Create a patient account", patSub: "Create your account. You will add your X-ray and medical details when you upload a case.",
+      proTitle: "Create a healthcare professional account", proSub: "An admin verifies your SCFHS licence before you can log in.",
       forgotTitle: "Forgot your password?", forgotSub: "Enter your registered email and we will send you a link to reset your password.",
       resetTitle: "Create a new password", resetSub: "Choose a new password for your account.",
       loggingOut: "Logging you out...",
@@ -54,7 +54,7 @@
       // professional
       role: "Role", roleSelect: "Select your role", radiologist: "Radiologist", doctor: "Doctor",
       nationalId: "National ID / Iqama number", nationalIdHint: "10 digits.", scfhs: "SCFHS licence number",
-      submitRequest: "Submit registration request",
+      submitRequest: "Submit account request",
       pendingTitle: "Request submitted", pendingBody: "Your registration request is pending admin approval. You will be able to log in once it is approved.",
       // forgot / reset
       sendLink: "Send reset link", forgotDone: "If this email is registered, a password reset link has been sent to it.",
@@ -85,8 +85,8 @@
     ar: {
       loginTitle: "تسجيل الدخول إلى مفصل", loginSub: "أهلًا بعودتك. أدخل بريدك الإلكتروني وكلمة المرور.",
       regTitle: "إنشاء حساب", regSub: "اختر كيف ستستخدم مفصل.",
-      patTitle: "تسجيل مريض", patSub: "أنشئ حسابك. ستضيف أشعتك ومعلوماتك الطبية عند رفع حالة جديدة.",
-      proTitle: "تسجيل ممارس صحي", proSub: "يتحقق المشرف من ترخيصك في هيئة التخصصات الصحية قبل أن تتمكن من تسجيل الدخول.",
+      patTitle: "إنشاء حساب مريض", patSub: "أنشئ حسابك. ستضيف أشعتك ومعلوماتك الطبية عند رفع حالة جديدة.",
+      proTitle: "إنشاء حساب ممارس صحي", proSub: "يتحقق المشرف من ترخيصك في هيئة التخصصات الصحية قبل أن تتمكن من تسجيل الدخول.",
       forgotTitle: "نسيت كلمة المرور؟", forgotSub: "أدخل بريدك الإلكتروني المسجل وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.",
       resetTitle: "إنشاء كلمة مرور جديدة", resetSub: "اختر كلمة مرور جديدة لحسابك.",
       loggingOut: "جارٍ تسجيل الخروج...",
@@ -112,7 +112,7 @@
       doneTitle: "تم إنشاء الحساب", doneBody: "حسابك جاهز. يمكنك الآن تسجيل الدخول.", goLogin: "الذهاب إلى تسجيل الدخول",
       role: "الدور", roleSelect: "اختر دورك", radiologist: "أخصائي أشعة", doctor: "طبيب",
       nationalId: "رقم الهوية الوطنية / الإقامة", nationalIdHint: "10 أرقام.", scfhs: "رقم ترخيص هيئة التخصصات الصحية",
-      submitRequest: "إرسال طلب التسجيل",
+      submitRequest: "إرسال طلب إنشاء الحساب",
       pendingTitle: "تم إرسال الطلب", pendingBody: "طلب تسجيلك بانتظار موافقة المشرف. ستتمكن من تسجيل الدخول بعد الموافقة عليه.",
       sendLink: "إرسال رابط إعادة التعيين", forgotDone: "إذا كان هذا البريد مسجلًا، فقد أُرسل إليه رابط لإعادة تعيين كلمة المرور.",
       demoOpenReset: "للتجربة فقط: افتح صفحة إعادة التعيين", backToLogin: "العودة إلى تسجيل الدخول",
