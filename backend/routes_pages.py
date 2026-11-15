@@ -12,14 +12,19 @@ from pathlib import Path
 
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 from auth_service import HOME
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 router = APIRouter()
 
-PUBLIC = {"login", "register", "register-patient", "register-professional",
-          "forgot-password", "reset-password", "logout", "header"}
+# The login / registration pages live in backend/templates and are rendered with Jinja
+# (like the patient dashboard). They open without an account.
+AUTH_TEMPLATES = {"login", "register", "register-patient", "register-professional",
+                  "forgot-password", "reset-password", "logout"}
+PUBLIC = AUTH_TEMPLATES | {"header"}
 
 ROLE_PAGES = {
     "patient": {"profile-patient", "patient-cases"},
@@ -52,6 +57,12 @@ def allowed_roles(name):
 def send_page(request, name):
     if not NAME_RE.match(name):
         return None
+    if name in AUTH_TEMPLATES:
+        lang = "ar" if request.cookies.get("lang") == "ar" else "en"
+        return templates.TemplateResponse(
+            request, f"{name}.html",
+            {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr"},
+            headers={"Cache-Control": "no-store"})
     file = PROJECT_DIR / f"{name}.html"
     if not file.is_file():
         return None
