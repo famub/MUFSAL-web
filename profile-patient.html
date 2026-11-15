@@ -10,9 +10,8 @@
   <link rel="stylesheet" href="static/css/global.css" />
   <link rel="stylesheet" href="static/css/header.css" />
   <link rel="stylesheet" href="static/css/profiles.css" />
-  <!-- auth.css holds the questionnaire styles (.q-section, .q-item, .q-option).
-       Loading it here keeps the questions looking exactly like the ones on the
-       registration page. -->
+  <!-- auth.css holds the shared form and button styles, so the fields and
+       buttons here match the ones on the registration page. -->
   <link rel="stylesheet" href="static/css/auth.css" />
 </head>
 
@@ -67,7 +66,7 @@
       </a>
 
       <h1>My Profile</h1>
-      <p class="subtitle">View and manage your personal information and medical history.</p>
+      <p class="subtitle">View and manage your personal information.</p>
     </section>
 
 
@@ -98,17 +97,6 @@
             <label for="full-name">Full Name</label>
             <input type="text" id="full-name" value="Sarah Ahmed" required disabled />
             <p class="error-message"></p>
-          </div>
-
-          <div class="field">
-            <label for="health-id">Health ID</label>
-            <div class="field-with-icon">
-              <input type="text" id="health-id" class="input-locked" value="MUF-10842" readonly disabled />
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
           </div>
 
           <div class="field">
@@ -151,106 +139,8 @@
     </section>
 
 
-    <!-- 
-         Card 2: Medical History
-         Works exactly like the card above, just with different fields.
-    -->
-    <section class="card profile-card" id="medical-card">
-
-      <div class="card-head">
-        <div class="card-head-title">
-          <div class="icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-3-3v6" />
-            </svg>
-          </div>
-          <div>
-            <h2>Medical History</h2>
-            <p class="subtitle">Review the health information shared during registration.</p>
-            <!-- Tells the doctor how old these answers are -->
-            <p class="last-updated">Last updated: <span class="last-updated-date">2026-03-18</span></p>
-          </div>
-        </div>
-
-        <button type="button" class="btn-edit" data-edit="medical-card">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Edit Medical History
-        </button>
-      </div>
-
-      <form class="card-body" novalidate>
-
-        <div class="info-banner">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Changes to your medical history will apply to future X-ray cases and will not affect cases already submitted.</span>
-        </div>
-
-        <div class="medical-grid">
-
-          <!-- Symptoms are asked inside the questionnaire below, so they
-               are not repeated here. -->
-
-          <div class="sub-card sub-card--wide">
-            <div class="sub-card-head">
-              <div class="icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                </svg>
-              </div>
-              <h3>Medications</h3>
-            </div>
-
-            <div class="sub-card-body">
-              <div class="field">
-                <label for="medications">Reported medications</label>
-                <textarea id="medications" rows="3" placeholder="No medications reported." disabled></textarea>
-                <p class="error-message"></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="sub-card sub-card--wide">
-            <div class="sub-card-head">
-              <div class="icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3>Medical Questionnaire</h3>
-            </div>
-
-            <div class="sub-card-body">
-              <!-- profiles.js fills this from static/js/questionnaire.js,
-                   the same file the registration form reads, so both pages
-                   always show the same questions. -->
-              <div id="questionnaire"></div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-primary">Save Changes</button>
-          <button type="button" class="btn-secondary" data-cancel="medical-card">Cancel</button>
-        </div>
-
-      </form>
-    </section>
-
   </main>
 
-  <!-- questionnaire.js holds the questions, the same file the
-       registration form reads. -->
-  <script src="static/js/questionnaire.js"></script>
   <script src="static/js/profiles.js"></script>
 
 </body>
