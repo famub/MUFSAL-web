@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<!-- lang="{{ lang }}" dir="{{ direction }} -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>MUFSAL - Questions (Step 2)</title>
+  <!-- <title>{% block title %}{% endblock %}</title> -->
+
+  <link rel="stylesheet" href="static/css/global.css" />
+  <link rel="stylesheet" href="static/css/header.css" />
+  <link rel="stylesheet" href="static/css/dashboards.css" />
+  <link rel="stylesheet" href="static/css/new-case.css" />
+  <!--{% block extra_css %}{% endblock %}-->
+</head>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <div id="header-logo-">
+        <a href="dashboard.html" aria-label="MUFSAL home">
+          <img src="assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="lang-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          ع
+        </button>
+
+        <a href="profile-patient.html" class="profile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+            class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </a>
+
+        <span class="site-header__rule" aria-hidden="true"></span>
+
+        <a href="logout.html" class="logout-link">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <!-- Top Banner -->
+    <section class="dashboard-banner">
+      <div class="banner-text">
+        <span id="dashboard">dashboard</span>
+        <h1>start a new case</h1>
+        <p class="subtitle">Upload a knee X-ray and answer a few short questions for an AI-assisted clinical assessment.</p>
+      </div>
+
+      <a href="dashboard-patient.html" class="btn-view-all">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to dashboard
+      </a>
+    </section>
+
+    <!-- 3-Step Progress Stepper -->
+    <nav class="stepper" aria-label="Case submission steps">
+      <div class="step-item is-completed">
+        <span class="step-circle">1</span>
+        <span class="step-label">upload X-ray</span>
+      </div>
+
+      <div class="step-item is-active">
+        <span class="step-circle">2</span>
+        <span class="step-label">questions</span>
+      </div>
+
+      <div class="step-item">
+        <span class="step-circle">3</span>
+        <span class="step-label">review &amp; submit</span>
+      </div>
+    </nav>
+
+    <!-- Step 2 Card -->
+    <section class="card upload-card">
+      <div class="upload-card-header">
+        <h2>2. clinical questions</h2>
+        <p class="subtitle">Help the reviewing doctor understand your knee symptoms and history.</p>
+      </div>
+
+      <div class="questions-grid">
+        <!-- Q1: Affected Knee -->
+        <div class="question-group" data-question="knee_side">
+          <label class="question-label">Which knee is shown in the X-ray? *</label>
+          <div class="option-pills">
+            <label class="option-pill">
+              <input type="radio" name="knee_side" value="Right knee" required />
+              <span>Right knee</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="knee_side" value="Left knee" />
+              <span>Left knee</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2: Pain with movement / rest -->
+        <div class="question-group" data-question="pain_movement">
+          <label class="question-label">Does your knee pain get worse with movement or use, and ease with rest? *</label>
+          <div class="option-pills">
+            <label class="option-pill">
+              <input type="radio" name="pain_movement" value="Yes" required />
+              <span>Yes</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="pain_movement" value="No" />
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3: Morning Stiffness -->
+        <div class="question-group" data-question="stiffness">
+          <label class="question-label">When you wake up, how long does knee stiffness last? *</label>
+          <div class="option-pills">
+            <label class="option-pill">
+              <input type="radio" name="stiffness" value="No stiffness" required />
+              <span>No stiffness</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="stiffness" value="30 minutes or less" />
+              <span>30 minutes or less</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="stiffness" value="More than 30 minutes" />
+              <span>More than 30 minutes</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q4: Stairs Pain -->
+        <div class="question-group" data-question="stairs_pain">
+          <label class="question-label">Pain going up or down stairs? *</label>
+          <div class="option-pills">
+            <label class="option-pill">
+              <input type="radio" name="stairs_pain" value="None" required />
+              <span>None</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="stairs_pain" value="Mild" />
+              <span>Mild</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="stairs_pain" value="Moderate" />
+              <span>Moderate</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="stairs_pain" value="Severe" />
+              <span>Severe</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="stairs_pain" value="Extreme" />
+              <span>Extreme</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q5: Previous Injury or Surgery -->
+        <div class="question-group" data-question="prior_injury">
+          <label class="question-label">Have you ever injured this knee or had knee surgery? *</label>
+          <div class="option-pills">
+            <label class="option-pill">
+              <input type="radio" name="prior_injury" value="Yes" required />
+              <span>Yes</span>
+            </label>
+            <label class="option-pill">
+              <input type="radio" name="prior_injury" value="No" />
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q6 & Q7: Height & Weight -->
+        <div class="measurements-row">
+          <div class="question-group" data-question="height">
+            <label class="question-label" for="patient-height">Height (cm) *</label>
+            <input type="number" id="patient-height" name="height" class="form-input" placeholder="e.g. 165" min="50" max="250" required />
+          </div>
+
+          <div class="question-group" data-question="weight">
+            <label class="question-label" for="patient-weight">Weight (kg) *</label>
+            <input type="number" id="patient-weight" name="weight" class="form-input" placeholder="e.g. 70" min="20" max="300" required />
+          </div>
+        </div>
+
+        <!-- Q8: Red Flag Symptoms (Choose all that apply) -->
+        <div class="question-group question-group--full" data-question="red_flags">
+          <label class="question-label">Do any of these apply to you now? (choose all that apply) *</label>
+          <div class="option-pills">
+            <label class="option-pill">
+              <input type="checkbox" name="red_flags" value="Knee injury or accident in the last 6 weeks" />
+              <span>Knee injury or accident in the last 6 weeks</span>
+            </label>
+            <label class="option-pill">
+              <input type="checkbox" name="red_flags" value="Knee is hot, red or very swollen" />
+              <span>Knee is hot, red or very swollen</span>
+            </label>
+            <label class="option-pill">
+              <input type="checkbox" name="red_flags" value="Fever along with the knee pain" />
+              <span>Fever along with the knee pain</span>
+            </label>
+            <label class="option-pill">
+              <input type="checkbox" name="red_flags" value="Pain has worsened quickly over recent weeks" />
+              <span>Pain has worsened quickly over recent weeks</span>
+            </label>
+            <label class="option-pill">
+              <input type="checkbox" name="red_flags" value="Pain wakes you at night, or unexplained weight loss" />
+              <span>Pain wakes you at night, or unexplained weight loss</span>
+            </label>
+            <label class="option-pill">
+              <input type="checkbox" name="red_flags" value="None of these" id="red-flag-none" />
+              <span>None of these</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 Validation Error Banner -->
+      <div id="step-2-error" class="step-error is-hidden" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <span>Please complete all required questions (*) and valid height/weight before continuing.</span>
+      </div>
+
+      <div class="step-actions">
+        <a href="new-case-step1.html" class="btn-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          back
+        </a>
+
+        <button type="button" class="btn-primary" id="to-step-3">
+          next
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Redirect to Step 1 if no file was uploaded yet
+      if (!sessionStorage.getItem('mufsal_file_name')) {
+        window.location.replace('new-case-step1.html');
+        return;
+      }
+
+      const requiredRadios = ['knee_side', 'pain_movement', 'stiffness', 'stairs_pain', 'prior_injury'];
+      const heightInput = document.getElementById('patient-height');
+      const weightInput = document.getElementById('patient-weight');
+      const redFlagCheckboxes = document.querySelectorAll('input[name="red_flags"]');
+      const redFlagNone = document.getElementById('red-flag-none');
+      const step2Error = document.getElementById('step-2-error');
+      const nextBtn = document.getElementById('to-step-3');
+
+      // Restore saved answers if returning from Step 3
+      const savedAnswers = JSON.parse(sessionStorage.getItem('mufsal_answers') || '{}');
+      requiredRadios.forEach(name => {
+        if (savedAnswers[name]) {
+          const radio = document.querySelector(`input[name="${name}"][value="${savedAnswers[name]}"]`);
+          if (radio) radio.checked = true;
+        }
+      });
+      if (savedAnswers.height) heightInput.value = savedAnswers.height;
+      if (savedAnswers.weight) weightInput.value = savedAnswers.weight;
+      if (Array.isArray(savedAnswers.red_flags)) {
+        redFlagCheckboxes.forEach(cb => {
+          if (savedAnswers.red_flags.includes(cb.value)) cb.checked = true;
+        });
+      }
+
+      // Mutual Exclusivity for "None of these"
+      redFlagCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          if (cb === redFlagNone && redFlagNone.checked) {
+            redFlagCheckboxes.forEach(other => {
+              if (other !== redFlagNone) other.checked = false;
+            });
+          } else if (cb !== redFlagNone && cb.checked) {
+            redFlagNone.checked = false;
+          }
+
+          const redFlagGroup = document.querySelector('.question-group[data-question="red_flags"]');
+          if (Array.from(redFlagCheckboxes).some(item => item.checked) && redFlagGroup) {
+            redFlagGroup.classList.remove('question-group--error');
+          }
+        });
+      });
+
+      // Clear error styling on input
+      requiredRadios.forEach(name => {
+        document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+          radio.addEventListener('change', () => {
+            const group = document.querySelector(`.question-group[data-question="${name}"]`);
+            if (group) group.classList.remove('question-group--error');
+          });
+        });
+      });
+
+      [heightInput, weightInput].forEach(input => {
+        input.addEventListener('input', () => {
+          const group = input.closest('.question-group');
+          if (group) group.classList.remove('question-group--error');
+        });
+      });
+
+      nextBtn.addEventListener('click', () => {
+        let isValid = true;
+
+        requiredRadios.forEach(name => {
+          const group = document.querySelector(`.question-group[data-question="${name}"]`);
+          const checked = document.querySelector(`input[name="${name}"]:checked`);
+          if (!checked) {
+            isValid = false;
+            if (group) group.classList.add('question-group--error');
+          } else {
+            if (group) group.classList.remove('question-group--error');
+          }
+        });
+
+        const redFlagGroup = document.querySelector('.question-group[data-question="red_flags"]');
+        const selectedFlags = Array.from(redFlagCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+        if (selectedFlags.length === 0) {
+          isValid = false;
+          if (redFlagGroup) redFlagGroup.classList.add('question-group--error');
+        } else {
+          if (redFlagGroup) redFlagGroup.classList.remove('question-group--error');
+        }
+
+        const heightGroup = document.querySelector('.question-group[data-question="height"]');
+        const hVal = Number(heightInput.value);
+        if (!heightInput.value.trim() || hVal < 50 || hVal > 250) {
+          isValid = false;
+          if (heightGroup) heightGroup.classList.add('question-group--error');
+        } else {
+          if (heightGroup) heightGroup.classList.remove('question-group--error');
+        }
+
+        const weightGroup = document.querySelector('.question-group[data-question="weight"]');
+        const wVal = Number(weightInput.value);
+        if (!weightInput.value.trim() || wVal < 20 || wVal > 300) {
+          isValid = false;
+          if (weightGroup) weightGroup.classList.add('question-group--error');
+        } else {
+          if (weightGroup) weightGroup.classList.remove('question-group--error');
+        }
+
+        step2Error.classList.toggle('is-hidden', isValid);
+        if (!isValid) return;
+
+        // Save answers to sessionStorage and go to Step 3
+        const answers = {
+          knee_side: document.querySelector('input[name="knee_side"]:checked').value,
+          pain_movement: document.querySelector('input[name="pain_movement"]:checked').value,
+          stiffness: document.querySelector('input[name="stiffness"]:checked').value,
+          stairs_pain: document.querySelector('input[name="stairs_pain"]:checked').value,
+          prior_injury: document.querySelector('input[name="prior_injury"]:checked').value,
+          height: heightInput.value.trim(),
+          weight: weightInput.value.trim(),
+          red_flags: selectedFlags
+        };
+        sessionStorage.setItem('mufsal_answers', JSON.stringify(answers));
+        window.location.href = 'new-case-step3.html';
+      });
+    });
+  </script>
+</body>
+
+</html>

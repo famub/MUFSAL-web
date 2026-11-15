@@ -4,6 +4,7 @@
   display: none !important;
 }
 
+
 .dashboard-container {
   max-width: 1120px;
   margin: 0 auto;
@@ -79,14 +80,20 @@
 
 .btn-choose-file {
   padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--light-gray);
-  color: var(--navy-blue);
-  opacity: 0.55;
+  background-color: var(--medium-blue);
+  color: var(--white);
   border: none;
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: var(--font-semibold);
+  cursor: pointer;
+}
+
+.btn-choose-file-disabled {
+  background-color: var(--light-gray);
+  color: var(--navy-blue);
+  opacity: 0.55;
   cursor: not-allowed;
 }
 

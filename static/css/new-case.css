@@ -1,0 +1,327 @@
+@import url('./vars.css');
+
+a {
+  text-decoration: none;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--medium-grey);
+}
+
+/* =========================================================
+   3-STEP PROGRESS BAR (.stepper)
+   ========================================================= */
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: var(--border) solid var(--white);
+  color: var(--medium-grey);
+  font-weight: var(--font-medium);
+}
+
+.step-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--white);
+  color: var(--medium-grey);
+  font-weight: var(--font-bold);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* Active Step */
+.step-item.is-active {
+  border-bottom-color: var(--medium-blue);
+  color: var(--navy-blue);
+  font-weight: var(--font-semibold);
+}
+
+.step-item.is-active .step-circle {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+/* Completed Step */
+.step-item.is-completed {
+  border-bottom-color: var(--medium-green);
+  color: var(--dark-green);
+  font-weight: var(--font-semibold);
+}
+
+.step-item.is-completed .step-circle {
+  background-color: var(--light-green);
+  color: var(--dark-green);
+}
+
+/* =========================================================
+   STEP 2: CLINICAL QUESTIONS
+   ========================================================= */
+.questions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.question-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.question-group--full {
+  grid-column: 1 / -1;
+}
+
+.question-label {
+  font-weight: var(--font-bold);
+  color: var(--navy-blue);
+  font-size: var(--font-size-base);
+}
+
+.option-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.option-pill {
+  cursor: pointer;
+}
+
+.option-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.option-pill span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--pale-blue);
+  color: var(--navy-blue);
+  border: var(--border) solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+}
+
+.option-pill input:checked + span {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+.form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--spacing-md);
+  background-color: var(--white);
+  color: var(--navy-blue);
+  border: var(--border) solid var(--light-gray);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  outline: none;
+}
+
+.form-textarea::placeholder {
+  color: var(--medium-grey);
+}
+
+.form-textarea:focus {
+  border-color: var(--medium-blue);
+}
+
+/* =========================================================
+   STEP 3: REVIEW SUMMARY BOXES
+   ========================================================= */
+.review-box {
+  padding: var(--spacing-lg);
+  border: var(--border) solid var(--light-gray);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.review-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--medium-blue);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-item--full {
+  grid-column: 1 / -1;
+}
+
+.summary-label {
+  font-size: 0.8125rem;
+  color: var(--medium-grey);
+  font-weight: var(--font-medium);
+}
+
+/* =========================================================
+   STEP NAVIGATION BUTTONS
+   ========================================================= */
+.step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--light-gray);
+}
+
+.step-actions--end {
+  justify-content: flex-end;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+.btn-secondary {
+  background-color: var(--pale-blue);
+  color: var(--medium-blue);
+}
+
+.btn-primary svg,
+.btn-secondary svg {
+  width: 16px;
+  height: 16px;
+}
+
+html[lang="ar"] .btn-primary svg,
+html[lang="ar"] .btn-secondary svg {
+  transform: scaleX(-1);
+}
+
+/* =========================================================
+   STEP VALIDATION & UPLOAD STATES
+   ========================================================= */
+.step-error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: var(--font-semibold);
+}
+
+.step-error svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.upload-dropzone--error {
+  border-color: var(--dark-red);
+  background-color: rgb(from var(--pale-red) r g b / 0.4);
+}
+
+.upload-dropzone--uploaded {
+  border-color: var(--medium-green);
+  background-color: rgb(from var(--light-green) r g b / 0.2);
+}
+
+.question-group--error .question-label {
+  color: var(--dark-red);
+}
+
+.question-group--error .option-pill span {
+  border-color: var(--dark-red);
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+}
+
+.measurements-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px var(--spacing-md);
+  background-color: var(--white);
+  color: var(--navy-blue);
+  border: var(--border) solid var(--light-gray);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: var(--font-medium);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--medium-grey);
+}
+
+.form-input:focus {
+  border-color: var(--medium-blue);
+}
+
+.question-group--error .form-input {
+  border-color: var(--dark-red);
+  background-color: var(--pale-red);
+}
