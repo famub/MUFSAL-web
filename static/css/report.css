@@ -46,3 +46,7 @@
   .card { border: 0; padding: 0; }
   .report-grade, .words div { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* report text from the database (Gemini) - keep its line breaks */
+.report-text { margin: 0; white-space: pre-line; }
+@media print { .success-banner { display: none !important; } }
