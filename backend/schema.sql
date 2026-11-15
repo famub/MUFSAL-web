@@ -30,9 +30,8 @@ CREATE TABLE patients (
 );
 
 CREATE TABLE professionals (
-    user_id           INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    scfhs_number      VARCHAR(20)  NOT NULL UNIQUE,
-    license_file_path VARCHAR(255) NOT NULL
+    user_id      INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    scfhs_number VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE registration_decisions (
@@ -135,11 +134,9 @@ CREATE TABLE complaints (
     user_id      INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     subject      VARCHAR(200) NOT NULL,
     body         TEXT         NOT NULL,
-    urgency      VARCHAR(10),
     status       VARCHAR(20)  NOT NULL DEFAULT 'open',
     created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT complaints_status_valid CHECK (status IN ('open','investigating','resolved')),
-    CONSTRAINT complaints_urgency_valid CHECK (urgency IN ('low','medium','high'))
+    CONSTRAINT complaints_status_valid CHECK (status IN ('open','investigating','resolved'))
 );
 
 CREATE TABLE complaint_replies (

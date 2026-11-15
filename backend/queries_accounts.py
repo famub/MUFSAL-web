@@ -34,7 +34,7 @@ def create_patient(full_name, email, password, phone, national_id, date_of_birth
 
 
 def create_professional(full_name, email, password, phone, national_id,
-                        role, scfhs_number, license_file_path):
+                        role, scfhs_number):
     """Create a doctor or radiologist account, waiting for admin approval."""
     with get_connection() as conn:
         row = conn.execute(
@@ -47,11 +47,8 @@ def create_professional(full_name, email, password, phone, national_id,
         ).fetchone()
 
         conn.execute(
-            """
-            INSERT INTO professionals (user_id, scfhs_number, license_file_path)
-            VALUES (%s, %s, %s)
-            """,
-            (row["user_id"], scfhs_number, license_file_path),
+            "INSERT INTO professionals (user_id, scfhs_number) VALUES (%s, %s)",
+            (row["user_id"], scfhs_number),
         )
     return row["user_id"]
 

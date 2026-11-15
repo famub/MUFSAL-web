@@ -77,10 +77,9 @@ Creates the account and the patient details in one step and returns the new
 * `date_of_birth` - `"YYYY-MM-DD"`, the patient must be 18 or older
 * `gender` - `"female"` or `"male"`
 
-### `create_professional(full_name, email, password, phone, national_id, role, scfhs_number, license_file_path)`
+### `create_professional(full_name, email, password, phone, national_id, role, scfhs_number)`
 Creates a doctor or radiologist account with status `pending`, waiting for the
-admin. `role` is `"doctor"` or `"radiologist"`. `license_file_path` is where you
-saved the uploaded licence file, e.g. `"uploads/licenses/12.pdf"`.
+admin. `role` is `"doctor"` or `"radiologist"`.
 
 ### `get_user_by_email(email)`
 Returns the raw account row, or `None`.
@@ -196,12 +195,13 @@ also delete that account's files from the `uploads` folder.
 
 ## 7. Still to do
 
-* Add a licence-file upload field to `register-professional.html` -
-  `license_file_path` is required and cannot be empty.
 * Confirm the real format of the SCFHS registration number (stored as text, max
   20 characters for now).
 * Remove the "both" option from the knee question in `static/js/questionnaire.js` -
   one X-ray shows one knee, and the database rejects `both`.
 * Remove the 6-digit case-ID check in `static/js/mock-cases.js` - case IDs now
   start at 1.
+* Merge the warning-signs question and the "other symptoms" box into one
+  question in `static/js/questionnaire.js`. The tables already store it that
+  way: five yes/no columns plus one optional text column.
 * Delete the demo data from `seed.sql` before the final version.
