@@ -115,7 +115,8 @@ html[dir="rtl"] .back-link svg, html[lang="ar"] .back-link svg { transform: scal
 }
 .xray-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .xray-box .heat { opacity: 0; transition: opacity .2s; mix-blend-mode: screen; }
-.xray-box.show-heat .heat { opacity: .75; }
+.xray-box.show-heat .heat,
+.card:has(#heat-toggle:checked) .xray-box .heat { opacity: .75; }   /* heatmap toggle without JavaScript */
 .xray-placeholder { color: var(--medium-grey); font-size: 14px; text-align: center; padding: var(--spacing-md); }
 .viewer-controls { display: flex; align-items: center; justify-content: space-between; margin-top: var(--spacing-md); gap: var(--spacing-md); flex-wrap: wrap; }
 .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: var(--font-medium); }
@@ -158,6 +159,8 @@ dl.kv-list { margin: 0; }
   box-sizing: border-box;
 }
 .field.small { width: 120px; }
+select.field.small { width: auto; min-width: 220px; }
+.field-label { display: block; font-weight: var(--font-medium); margin-bottom: 6px; }
 textarea.field { min-height: 130px; resize: vertical; }
 .field.invalid { border-color: var(--orange); }
 .error-msg { color: var(--dark-red); background: var(--pale-red); border-radius: var(--radius-sm); padding: 6px 12px; margin-top: 8px; font-size: 14px; }
