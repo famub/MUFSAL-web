@@ -21,13 +21,16 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 RECENT_LIMIT = 5   # how many cases the dashboard table shows
 
 
+# ---------------------------------------------------------------- helpers
+# routes_complaints.py imports these too.
+
 def get_lang(request):
     """Page language from the 'lang' cookie (English by default)."""
     return "ar" if request.cookies.get("lang") == "ar" else "en"
 
 
 def get_full_name(user_id):
-    """The patient's name for the welcome banner."""
+    """The user's name for the welcome banner."""
     with get_connection() as conn:
         row = conn.execute(
             "SELECT full_name FROM users WHERE user_id = %s", (user_id,)
@@ -41,6 +44,8 @@ def format_date(value, lang):
         return ""
     return f"{value.day} {DASHBOARD_TEXT[lang]['months'][value.month - 1]} {value.year}"
 
+
+# ---------------------------------------------------------------- page
 
 @router.get("/dashboard-patient", include_in_schema=False)
 def dashboard_patient(request: Request):
@@ -69,7 +74,13 @@ def dashboard_patient(request: Request):
         })
 
     # A patient can have only one case under review at a time
-    has_open_case = any(c["status"] == "under_review" for c in all_cases)
+    open_case = next((c for c in all_cases if c["status"] == "under_review"), None)
+    waiting_text = None
+    if open_case is not None:
+        waiting_text = t["waiting_text"].format(
+            case_id=open_case["case_id"],
+            date=format_date(open_case["submitted_at"], lang),
+        )
 
     return templates.TemplateResponse(
         request, "dashboard-patient.html",
@@ -80,6 +91,7 @@ def dashboard_patient(request: Request):
             "welcome": t["welcome"].format(name=first_name),
             "cases": rows,
             "total": len(all_cases),
-            "has_open_case": has_open_case,
+            "has_open_case": open_case is not None,
+            "waiting_text": waiting_text,
         },
     )
