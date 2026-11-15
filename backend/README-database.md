@@ -205,3 +205,11 @@ also delete that account's files from the `uploads` folder.
   question in `static/js/questionnaire.js`. The tables already store it that
   way: five yes/no columns plus one optional text column.
 * Delete the demo data from `seed.sql` before the final version.
+
+---
+
+## 8. Login and registration
+
+The login, registration and password-reset API is in `routes_auth.py` / `auth_service.py`; see `README-auth.md` in the project root.
+New account functions at the bottom of `queries_accounts.py`: `national_id_exists`, `scfhs_exists`, `get_rejection_reason`, `resubmit_professional`,
+`list_pending_professionals`, `decide_professional`, `create_password_reset`, `get_valid_password_reset`, `complete_password_reset`.

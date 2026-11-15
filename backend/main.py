@@ -1,15 +1,36 @@
-"""MUFSAL - FastAPI app."""
-from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
+"""MUFSAL - FastAPI app.
 
+Start it from the backend folder:   uvicorn main:app --reload
+Then open http://127.0.0.1:8000/login
+"""
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
+load_dotenv()   # reads .env BEFORE the modules below read their settings
+
+import routes_auth
+import routes_dashboard
+import routes_pages
+import routes_review
+import session_guard
 from db import get_connection
+
+BASE_DIR = Path(__file__).resolve().parent   # .../backend
+PROJECT_DIR = BASE_DIR.parent                # the project root (static/, assets/, the HTML pages)
 
 app = FastAPI()
 
-BASE_DIR = Path(__file__).resolve().parent
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+# Server session (secure cookie) + the 15-minute inactivity rule for doctors and radiologists
+session_guard.install(app)
+
+# CSS, JS and images of the pages
+app.mount("/static", StaticFiles(directory=PROJECT_DIR / "static"), name="static")
+app.mount("/assets", StaticFiles(directory=PROJECT_DIR / "assets"), name="assets")
+
 
 @app.get("/db-test")
 def db_test():
@@ -18,38 +39,9 @@ def db_test():
         row = conn.execute("SELECT COUNT(*) AS accounts FROM users").fetchone()
     return row
 
-"""MUFSAL - FastAPI app."""
-import os
-from pathlib import Path
 
-from dotenv import load_dotenv
-from fastapi.staticfiles import StaticFiles
-from starlette.middleware.sessions import SessionMiddleware
-
-import routes_review
-import routes_dashboard
-app.include_router(routes_dashboard.router)
-
-load_dotenv()
-
-BASE_DIR = Path(__file__).parent          # .../backend
-PROJECT_DIR = BASE_DIR.parent             # the project root (static/, assets/)
-
-# Server session (secure cookie) - the login page puts user_id and role in it
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SESSION_SECRET", "change-me"),
-    max_age=60 * 60 * 8,
-    same_site="lax",
-)
-
-# CSS, JS and images of the pages
-app.mount("/static", StaticFiles(directory=PROJECT_DIR / "static"), name="static")
-app.mount("/assets", StaticFiles(directory=PROJECT_DIR / "assets"), name="assets")
-
-# Pages
-app.include_router(routes_review.router)   # review-case + view-report
-
-@app.get("/dashboard-patient", include_in_schema=False)
-def dashboard(req: Request):
-    return templates.TemplateResponse(req, "dashboard-patient.html")
+# The order matters: specific routes first, the page server (routes_pages) LAST.
+app.include_router(routes_auth.router)        # /api/login, /api/register/...
+app.include_router(routes_dashboard.router)   # /dashboard-patient (built by the server)
+app.include_router(routes_review.router)      # /cases/{id}/review, /set-lang ...
+app.include_router(routes_pages.router)       # /login, /register ... and every other .html page
