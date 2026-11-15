@@ -16,12 +16,14 @@ from psycopg import errors as pg_errors
 import auth_rules as rules
 import queries_accounts as db
 
-# Where each role goes after logging in. The patient dashboard is rendered by the server (routes_dashboard.py).
+# Where each role goes after logging in (same addresses as HOME_BY_ROLE in routes_complaints.py).
+# The patient dashboard is rendered by the server (routes_dashboard.py). The other three open the
+# static page until the team adds a server route with the same address, BEFORE routes_pages in main.py.
 HOME = {
     "patient": "/dashboard-patient",
-    "radiologist": "/dashboard-radiologist.html",
+    "radiologist": "/dashboard-radiologist",
     "doctor": "/dashboard-doctor",
-    "admin": "/dashboard-admin.html",
+    "admin": "/dashboard-admin",
 }
 
 MAX_FAILS = 5                 # wrong passwords in a row ...
