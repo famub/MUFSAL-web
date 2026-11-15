@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL - {{ status_code }}</title>
+  <link rel="stylesheet" href="/static/css/global.css" />
+  <link rel="stylesheet" href="/static/css/review.css" />
+</head>
+
+<body>
+  <main class="review-main">
+    <section class="card empty-state">
+      {% if status_code == 404 %}
+        <p>{{ 'الصفحة أو الحالة غير موجودة.' if lang == 'ar' else 'This page or case was not found.' }}</p>
+      {% else %}
+        <p>{{ 'ليس لديك صلاحية لفتح هذه الصفحة.' if lang == 'ar' else 'You do not have permission to open this page.' }}</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+
+</html>
