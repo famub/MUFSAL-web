@@ -23,7 +23,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-
+import routes_dashboards
 import routes_review
 
 load_dotenv()
@@ -45,3 +45,4 @@ app.mount("/assets", StaticFiles(directory=PROJECT_DIR / "assets"), name="assets
 
 # Pages
 app.include_router(routes_review.router)   # review-case + view-report
+app.include_router(routes_dashboards.router)   # doctor dashboard
