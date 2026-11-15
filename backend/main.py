@@ -1,9 +1,12 @@
 """MUFSAL - FastAPI app."""
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
 
 from db import get_connection
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templets")
 
 
 @app.get("/db-test")
