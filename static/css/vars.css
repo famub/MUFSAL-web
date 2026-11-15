@@ -20,8 +20,8 @@
     --pale-red: #ffe9e9;
     
     /* Fonts */
-    --font-en: "DM Sans", sans-serif;
-    --font-ar: "IBM Plex Sans Arabic", sans-serif;
+    --font-en: "DM Sans", "IBM Plex Sans Arabic", sans-serif;
+    --font-ar: "IBM Plex Sans Arabic", "DM Sans", sans-serif;
 
     /* Font weights */
     --font-regular: 400;

@@ -1,0 +1,71 @@
+@import url('./vars.css');
+
+body,
+body.has-footer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body > main,
+body.has-footer > main {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.site-footer {
+  margin-top: var(--spacing-lg);
+  border-top: 1px solid var(--light-gray);
+  background-color: var(--white);
+}
+
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.footer-brand {
+  font-weight: var(--font-bold);
+  color: var(--navy-blue);
+  letter-spacing: 0.05em;
+}
+
+.footer-text {
+  margin: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--medium-grey);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-lg);
+}
+
+.footer-links a {
+  font-size: 0.875rem;
+  color: var(--medium-grey);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--medium-blue);
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .footer-links {
+    justify-content: center;
+  }
+}

@@ -2,6 +2,7 @@
 
 @import url('./vars.css');
 @import url('./header.css');
+@import url('./footer.css');
 
 body {
   margin: 0;
@@ -42,3 +43,159 @@ html[lang="ar"] body {
 }
 .back-link:hover { text-decoration: underline; }
 html[dir="rtl"] .back-link svg, html[lang="ar"] .back-link svg { transform: scaleX(-1); }
+
+.subtitle {
+  margin: 0;
+  color: var(--medium-grey);
+}
+
+.icon-box--sm {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+}
+
+.icon-box--sm svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- Complaints page ---------- */
+
+.back-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+html[dir="rtl"] .back-link svg,
+html[lang="ar"] .back-link svg {
+  transform: scaleX(-1);
+}
+
+.success-box {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--light-green);
+  color: var(--dark-green);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-semibold);
+}
+
+/* New Complaint Form */
+.complaint-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: var(--font-bold);
+  color: var(--navy-blue);
+}
+
+.form-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px var(--spacing-md);
+  background-color: var(--white);
+  color: var(--navy-blue);
+  border: var(--border) solid var(--light-gray);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.875rem;
+  outline: none;
+  resize: vertical;
+}
+
+.form-field::placeholder {
+  color: var(--medium-grey);
+}
+
+.form-field:focus {
+  border-color: var(--medium-blue);
+}
+
+.form-field.invalid {
+  border-color: var(--dark-red);
+  background-color: var(--pale-red);
+}
+
+.form-error {
+  font-size: 0.8125rem;
+  font-weight: var(--font-semibold);
+  color: var(--dark-red);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-submit {
+  padding: 10px var(--spacing-lg);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* Previous Complaints Table Cells */
+.complaint-body-text {
+  margin: 0;
+  max-width: 320px;
+  white-space: pre-line;
+  font-size: 0.875rem;
+  color: var(--navy-blue);
+}
+
+.complaint-replies-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 320px;
+}
+
+.complaint-reply {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--pale-blue);
+  border-radius: var(--radius-sm);
+}
+
+.complaint-reply small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--medium-grey);
+  margin-bottom: 2px;
+}
+
+.complaint-reply p {
+  margin: 0;
+  font-size: 0.875rem;
+  white-space: pre-line;
+}
+
+/* Complaint Status Pills */
+.complaint-open {
+  background-color: var(--cream);
+  color: var(--brown);
+}
+
+.complaint-investigating {
+  background-color: var(--pale-blue);
+  color: var(--medium-blue);
+}
+
+.complaint-resolved {
+  background-color: var(--light-green);
+  color: var(--dark-green);
+}
+
+.empty-state {
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--medium-grey);
+}

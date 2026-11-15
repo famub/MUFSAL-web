@@ -1,4 +1,5 @@
-"""MUFSAL - English / Arabic texts for the patient dashboard."""
+"""MUFSAL - English / Arabic texts for the patient dashboard, the complaints
+page and the shared footer."""
 
 DASHBOARD_TEXT = {
     "en": {
@@ -11,8 +12,11 @@ DASHBOARD_TEXT = {
         "add_case_title": "Add a new case",
         "add_case_sub": "It takes about 3 minutes. You can review everything before submitting.",
         "add_case_btn": "Add new case",
-        "add_case_locked": "You can add a new case as soon as your current assessment is completed.",
         "my_cases": "My cases",
+        "waiting_title": "You already have a case waiting for the doctor's approval",
+        "waiting_text": "Case #{case_id}, submitted on {date}. You can add a new case as soon as the doctor approves it.",
+        "locked_title": "Uploading is paused",
+        "locked_sub": "Only one case can be under review at a time.",
         "my_cases_sub": "Your previous submissions and assessment reports",
         "col_id": "Case ID",
         "col_date": "Submission date",
