@@ -1,8 +1,9 @@
-"""MUFSAL - English / Arabic texts for the patient dashboard, the complaints
-page and the shared footer."""
+"""MUFSAL - English / Arabic texts for the patient dashboard and the complaints page.
+(The shared footer keeps its own texts inside templates/_footer.html.)"""
 
 DASHBOARD_TEXT = {
     "en": {
+        # ---- dashboard
         "page_title": "Patient dashboard",
         "dashboard": "Dashboard",
         "welcome": "Welcome back, {name}",
@@ -12,11 +13,11 @@ DASHBOARD_TEXT = {
         "add_case_title": "Add a new case",
         "add_case_sub": "It takes about 3 minutes. You can review everything before submitting.",
         "add_case_btn": "Add new case",
-        "my_cases": "My cases",
         "waiting_title": "You already have a case waiting for the doctor's approval",
         "waiting_text": "Case #{case_id}, submitted on {date}. You can add a new case as soon as the doctor approves it.",
         "locked_title": "Uploading is paused",
         "locked_sub": "Only one case can be under review at a time.",
+        "my_cases": "My cases",
         "my_cases_sub": "Your previous submissions and assessment reports",
         "col_id": "Case ID",
         "col_date": "Submission date",
@@ -29,10 +30,33 @@ DASHBOARD_TEXT = {
         "no_cases": "You have not submitted any cases yet.",
         "showing": "Showing {shown} of {total} submissions",
         "view_all": "View all my cases",
+
+        # ---- complaints page
+        "c_page_title": "My complaints",
+        "c_subtitle": "Tell us about a problem and follow the answers from the MUFSAL team.",
+        "c_back": "Back to dashboard",
+        "c_sent": "Your complaint was sent. The MUFSAL team will reply here.",
+        "c_previous": "Previous complaints",
+        "c_none": "You have no previous complaints.",
+        "c_sent_on": "Sent on {date}",
+        "c_your_message": "Your message",
+        "c_replies": "Replies from the MUFSAL team",
+        "c_no_reply": "No reply yet.",
+        "c_new": "New complaint",
+        "c_subject": "Subject",
+        "c_subject_ph": "A short title for your complaint",
+        "c_body": "Details",
+        "c_body_ph": "Describe the problem...",
+        "c_submit": "Send complaint",
+        "c_err_subject": "Please enter a subject (up to 200 characters).",
+        "c_err_body": "Please describe the problem (up to 2000 characters).",
+        "c_status": {"open": "Open", "investigating": "Investigating", "resolved": "Resolved"},
+
         "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         "lang_button": "ع",
     },
     "ar": {
+        # ---- dashboard
         "page_title": "لوحة تحكم المريض",
         "dashboard": "لوحة التحكم",
         "welcome": "مرحباً بعودتك، {name}",
@@ -42,7 +66,10 @@ DASHBOARD_TEXT = {
         "add_case_title": "إضافة حالة جديدة",
         "add_case_sub": "تستغرق حوالي 3 دقائق، ويمكنك مراجعة كل شيء قبل الإرسال.",
         "add_case_btn": "إضافة حالة جديدة",
-        "add_case_locked": "يمكنك إضافة حالة جديدة بمجرد اكتمال تقييمك الحالي.",
+        "waiting_title": "لديك حالة بانتظار اعتماد الطبيب",
+        "waiting_text": "الحالة #{case_id}، أُرسلت في {date}. يمكنك إضافة حالة جديدة فور اعتماد الطبيب لها.",
+        "locked_title": "الرفع متوقف مؤقتاً",
+        "locked_sub": "يمكن أن تكون حالة واحدة فقط قيد المراجعة في كل مرة.",
         "my_cases": "حالاتي",
         "my_cases_sub": "طلباتك السابقة وتقارير التقييم",
         "col_id": "رقم الحالة",
@@ -56,6 +83,28 @@ DASHBOARD_TEXT = {
         "no_cases": "لم ترسل أي حالة بعد.",
         "showing": "عرض {shown} من {total} طلبات",
         "view_all": "عرض جميع حالاتي",
+
+        # ---- complaints page
+        "c_page_title": "شكاواي",
+        "c_subtitle": "أخبرنا عن أي مشكلة وتابع ردود فريق مُفصّل.",
+        "c_back": "العودة إلى لوحة التحكم",
+        "c_sent": "تم إرسال شكواك. سيرد فريق مُفصّل هنا.",
+        "c_previous": "الشكاوى السابقة",
+        "c_none": "لا توجد لديك شكاوى سابقة.",
+        "c_sent_on": "أُرسلت في {date}",
+        "c_your_message": "رسالتك",
+        "c_replies": "ردود فريق مُفصّل",
+        "c_no_reply": "لا يوجد رد بعد.",
+        "c_new": "شكوى جديدة",
+        "c_subject": "العنوان",
+        "c_subject_ph": "عنوان قصير لشكواك",
+        "c_body": "التفاصيل",
+        "c_body_ph": "صف المشكلة...",
+        "c_submit": "إرسال الشكوى",
+        "c_err_subject": "الرجاء كتابة عنوان (حتى 200 حرف).",
+        "c_err_body": "الرجاء وصف المشكلة (حتى 2000 حرف).",
+        "c_status": {"open": "مفتوحة", "investigating": "قيد المتابعة", "resolved": "تم الحل"},
+
         "months": ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو",
                    "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
         "lang_button": "EN",

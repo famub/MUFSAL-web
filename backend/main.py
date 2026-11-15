@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 load_dotenv()   # reads .env BEFORE the modules below read their settings
 
 import routes_auth
+import routes_complaints
 import routes_dashboard
 import routes_pages
 import routes_review
@@ -43,5 +44,6 @@ def db_test():
 # The order matters: specific routes first, the page server (routes_pages) LAST.
 app.include_router(routes_auth.router)        # /api/login, /api/register/...
 app.include_router(routes_dashboard.router)   # /dashboard-patient (built by the server)
+app.include_router(routes_complaints.router)   # ← add, BEFORE routes_pages
 app.include_router(routes_review.router)      # /cases/{id}/review, /set-lang ...
 app.include_router(routes_pages.router)       # /login, /register ... and every other .html page

@@ -1,12 +1,25 @@
-{# Shared page footer. Include it with {% include "footer.html" %}. Needs: t. #}
+{# Shared page footer - works on ANY Jinja page: {% include "_footer.html" %}
+
+   It keeps its own English/Arabic texts here, so the page that includes it
+   does not need to provide them. It only reads `lang` ('en' or 'ar'), and
+   uses English when a page does not pass it. #}
+{% set ar = (lang | default('en')) == 'ar' %}
+
 <footer class="site-footer">
   <div class="footer-inner">
     <span class="footer-brand">MUFSAL</span>
 
-    <p class="footer-text">&copy; 2027 MUFSAL. {{ t.footer_warning }}</p>
+    <p class="footer-text">
+      &copy; 2027 MUFSAL.
+      {% if ar %}
+        مُفصّل نظام يعمل بالذكاء الاصطناعي، ونتائجه تدعم طبيبك ولا يجب الاعتماد عليها مصدراً رئيسياً للتشخيص.
+      {% else %}
+        An AI-powered system. It must not be used as the main source for a diagnosis.
+      {% endif %}
+    </p>
 
-    <nav class="footer-links" aria-label="Footer">
-      <a href="/complaints">{{ t.footer_complaints }}</a>
+    <nav class="footer-links" aria-label="{{ 'روابط' if ar else 'Footer' }}">
+      <a href="/complaints">{{ 'الشكاوى' if ar else 'Complaints' }}</a>
     </nav>
   </div>
 </footer>
