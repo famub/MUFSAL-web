@@ -15,10 +15,11 @@
 </head>
 
   <!-- TO BE DELETED (JUST TESTING CASES!!!) -->
-  <script>
+<script>
   document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.querySelector('.btn-search');
     const searchInput = document.querySelector('.search-bar');
+    const startCaseBtn = document.getElementById('start-linked-case-btn');
 
     const states = {
       default: document.getElementById('state-default'),
@@ -30,25 +31,29 @@
     function handleSearch() {
       const val = searchInput.value.trim().toUpperCase();
 
-      // Hide all state blocks that exist in the HTML
       Object.values(states).forEach(el => {
         if (el) el.classList.add('is-hidden');
       });
 
       if (!val) {
         if (states.default) states.default.classList.remove('is-hidden');
-      } else if (val === 'MUF-10842' || val === 'C-240318') {
-        // State 2: Registered + Case already under review
-        if (states.review) states.review.classList.remove('is-hidden');
-      } else if (val === 'MUF-30751' || val === 'MUF-42163' || val === 'C-231104') {
-        // State 3: Registered + Eligible to upload
+      } else if (val === 'MUF-10842' || val === 'MUF-250322' || val === 'C-240318' || val === 'C-241211') {
+        // State 1: Registered + Case already under review
+        if (states.review) {
+          const reviewBadge = states.review.querySelector('.selected-patient-box strong');
+          if (reviewBadge) reviewBadge.textContent = val;
+          states.review.classList.remove('is-hidden');
+        }
+      } else if (val === 'MUF-20417' || val === 'MUF-30751' || val === 'MUF-42163' || val === 'C-259111') {
+        // State 2: Registered + Eligible to start a new case
         if (states.eligible) {
           const badgeStrong = states.eligible.querySelector('.selected-patient-box strong');
           if (badgeStrong) badgeStrong.textContent = val;
+          sessionStorage.setItem('mufsal_linked_patient_id', val);
           states.eligible.classList.remove('is-hidden');
         }
       } else {
-        // State 4: Unregistered / Not found
+        // State 3: Unregistered / Not found
         if (states.notFound) {
           const notFoundId = states.notFound.querySelector('.not-found-id');
           if (notFoundId) notFoundId.textContent = val;
@@ -58,15 +63,21 @@
     }
 
     if (searchBtn && searchInput) {
-      // Trigger on button click
       searchBtn.addEventListener('click', handleSearch);
-
-      // Trigger when pressing "Enter" inside the input box
       searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
           handleSearch();
         }
+      });
+    }
+
+    // Ensure fresh case state when clicking "add new case"
+    if (startCaseBtn) {
+      startCaseBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('mufsal_file_name');
+        sessionStorage.removeItem('mufsal_file_size');
+        sessionStorage.removeItem('mufsal_answers');
       });
     }
   });
@@ -204,7 +215,6 @@
       <!--  =========================================================
             STATE 2: Registered Patient + Eligible for New Upload
             ========================================================= -->
-
       <div id="state-eligible" class="workflow-state is-hidden">
         <div class="patient-found-banner">
           <div class="found-info">
@@ -222,36 +232,28 @@
 
           <div class="selected-patient-box">
             <span class="selected-label">Selected patient</span>
-            <strong>MUF-20417</strong>
+            <strong id="eligible-patient-id">MUF-20417</strong>
             <span class="registered-indicator"><span class="dot"></span> Registered</span>
           </div>
         </div>
 
         <div class="state-body">
-          <div class="upload-dropzone upload-dropzone--active">
+          <div class="upload-dropzone">
             <div class="dropzone-info">
               <div class="icon-box">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               </div>
               <div>
-                <h3>Upload Knee X-ray</h3>
-                <p class="subtitle">Select a clear knee X-ray file to link to this patient for AI assessment.</p>
+                <h3>add a new case</h3>
+                <p class="subtitle">It takes about 3 minutes. You can review everything before submitting.</p>
               </div>
             </div>
 
-            <label class="btn-choose-file btn-choose-file--active">
-              Choose File
-              <input type="file" accept=".jpg,.jpeg,.png,.dcm" hidden />
-            </label>
-          </div>
-
-          <div class="upload-meta">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-            </svg>
-            <span>Accepted formats: JPG, PNG, or DICOM · Maximum file size 20 MB</span>
+            <a href="new-case-step1.html" id="start-linked-case-btn" class="btn-search">
+              add new case
+            </a>
           </div>
         </div>
       </div>
