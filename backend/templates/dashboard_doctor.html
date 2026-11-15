@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>MUFSAL - {{ t.doc_title }}</title>
+
+  <link rel="stylesheet" href="/static/css/global.css" />
+  <link rel="stylesheet" href="/static/css/header.css" />
+  <link rel="stylesheet" href="/static/css/dashboards.css" />
+</head>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <div id="header-logo-">
+        <a href="/dashboard-doctor" aria-label="MUFSAL home">
+          <img src="/assets/logo-light.png" alt="MUFSAL" class="logo-img" />
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <form action="/set-lang" method="get">
+          <input type="hidden" name="lang" value="{{ 'en' if lang == 'ar' else 'ar' }}" />
+          <input type="hidden" name="next" value="{{ request.url.path }}" />
+          <button type="submit" id="lang-toggle">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+            {{ t.lang_button }}
+          </button>
+        </form>
+
+        <a href="/profile-doctor" class="profile-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </a>
+
+        <span class="site-header__rule" aria-hidden="true"></span>
+
+        <a href="/logout" class="logout-link">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <!-- Top banner -->
+    <section class="dashboard-banner">
+      <div class="banner-text">
+        <span id="dashboard">{{ t.doc_badge }}</span>
+        <h1>{{ t.welcome.format(name=name) }}</h1>
+        <p class="subtitle">{{ t.doc_subtitle }}</p>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stat-cards">
+      <div class="card stat-card">
+        <div class="icon-box">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+        </div>
+        <div class="stat-info">
+          <strong class="stat-number">{{ stats.pending }}</strong>
+          <span class="stat-label">{{ t.st_pending }}</span>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="icon-box icon-box--warning">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" /></svg>
+        </div>
+        <div class="stat-info">
+          <strong class="stat-number">{{ stats.high_priority }}</strong>
+          <span class="stat-label">{{ t.st_high }}</span>
+        </div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="icon-box icon-box--success">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <div class="stat-info">
+          <strong class="stat-number">{{ stats.approved }}</strong>
+          <span class="stat-label">{{ t.st_approved }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pending cases -->
+    <section class="card cases-card pending-cases-card">
+      <div class="cases-card-header">
+        <h2>{{ t.pending_title }}</h2>
+        <p class="subtitle">{{ t.pending_sub }}</p>
+      </div>
+
+      {% if pending %}
+      <div class="table-responsive">
+        <table class="cases-table">
+          <thead>
+            <tr>
+              <th>{{ t.th_health_id }}</th>
+              <th>{{ t.th_case }}</th>
+              <th>{{ t.th_submitted }}</th>
+              <th>{{ t.th_grade }}</th>
+              <th>{{ t.th_conf }}</th>
+              <th>{{ t.th_priority }}</th>
+              <th>{{ t.th_actions }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in pending %}
+            <tr>
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg></div>
+                  <strong><bdi>{{ c.national_id }}</bdi></strong>
+                </div>
+              </td>
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+                  <strong>{{ c.case_id }}</strong>
+                </div>
+              </td>
+              <td>
+                <div class="date-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <span>{{ c.date }}</span>
+                </div>
+              </td>
+              <td>
+                {% if c.predicted_grade is not none %}
+                <div class="grade-cell"><span class="grade-pill grade-{{ c.predicted_grade }}">KL {{ c.predicted_grade }}</span></div>
+                {% else %}-{% endif %}
+              </td>
+              <td><strong class="confidence-val">{{ c.confidence_pct ~ '%' if c.confidence_pct is not none else '-' }}</strong></td>
+              <td>
+                {% if c.priority %}
+                <span class="status-pill priority-{{ c.priority }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" /></svg>
+                  {{ t[c.priority] }}
+                </span>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <span class="view-report">
+                    <a href="/cases/{{ c.case_id }}/review">{{ t.review }}</a>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ 'M15 19l-7-7 7-7' if lang == 'ar' else 'M9 5l7 7-7 7' }}" /></svg>
+                  </span>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="subtitle" style="padding:16px 24px">{{ t.no_pending }}</p>
+      {% endif %}
+
+      <div class="card-footer">
+        <span class="footer-note">{{ t.top5_pending }}</span>
+        <a href="/pending-cases" class="btn-view-all">
+          {{ t.all_pending }}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ 'M15 19l-7-7 7-7' if lang == 'ar' else 'M9 5l7 7-7 7' }}" /></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Approved cases -->
+    <section class="card cases-card">
+      <div class="cases-card-header">
+        <h2>{{ t.approved_title }}</h2>
+        <p class="subtitle">{{ t.approved_sub }}</p>
+      </div>
+
+      {% if approved %}
+      <div class="table-responsive">
+        <table class="cases-table">
+          <thead>
+            <tr>
+              <th>{{ t.th_health_id }}</th>
+              <th>{{ t.th_approved }}</th>
+              <th>{{ t.th_final_grade }}</th>
+              <th>{{ t.th_actions }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in approved %}
+            <tr>
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg></div>
+                  <strong><bdi>{{ c.national_id }}</bdi></strong>
+                </div>
+              </td>
+              <td>
+                <div class="date-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <span>{{ c.date }}</span>
+                </div>
+              </td>
+              <td><div class="grade-cell"><span class="grade-pill grade-{{ c.final_grade }}">KL {{ c.final_grade }}</span></div></td>
+              <td>
+                <div class="actions-cell">
+                  <span class="view-report">
+                    <a href="/cases/{{ c.case_id }}/report">{{ t.view_report }}</a>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ 'M15 19l-7-7 7-7' if lang == 'ar' else 'M9 5l7 7-7 7' }}" /></svg>
+                  </span>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="subtitle" style="padding:16px 24px">{{ t.no_approved }}</p>
+      {% endif %}
+
+      <div class="card-footer">
+        <span class="footer-note">{{ t.top5_approved }}</span>
+        <a href="/approved-cases" class="btn-view-all">
+          {{ t.all_approved }}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ 'M15 19l-7-7 7-7' if lang == 'ar' else 'M9 5l7 7-7 7' }}" /></svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+</body>
+
+</html>
