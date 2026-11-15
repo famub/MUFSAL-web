@@ -288,3 +288,62 @@ def dev_login_as(request: Request, user_id: int):
     request.session["user_id"] = user["user_id"]
     request.session["role"] = user["role"]
     return {"logged_in_as": user}
+
+
+
+
+# ================================================================ view-report
+from texts_report import REPORT_TEXT  # noqa: E402
+
+HOMES = {"patient": "/dashboard-patient", "doctor": "/dashboard-doctor", "radiologist": "/dashboard-radiologist"}
+
+
+def long_date(value, lang):
+    """15 November 2026 / 15 نوفمبر 2026"""
+    if value is None:
+        return ""
+    return f"{value.day} {REPORT_TEXT[lang]['months'][value.month - 1]} {value.year}"
+
+
+@router.get("/cases/{case_id}/report")
+def view_report_page(request: Request, case_id: int, confirmed: int = 0):
+    user = current_user(request)
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+
+    case = get_case(case_id)
+    if case is None:
+        return error_page(request, 404)
+    if not can_view_case(user, case):
+        return error_page(request, 403)
+
+    lang = get_lang(request)
+    ai = case["ai_result"]
+    report = case["report"]
+    approved = case["status"] == "approved" and report is not None
+
+    gradcam_file = safe_upload_path(ai["gradcam_image_path"]) if ai else None
+    xray_file = safe_upload_path(case["xray_image_path"])
+
+    return templates.TemplateResponse(
+        request, "view_report.html",
+        {
+            "lang": lang,
+            "direction": "rtl" if lang == "ar" else "ltr",
+            "t": REPORT_TEXT[lang],
+            "role": user["role"],
+            "home": HOMES[user["role"]],
+            "case": case,
+            "ai": ai,
+            "report": report,
+            "approved": approved,
+            # NFR-R1: nothing about the result is sent before the doctor approves
+            "report_text": (report["report_ar"] if lang == "ar" else report["report_en"]) if approved else "",
+            "confidence": int(round(float(ai["confidence"]) * 100)) if (approved and ai) else None,
+            "has_xray": approved and xray_file is not None and xray_file.is_file(),
+            "has_gradcam": approved and gradcam_file is not None and gradcam_file.is_file(),
+            "submitted": long_date(case["submitted_at"], lang),
+            "approved_on": long_date(report["approved_at"], lang) if approved else "",
+            "confirmed": confirmed == 1 and user["role"] == "doctor" and approved,
+        },
+    )
