@@ -20,7 +20,7 @@ import queries_accounts as db
 HOME = {
     "patient": "/dashboard-patient",
     "radiologist": "/dashboard-radiologist.html",
-    "doctor": "/dashboard-doctor.html",
+    "doctor": "/dashboard-doctor",
     "admin": "/dashboard-admin.html",
 }
 
