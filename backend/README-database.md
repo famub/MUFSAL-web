@@ -213,3 +213,37 @@ also delete that account's files from the `uploads` folder.
 The login, registration and password-reset API is in `routes_auth.py` / `auth_service.py`; see `README-auth.md` in the project root.
 New account functions at the bottom of `queries_accounts.py`: `national_id_exists`, `scfhs_exists`, `get_rejection_reason`, `resubmit_professional`,
 `list_pending_professionals`, `decide_professional`, `create_password_reset`, `get_valid_password_reset`, `complete_password_reset`.
+
+---
+
+## 9. Delay complaints - `queries_delays.py`
+
+A patient, or the radiologist who uploaded the X-ray, can press one button to
+report that a report has not come back. It carries no text. The complaint lands
+on the admin's delayed-requests page, where the admin moves the case to another
+doctor. The waiting period is `DELAY_DAYS` at the top of the file (10 days),
+counted from `cases.submitted_at`.
+
+### `can_report_delay(case_id, user_id)`
+`True` when the button should be enabled. It is enabled only when the user is
+the patient or the uploading radiologist, the case is still under review, ten
+days have passed, and there is no open complaint on that case yet.
+
+### `create_delay_complaint(case_id, user_id)`
+Sends the complaint and returns its id, or a dict with `error`:
+`case_not_found`, `not_allowed`, `already_approved`, `too_early` or
+`already_reported`.
+
+### `list_delay_complaints(status="pending")`
+The admin's list, longest wait first. Each row carries the case, the patient,
+who raised it, the current doctor and `days_waiting`. Pass `status="handled"`
+for the ones already dealt with.
+
+### `reassign_case(case_id, new_doctor_id, admin_id)`
+Moves the case to another doctor, closes the open complaint and adds a
+`reassigned` line to the case timeline. Returns `True`, or a dict with
+`error: doctor_not_found`.
+
+Complaints are never deleted. Once handled they leave the list but stay in the
+table as a record, and the button can be used again if the new doctor is late
+as well.

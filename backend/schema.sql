@@ -155,3 +155,18 @@ CREATE TABLE password_resets (
     used       BOOLEAN      NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE delay_complaints (
+    delay_complaint_id SERIAL      PRIMARY KEY,
+    case_id            INTEGER     NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    user_id            INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    status             VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    handled_at         TIMESTAMP,
+    handled_by         INTEGER     REFERENCES users(user_id) ON DELETE SET NULL,
+    CONSTRAINT delay_status_valid CHECK (status IN ('pending','handled'))
+);
+
+-- Only one open delay complaint per case at a time
+CREATE UNIQUE INDEX delay_one_open_per_case
+    ON delay_complaints (case_id) WHERE status = 'pending';
