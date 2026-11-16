@@ -1,0 +1,61 @@
+/* ============================================================
+   MUFSAL — profile-patient
+   Only what this page needs. Everything else (colours, the
+   side header, cards, buttons, tags, fields) comes from
+   mufsal-ui.css, which is linked before this file.
+   ============================================================ */
+
+/* ============================================================
+     MUFSAL - patient profile (design study)
+     Name, email and phone can change. The national ID, date of
+     birth and gender were checked at sign-up and stay locked.
+     No medical history here: it is asked with every new X-ray.
+     ============================================================ */
+.topbar { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 30px; }
+.topbar p { color: var(--grey); margin-top: 8px; }
+.pill { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 8px; background: var(--white); border: none; border-radius: 999px; padding: 9px 16px; font-size: .88rem; color: var(--body); box-shadow: 0 6px 18px -10px rgba(6,24,47,.25); }
+/* the saved banner */
+.saved { display: none; align-items: center; gap: 10px; background: var(--ok-pale); color: var(--ok); border-radius: 14px; padding: 13px 18px; font-size: .92rem; margin-bottom: 18px; }
+.saved.show { display: flex; }
+.saved svg { width: 18px; height: 18px; }
+/* ---------- cards ---------- */
+.card { background: var(--white); border-radius: var(--radius); padding: 28px 30px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.card-head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.card-head h2 { font-size: 1.12rem; letter-spacing: -.01em; }
+.card-head p { color: var(--grey); font-size: .88rem; margin-top: 3px; }
+.btn-edit { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 9px; background: var(--brand-soft); color: var(--brand-dark); border: none; border-radius: 999px; padding: 10px 18px; font-size: .88rem; font-weight: 500; white-space: nowrap; }
+.btn-edit:hover { background: #d6e5ff; }
+.btn-edit svg { width: 16px; height: 16px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.field label { display: block; font-size: .85rem; color: var(--body); margin-bottom: 7px; }
+.field input, .field select {
+    font: inherit; font-size: .96rem; color: var(--ink); width: 100%;
+    background: var(--mint); border: 1px solid transparent; border-radius: 13px;
+    padding: 13px 16px; transition: background .16s ease, border-color .16s ease;
+  }
+.field input:focus, .field select:focus { outline: none; background: var(--white); border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
+.actions { display: none; gap: 12px; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.card.editing .actions { display: flex; }
+.card.editing .btn-edit { display: none; }
+.btn-save { background: var(--ink); color: #fff; border: none; border-radius: 999px; padding: 13px 26px; font-size: .92rem; box-shadow: 0 12px 26px -14px rgba(6,24,47,.8); }
+.btn-save:hover { background: #0d2c53; }
+.btn-cancel { background: var(--white); color: var(--body); border: 1px solid var(--line); border-radius: 999px; padding: 13px 24px; font-size: .92rem; }
+.btn-cancel:hover { color: var(--ink); }
+/* password row */
+.pw { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.pw p { color: var(--grey); font-size: .9rem; }
+.pw .btn-edit { margin-inline-start: auto; }
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .card { padding: 22px 20px; }
+}
+
+/* ---------- a box the server refused ---------- */
+
+.err { color: var(--red); font-size: .8rem; margin-top: 6px; }
+.field.bad input, .field.bad select, .field.bad textarea { border-color: var(--red); background: var(--red-pale); }
+
+/* Cancel is a link back to the clean page, so it needs a button's shape */
+a.btn-cancel { display: inline-flex; align-items: center; text-decoration: none; }

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — My profile</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
+
+  <!-- shared across every MUFSAL page -->
+  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css" />
+  <!-- only what this page needs on top of it -->
+  <link rel="stylesheet" href="/static/NewCss/profile-patient.css" />
+</head>
+
+<body>
+
+  <aside class="rail">
+    <a href="/dashboard-patient" class="rail-brand">
+      <img src="/assets/logo-light.png" alt="" />
+      MUFSAL
+    </a>
+
+    <p class="rail-label">Menu</p>
+
+    <nav class="rail-nav">
+      <a href="/dashboard-patient" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
+        <span class="txt">Home</span>
+      </a>
+      <a href="/patient-cases" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round" /></svg>
+        <span class="txt">My cases</span>
+        <span class="count">{{ total_cases }}</span>
+      </a>
+      <a href="/complaints" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2" stroke-linecap="round" /><rect x="2.5" y="12.5" width="4.5" height="7.5" rx="2.2" /><rect x="17" y="12.5" width="4.5" height="7.5" rx="2.2" /><path d="M19.2 20v.4a2.8 2.8 0 0 1-2.8 2.8H13.4" stroke-linecap="round" /></svg>
+        <span class="txt">Complaints</span>
+      </a>
+      <a href="/profile-patient" class="rail-link is-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" stroke-linecap="round" /></svg>
+        <span class="txt">Profile</span>
+      </a>
+    </nav>
+
+    <div class="rail-foot">
+      <a href="/logout" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span class="txt">Log out</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>My profile</h1>
+          <p>Your account details. Your medical answers are asked with each new X-ray.</p>
+        </div>
+      </div>
+
+      {% if saved %}
+      <p class="saved show">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        Your details have been saved.
+      </p>
+      {% endif %}
+
+      <!-- ---------- contact details ----------
+           The three boxes at the top can be changed. The three below them
+           were checked when the account was made and the doctor reads the
+           X-ray against them, so they are locked. -->
+      <form method="post" action="/profile-patient" novalidate>
+        <section class="card{{ ' editing' if errors }}" id="contact-card">
+          <div class="card-head">
+            <div>
+              <h2>Personal information</h2>
+              <p>Your name and contact details. The rest was checked when you signed up.</p>
+            </div>
+            <button class="btn-edit" type="button" data-edit="contact-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 112.8 2.8L11.8 15H9v-2.8l8.6-8.6z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              Edit
+            </button>
+          </div>
+
+          <div class="grid">
+            <div class="field{{ ' bad' if errors.full_name }}">
+              <label for="name">Full name</label>
+              <input type="text" id="name" name="full_name" value="{{ form.full_name }}"
+                     maxlength="100" {% if not errors %}disabled{% endif %} />
+              {% if errors.full_name %}<p class="err">{{ errors.full_name }}</p>{% endif %}
+            </div>
+
+            <div class="field{{ ' bad' if errors.email }}">
+              <label for="email">Email address</label>
+              <input type="text" inputmode="email" id="email" name="email" value="{{ form.email }}"
+                     maxlength="255" {% if not errors %}disabled{% endif %} />
+              {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
+            </div>
+
+            <div class="field{{ ' bad' if errors.phone }}">
+              <label for="phone">Phone number</label>
+              <input type="tel" id="phone" name="phone" value="{{ form.phone }}"
+                     maxlength="12" {% if not errors %}disabled{% endif %} />
+              {% if errors.phone %}<p class="err">{{ errors.phone }}</p>{% endif %}
+            </div>
+
+            <div class="field locked">
+              <label for="nid">National ID</label>
+              <input type="text" id="nid" value="{{ national_id }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+
+            <div class="field locked">
+              <label for="dob">Date of birth</label>
+              <input type="text" id="dob" value="{{ date_of_birth }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+
+            <div class="field locked">
+              <label for="sex">Sex</label>
+              <input type="text" id="sex" value="{{ gender }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-save" type="submit">Save changes</button>
+            <a class="btn-cancel" href="/profile-patient">Cancel</a>
+          </div>
+        </section>
+      </form>
+
+    </div>
+  </main>
+
+  <script>
+    // Edit mode: unlock the three boxes that may be changed, then lock them
+    // again on cancel. The locked boxes carry .locked and are left alone.
+    // Saving is an ordinary form submit, so the server has the last word.
+    const card = document.getElementById('contact-card');
+
+    function editable() {
+      return [...card.querySelectorAll('.field:not(.locked) input')];
+    }
+
+    document.querySelector('[data-edit]').addEventListener('click', function () {
+      editable().forEach(function (f) { f.disabled = false; });
+      card.classList.add('editing');
+      editable()[0].focus();
+    });
+  </script>
+
+</body>
+
+</html>

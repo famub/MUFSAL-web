@@ -132,6 +132,9 @@ CREATE TABLE case_activity (
 CREATE TABLE complaints (
     complaint_id SERIAL       PRIMARY KEY,
     user_id      INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    -- which case the complaint is about, when it is about one at all.
+    -- The complaint survives the case, so the admin can still read it.
+    case_id      INTEGER      REFERENCES cases(case_id) ON DELETE SET NULL,
     subject      VARCHAR(200) NOT NULL,
     body         TEXT         NOT NULL,
     status       VARCHAR(20)  NOT NULL DEFAULT 'open',

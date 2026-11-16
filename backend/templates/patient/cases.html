@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — My cases</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
+
+  <!-- shared across every MUFSAL page -->
+  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css" />
+  <!-- only what this page needs on top of it -->
+  <link rel="stylesheet" href="/static/NewCss/my-cases.css" />
+</head>
+
+<body>
+
+  <!-- ======================= LEFT RAIL ======================= -->
+  <aside class="rail">
+    <a href="/dashboard-patient" class="rail-brand">
+      <img src="/assets/logo-light.png" alt="" />
+      MUFSAL
+    </a>
+
+    <p class="rail-label">Menu</p>
+
+    <nav class="rail-nav">
+      <a href="/dashboard-patient" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" />
+        </svg>
+        <span class="txt">Home</span>
+      </a>
+
+      <a href="/patient-cases" class="rail-link is-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="4" y="3" width="16" height="18" rx="3" />
+          <path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round" />
+        </svg>
+        <span class="txt">My cases</span>
+        <span class="count">{{ total_cases }}</span>
+      </a>
+
+      <a href="/complaints" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2" stroke-linecap="round" /><rect x="2.5" y="12.5" width="4.5" height="7.5" rx="2.2" /><rect x="17" y="12.5" width="4.5" height="7.5" rx="2.2" /><path d="M19.2 20v.4a2.8 2.8 0 0 1-2.8 2.8H13.4" stroke-linecap="round" /></svg>
+        <span class="txt">Complaints</span>
+      </a>
+      <a href="/profile-patient" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21a8 8 0 0 1 16 0" stroke-linecap="round" />
+        </svg>
+        <span class="txt">Profile</span>
+      </a>
+    </nav>
+
+    <div class="rail-foot">
+
+      <a href="/logout" class="rail-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="txt">Log out</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ======================= MAIN ======================= -->
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>My cases</h1>
+          <p>Every X-ray you have sent, and what the doctor said about it.</p>
+        </div>
+      </div>
+
+      {% if message %}
+      <div class="banner {{ 'banner-ok' if message_ok else 'banner-bad' }} show">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          {% if message_ok %}
+          <path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" />
+          {% else %}
+          <path d="M12 7.5v5M12 16v.1" stroke-linecap="round" />
+          {% endif %}
+        </svg>
+        <span>{{ message }}</span>
+      </div>
+      {% endif %}
+
+      <div class="toolbar">
+        <div class="chips">
+          <button class="chip is-on" data-filter="all" type="button">All</button>
+          <button class="chip" data-filter="review" type="button">In progress</button>
+          <button class="chip" data-filter="done" type="button">Completed</button>
+        </div>
+
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" stroke-linecap="round" />
+          </svg>
+          <input type="search" id="q" placeholder="Search by case number" aria-label="Search by case number" />
+        </div>
+      </div>
+
+      <div class="list" id="list">
+
+        {% for c in cases %}
+        <article class="row" data-status="{{ 'done' if c.done else 'review' }}" data-case="{{ c.case_id }}">
+          <div class="who">
+            <strong>Case #{{ c.case_id }}</strong>
+            <p>{{ c.knee }} &middot; {{ c.date }}</p>
+          </div>
+
+          {% if c.done %}
+          <span class="tag tag-done">Report ready</span>
+          <div class="grade"><span class="g g-{{ c.grade }}">KL {{ c.grade }}</span><span>Grade</span></div>
+          <a class="go" href="/cases/{{ c.case_id }}/report">
+            View report
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 10h11m0 0-4-4m4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+          {% else %}
+          <span class="tag tag-review">With your doctor</span>
+          <div class="grade"><span class="pending">&mdash;</span><span>Grade</span></div>
+          <button class="go quiet" type="button">Not ready yet</button>
+          {% endif %}
+        </article>
+        {% endfor %}
+
+      </div>
+
+      <p class="none{{ ' show' if not cases }}" id="none">
+        {% if cases %}No case matches that.{% else %}You have not sent an X-ray yet. Start from the home page.{% endif %}
+      </p>
+
+    </div>
+  </main>
+
+  <script>
+    // The chips and the search box only hide rows, so this page needs
+    // nothing from the server to be tried out.
+    const rows = [...document.querySelectorAll('.row')];
+    const chips = [...document.querySelectorAll('.chip')];
+    const search = document.getElementById('q');
+    const none = document.getElementById('none');
+    let filter = 'all';
+
+    function apply() {
+      const text = search.value.trim().toLowerCase();
+      let shown = 0;
+
+      rows.forEach(function (row) {
+        const okFilter = filter === 'all' || row.dataset.status === filter;
+        const okText = text === '' || row.dataset.case.includes(text.replace('#', ''));
+        const show = okFilter && okText;
+        row.style.display = show ? '' : 'none';
+        if (show) shown++;
+      });
+
+      none.classList.toggle('show', shown === 0);
+    }
+
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        chips.forEach(function (c) { c.classList.remove('is-on'); });
+        chip.classList.add('is-on');
+        filter = chip.dataset.filter;
+        apply();
+      });
+    });
+
+    search.addEventListener('input', apply);
+  </script>
+
+</body>
+
+</html>

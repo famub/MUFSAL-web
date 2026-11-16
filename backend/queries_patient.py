@@ -14,6 +14,8 @@ from db import get_connection
 DELAY_DAYS = 10
 
 
+# ============================================================ the home page
+
 def get_patient_header(patient_id):
     """The name for the welcome line and how many cases the patient has.
 
@@ -65,3 +67,155 @@ def get_open_case(patient_id):
             """,
             {"patient": patient_id, "days": DELAY_DAYS},
         ).fetchone()
+
+
+# =============================================================== "My cases"
+
+def get_all_cases(patient_id):
+    """Every X-ray this patient has sent, newest first.
+
+    final_grade and approved_at are empty while a case is still being
+    read, which is how the page knows whether to offer the report.
+    """
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT c.case_id,
+                   c.status,
+                   c.submitted_at,
+                   h.knee,
+                   r.final_grade,
+                   r.approved_at
+            FROM cases c
+            LEFT JOIN case_history h ON h.case_id = c.case_id
+            LEFT JOIN reports      r ON r.case_id = c.case_id
+            WHERE c.patient_id = %s
+            ORDER BY c.submitted_at DESC
+            """,
+            (patient_id,),
+        ).fetchall()
+
+
+# ================================================================= profile
+
+def get_profile(user_id):
+    """Everything the profile page shows.
+
+    The account row and the patient row are always created together at
+    sign-up, so one question with a join answers the whole page.
+    """
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT u.full_name, u.email, u.phone, u.national_id,
+                   p.date_of_birth, p.gender
+            FROM users u
+            JOIN patients p ON p.user_id = u.user_id
+            WHERE u.user_id = %s
+            """,
+            (user_id,),
+        ).fetchone()
+
+
+def email_belongs_to_someone_else(email, user_id):
+    """True when another account already uses this email address.
+
+    Checked here as well as by the UNIQUE rule on the column, so the
+    patient gets a clear message instead of a database error.
+    """
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM users WHERE lower(email) = lower(%s) AND user_id <> %s",
+            (email, user_id),
+        ).fetchone()
+    return row is not None
+
+
+def update_profile(user_id, full_name, email, phone):
+    """Save the three details a patient is allowed to change.
+
+    The national ID, the date of birth and the sex are left out on
+    purpose: the doctor reads the X-ray against them.
+    """
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE users SET full_name = %s, email = %s, phone = %s WHERE user_id = %s",
+            (full_name, email, phone, user_id),
+        )
+
+
+# =============================================================== complaints
+
+def get_case_choices(patient_id):
+    """The patient's cases, for the "which case?" list on the complaint form."""
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT c.case_id, c.submitted_at, h.knee
+            FROM cases c
+            LEFT JOIN case_history h ON h.case_id = c.case_id
+            WHERE c.patient_id = %s
+            ORDER BY c.submitted_at DESC
+            """,
+            (patient_id,),
+        ).fetchall()
+
+
+def create_complaint(user_id, subject, body, case_id=None):
+    """Save a complaint. case_id may be None when it is about nothing in
+    particular. Returns the new complaint_id."""
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            INSERT INTO complaints (user_id, subject, body, case_id)
+            VALUES (%s, %s, %s, %s)
+            RETURNING complaint_id
+            """,
+            (user_id, subject, body, case_id),
+        ).fetchone()
+    return row["complaint_id"]
+
+
+def get_written_complaints(user_id):
+    """The complaints this user typed, newest first, each with the admin's
+    answers underneath."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT complaint_id, subject, body, status, created_at, case_id
+            FROM complaints
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+            """,
+            (user_id,),
+        ).fetchall()
+
+        for row in rows:
+            row["replies"] = conn.execute(
+                """
+                SELECT body, created_at
+                FROM complaint_replies
+                WHERE complaint_id = %s
+                ORDER BY created_at ASC
+                """,
+                (row["complaint_id"],),
+            ).fetchall()
+    return rows
+
+
+def get_delay_complaints(user_id):
+    """The delays this user reported with the one-click button on a case.
+
+    They live in their own table because they carry no text, so the
+    complaints page reads both and shows them in one list.
+    """
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT delay_complaint_id, case_id, status, created_at
+            FROM delay_complaints
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+            """,
+            (user_id,),
+        ).fetchall()

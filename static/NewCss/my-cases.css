@@ -1,0 +1,65 @@
+/* ============================================================
+   MUFSAL — my-cases
+   Only what this page needs. Everything else (colours, the
+   side header, cards, buttons, tags, fields) comes from
+   mufsal-ui.css, which is linked before this file.
+   ============================================================ */
+
+.topbar p { color: var(--grey); margin-top: 8px; }
+.pill {
+    margin-inline-start: auto; display: inline-flex; align-items: center; gap: 8px;
+    background: var(--white); border: none; border-radius: 999px; padding: 9px 16px;
+    font-size: .88rem; color: var(--body); box-shadow: 0 6px 18px -10px rgba(6, 24, 47, .25);
+  }
+/* ---------- toolbar ---------- */
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.chips { display: flex; gap: 8px; }
+.search { margin-inline-start: auto; position: relative; }
+.search svg { position: absolute; inset-inline-start: 15px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--grey); }
+.search input {
+    font: inherit; font-size: .9rem; color: var(--ink);
+    background: var(--white); border: none; border-radius: 999px;
+    padding: 11px 18px 11px 42px; width: 230px;
+    box-shadow: 0 6px 18px -12px rgba(6, 24, 47, .3);
+  }
+.search input::placeholder { color: var(--grey); }
+.search input:focus { outline: 2px solid var(--brand-soft); outline-offset: 1px; }
+/* ---------- the list ---------- */
+.list { display: grid; gap: 12px; }
+.row {
+    background: var(--white); border-radius: var(--radius);
+    padding: 20px 24px; display: grid;
+    grid-template-columns: 1fr auto auto auto; align-items: center; gap: 20px;
+    box-shadow: var(--shadow);
+    transition: transform .16s ease;
+  }
+.row .who strong { font-size: 1.02rem; font-weight: 700; letter-spacing: -.01em; }
+.row .who p { color: var(--grey); font-size: .85rem; }
+.tag { border-radius: 999px; padding: 7px 14px; font-size: .82rem; font-weight: 500; white-space: nowrap; }
+.tag-review { background: var(--brand-soft); color: var(--brand-dark); }
+.grade { text-align: center; min-width: 74px; }
+.grade .g { font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
+.grade span { display: block; font-size: .72rem; color: var(--grey); letter-spacing: .08em; text-transform: uppercase; }
+.grade .pending { font-size: 1.25rem; color: var(--line); font-weight: 700; }
+.go {
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+    background: var(--ink); color: #fff; border: none; border-radius: 999px;
+    padding: 11px 20px; font-size: .88rem;
+    box-shadow: 0 10px 24px -14px rgba(6, 24, 47, .8);
+    transition: transform .16s ease;
+  }
+.go:hover { transform: translateY(-2px); }
+.go svg { width: 16px; height: 16px; }
+.go.quiet { background: var(--white); color: var(--grey); box-shadow: none; border: 1px solid var(--line); cursor: default; }
+.go.quiet:hover { transform: none; }
+.none { display: none; background: var(--white); border-radius: var(--radius); padding: 48px 24px; text-align: center; color: var(--grey); box-shadow: var(--shadow); }
+.none.show { display: block; }
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .search { margin-inline-start: 0; width: 100%; }
+  .search input { width: 100%; }
+}
+@media (max-width: 620px) {
+  .row { grid-template-columns: 1fr auto; row-gap: 14px; }
+  .row .go { grid-column: 1 / -1; justify-content: center; }
+}
