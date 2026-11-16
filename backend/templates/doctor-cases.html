@@ -78,10 +78,10 @@
             <thead>
               <tr>
                 {% if kind == 'pending' %}
-                  <th>{{ t.th_health_id }}</th><th>{{ t.th_case }}</th><th>{{ t.th_submitted }}</th>
+                  <th>{{ t.th_patient }}</th><th>{{ t.th_source }}</th><th>{{ t.th_submitted }}</th>
                   <th>{{ t.th_grade }}</th><th>{{ t.th_conf }}</th><th>{{ t.th_priority }}</th><th>{{ t.th_actions }}</th>
                 {% else %}
-                  <th>{{ t.th_health_id }}</th><th>{{ t.th_approved }}</th><th>{{ t.th_final_grade }}</th><th>{{ t.th_actions }}</th>
+                  <th>{{ t.th_patient }}</th><th>{{ t.th_source }}</th><th>{{ t.th_approved }}</th><th>{{ t.th_final_grade }}</th><th>{{ t.th_actions }}</th>
                 {% endif %}
               </tr>
             </thead>
