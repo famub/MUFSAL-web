@@ -1294,3 +1294,63 @@ html[lang="ar"] .btn-view-all svg {
 .empty-state p {
   margin: 0;
 }
+
+/* =====================================================================
+   PATIENT DASHBOARD - "Report a delay" button (templates/dashboard-patient.html)
+   Paste this block at the END of static/css/dashboards.css.
+   ===================================================================== */
+
+.btn-complain {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px var(--spacing-md);
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+  border: var(--border-sm) solid var(--dark-red);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: var(--font-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-complain:hover {
+  background-color: var(--dark-red);
+  color: var(--white);
+}
+
+.btn-complain:disabled {
+  background-color: var(--light-gray);
+  color: var(--medium-grey);
+  border-color: var(--light-gray);
+  cursor: not-allowed;
+}
+
+.complain-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.complain-wait small {
+  font-size: 0.75rem;
+  color: var(--medium-grey);
+  white-space: nowrap;
+}
+
+.delay-reported {
+  background-color: var(--light-gray);
+  color: var(--medium-grey);
+  white-space: nowrap;
+}
+
+/* the red twin of .success-box (which is in global.css) */
+.error-box {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--pale-red);
+  color: var(--dark-red);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-semibold);
+}

@@ -26,6 +26,10 @@
       </div>
     </section>
 
+    {% if message %}
+      <div class="{{ 'success-box' if message_ok else 'error-box' }}" role="status">{{ message }}</div>
+    {% endif %}
+
     <!-- Card 1: start a new case -->
     <section class="card upload-card">
       <div class="upload-card-header">
@@ -151,8 +155,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                       </svg>
                     </span>
+                  {% elif c.delay == 'can_report' %}
+                    <form method="post" action="/cases/{{ c.case_id }}/report-delay">
+                      <button type="submit" class="btn-complain">{{ t.complain_delay }}</button>
+                    </form>
+                  {% elif c.delay == 'reported' %}
+                    <span class="status-pill delay-reported">{{ t.delay_reported }}</span>
                   {% else %}
-                    <span>-</span>
+                    <div class="complain-wait">
+                      <button type="button" class="btn-complain" disabled>{{ t.complain_delay }}</button>
+                      <small>{{ t.complain_from.format(date=c.delay_from) }}</small>
+                    </div>
                   {% endif %}
                 </div>
               </td>
