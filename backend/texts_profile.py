@@ -1,0 +1,69 @@
+"""MUFSAL - texts of the profile pages, English and Arabic."""
+
+PROFILE_TEXT = {
+    "en": {
+        "lang_button": "ع",
+        "doc_title": "My Profile",
+        "back": "Back to Dashboard",
+        "page_title": "My Profile",
+        "page_subtitle": "View your professional credentials and manage your account details.",
+
+        "prof_title": "Professional Information",
+        "prof_subtitle": "Verified by the administrator during registration. "
+                         "Contact the administrator to request a change.",
+        "verified": "Verified by the administrator",
+        "role_label": "Professional Role",
+        "role_doctor": "Doctor",
+        "role_radiologist": "Radiology Specialist",
+        "scfhs_label": "SCFHS Registration Number",
+
+        "personal_title": "Personal Information",
+        "edit": "Edit Profile",
+        "name_label": "Full Name",
+        "email_label": "Email Address",
+        "phone_label": "Phone Number",
+        "phone_hint": "A Saudi mobile number, for example 0512345678",
+        "nid_label": "National ID / Iqama",
+        "protected": "Protected identifier",
+        "save": "Save Changes",
+        "cancel": "Cancel",
+
+        "saved_msg": "Your details have been saved.",
+        "err": {
+            "email_taken": "That email address is already used by another account.",
+            "bad_value": "Please check the email address and the phone number.",
+        },
+    },
+    "ar": {
+        "lang_button": "EN",
+        "doc_title": "ملفي الشخصي",
+        "back": "العودة إلى اللوحة",
+        "page_title": "ملفي الشخصي",
+        "page_subtitle": "اطّلع على بياناتك المهنية وعدّل بيانات حسابك.",
+
+        "prof_title": "البيانات المهنية",
+        "prof_subtitle": "تحقّق منها المسؤول عند التسجيل. لتعديلها تواصل مع المسؤول.",
+        "verified": "تحقّق منها المسؤول",
+        "role_label": "الدور المهني",
+        "role_doctor": "طبيب",
+        "role_radiologist": "أخصائي أشعة",
+        "scfhs_label": "رقم التسجيل المهني",
+
+        "personal_title": "البيانات الشخصية",
+        "edit": "تعديل الملف",
+        "name_label": "الاسم الكامل",
+        "email_label": "البريد الإلكتروني",
+        "phone_label": "رقم الجوال",
+        "phone_hint": "رقم جوال سعودي، مثل 0512345678",
+        "nid_label": "رقم الهوية / الإقامة",
+        "protected": "معرّف محمي",
+        "save": "حفظ التغييرات",
+        "cancel": "إلغاء",
+
+        "saved_msg": "تم حفظ بياناتك.",
+        "err": {
+            "email_taken": "هذا البريد الإلكتروني مستخدم في حساب آخر.",
+            "bad_value": "تأكد من البريد الإلكتروني ورقم الجوال.",
+        },
+    },
+}
