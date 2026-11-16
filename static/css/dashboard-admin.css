@@ -49,7 +49,6 @@ dialog label { display: grid; gap: var(--spacing-sm); margin-block: var(--spacin
 .panel-body { display: grid; gap: var(--spacing-md); }
 dl.kv { display: grid; grid-template-columns: auto 1fr; gap: var(--spacing-sm) var(--spacing-md); margin: 0; }
 dl.kv dt { color: var(--medium-grey); } dl.kv dd { margin: 0; font-weight: var(--font-semibold); }
-.doc-link { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border: 1.5px dashed var(--light-gray); border-radius: var(--radius-sm); color: var(--medium-blue); text-decoration: none; }
 .msg { padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); background: var(--light-gray); }
 .msg small { display: block; color: var(--medium-grey); }
 .panel-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
