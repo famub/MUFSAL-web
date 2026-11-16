@@ -113,6 +113,8 @@ def get_doctor_cases(doctor_id, status="under_review"):
             ORDER BY CASE a.priority WHEN 'high' THEN 1
                                      WHEN 'medium' THEN 2
                                      ELSE 3 END,
+                     a.predicted_grade DESC NULLS LAST,   -- backlog: by predicted grade
+                     a.confidence DESC NULLS LAST,        -- and confidence score
                      c.submitted_at ASC
             """,
             (doctor_id, status),
