@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="/static/css/header.css" />
   <link rel="stylesheet" href="/static/css/review.css" />
   <link rel="stylesheet" href="/static/css/report.css" />
+  <link rel="stylesheet" href="/static/css/footer.css" />
+  {% if role == 'doctor' %}<link rel="stylesheet" href="/static/css/doctor-nav.css" />{% endif %}
 </head>
 
 <body>
@@ -34,133 +36,7 @@
           </button>
         </form>
 
+        {% if role != 'doctor' %}
         <a href="/profile-{{ role }}" class="profile-link">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-          </svg>
-        </a>
-
-        <span class="site-header__rule" aria-hidden="true"></span>
-
-        <a href="/logout" class="logout-link">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <main class="review-main">
-    <a class="back-link" href="{{ home }}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg><span>{{ t.back }}</span></a>
-
-    <div class="page-head case-title">
-      <div>
-        <h1>{{ t.case_no }} {{ case.case_id }}</h1>
-        {# the patient does not need to see their own name and ID #}
-        <p>{% if role != 'patient' %}{{ case.patient_name }} - <bdi>{{ case.national_id }}</bdi>{% else %}{{ submitted }}{% endif %}</p>
-      </div>
-      <div class="meta report-actions">
-        <span class="badge {{ 'badge-approved' if approved else 'badge-pending' }}">{{ t.approved if approved else t.under_review }}</span>
-        {% if approved and role != 'doctor' %}
-        <!-- the browser's "Save as PDF" - report.css prints only the report -->
-        <button type="button" class="btn btn-primary" onclick="window.print()" title="{{ t.print_hint }}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg><span>{{ t.download }}</span></button>
-        {% endif %}
-      </div>
-    </div>
-
-    {% if confirmed %}
-    <div class="success-banner" role="status">{{ t.confirmed_msg }}{{ t.and_rad if case.source == 'radiologist' }}.</div>
-    {% endif %}
-
-    {% if not approved %}
-      <!-- not approved yet: only the status (NFR-R1) -->
-      <section class="card wait">
-        <span class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg></span>
-        {% if role == 'doctor' %}
-          <h2>{{ t.wait_doctor_title }}</h2>
-          <p>{{ t.wait_doctor_text }}</p>
-          <a class="btn btn-primary" href="/cases/{{ case.case_id }}/review">{{ t.go_review }}</a>
-        {% else %}
-          <h2>{{ t.wait_title }}</h2>
-          <p>{{ t.wait_text }}</p>
-        {% endif %}
-      </section>
-    {% else %}
-      {% set g = report.final_grade %}
-      <div class="{{ 'grid-report' if role == 'doctor' }}">
-        <!-- the simplified report -->
-        <article class="card report" lang="{{ lang }}" dir="{{ direction }}">
-          <div class="report-head">
-            <h2>{{ t.r_title }}</h2>
-            <span class="muted"><bdi>{{ case.case_id }}</bdi> &middot; {{ approved_on }}</span>
-          </div>
-
-          <div class="report-grade">
-            <div class="grade-circle"><small>{{ t.r_grade }}</small><strong>{{ g }}</strong></div>
-            <div>
-              <p class="grade-name">KL{{ g }} - {{ t.r_names[g] }}</p>
-              <p class="grade-desc report-meaning">{{ t.r_meaning[g] }}</p>
-            </div>
-          </div>
-
-          <div class="report-grid">
-            <section>
-             <h3>{{ t.r_xray_title }}</h3>
-              <div class="xray-box small">
-                {% if has_xray %}
-                  <img src="/cases/{{ case.case_id }}/image/xray" alt="{{ t.r_xray_title }}" />
-                {% else %}
-                  <div class="xray-placeholder">{{ t.r_xray_ph }}</div>
-                {% endif %}
-              </div>
-            </section>
-            <section>
-              {% if confidence is not none %}
-              <h3>{{ t.r_conf_title }}</h3>
-              <p>{{ t.r_conf.format(p=confidence) }}</p>
-              {% endif %}
-              <h3>{{ t.r_report_title }}</h3>
-              <p class="report-text">{{ report_text }}</p>
-            </section>
-          </div>
-
-          <section>
-            <h3>{{ t.r_words_title }}</h3>
-            <dl class="words">
-              {% for word, meaning in t.r_words %}
-              <div><dt>{{ word }}</dt><dd>{{ meaning }}</dd></div>
-              {% endfor %}
-            </dl>
-          </section>
-
-          <p class="disclaimer left">{{ t.r_disclaimer }}</p>
-        </article>
-
-        {% if role == 'doctor' %}
-        <!-- doctor-only clinical summary (read-only) -->
-        <aside class="card clinical">
-          <h2>{{ t.clinical }} <span class="badge badge-source">{{ t.doctor_only }}</span></h2>
-          <dl class="kv-list">
-            {% if ai %}<div class="kv"><dt>{{ t.ai_grade }}</dt><dd>KL{{ ai.predicted_grade }}</dd></div>{% endif %}
-            <div class="kv"><dt>{{ t.final_grade }}</dt><dd>KL{{ g }}
-              {% if ai %}{% set edited = ai.predicted_grade != g %}
-              <span class="badge {{ 'badge-pending' if edited else 'badge-approved' }}">{{ t.edited if edited else t.same }}</span>{% endif %}
-            </dd></div>
-            {% if confidence is not none %}<div class="kv"><dt>{{ t.confidence }}</dt><dd>{{ confidence }}%</dd></div>{% endif %}
-            <div class="kv"><dt>{{ t.patient }}</dt><dd>{{ case.patient_name }} (<bdi>{{ case.national_id }}</bdi>)</dd></div>
-            <div class="kv"><dt>{{ t.source }}</dt><dd>{{ t.src_patient if case.source == 'patient' else t.src_radiologist }}</dd></div>
-            <div class="kv"><dt>{{ t.submitted }}</dt><dd>{{ submitted }}</dd></div>
-            <div class="kv"><dt>{{ t.approved_on }}</dt><dd>{{ approved_on }}</dd></div>
-            <div class="kv"><dt>{{ t.doctor }}</dt><dd>{{ report.doctor_name }}</dd></div>
-          </dl>
-          <h3 class="hint" style="margin-top:16px">{{ t.notes }}</h3>
-          <p class="notes-text">{{ report.doctor_notes }}</p>
-        </aside>
-        {% endif %}
-      </div>
-    {% endif %}
-  </main>
-</body>
-
-</html>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            
