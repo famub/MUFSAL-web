@@ -60,4 +60,121 @@
       </div>
       <div class="meta">
         {% if ai %}<span class="badge badge-{{ ai.priority }}">{{ t[ai.priority] }}</span>{% endif %}
-        <span class="badge
+        <span class="badge badge-pending">{{ t.pending }}</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- X-ray + heatmap -->
+      <section class="card" aria-labelledby="h-xray">
+        <h2 id="h-xray"><span class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm6 3a2 2 0 100 4 2 2 0 000-4z"/></svg></span><span>{{ t.xray }}</span></h2>
+        <div class="xray-box">
+          {% if has_xray %}
+            <img src="/cases/{{ case.case_id }}/image/xray" alt="{{ t.xray }}" />
+            
+          {% else %}
+            <div class="xray-placeholder">{{ t.no_image }}</div>
+          {% endif %}
+        </div>
+       
+      </section>
+
+      <!-- AI result -->
+      <section class="card" aria-labelledby="h-ai">
+        <h2 id="h-ai"><span class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2 2 0 01-.586 1.414L4 15.5V19a2 2 0 002 2h12a2 2 0 002-2v-3.5l-5.164-5.268a2 2 0 01-.586-1.414V3.104M8 3h8"/></svg></span><span>{{ t.ai_result }}</span></h2>
+        {% if ai %}
+          <div class="grade-row">
+            <div class="grade-circle"><small>{{ t.kl_grade }}</small><strong>{{ ai.predicted_grade }}</strong></div>
+            <div>
+              <p class="grade-name">KL{{ ai.predicted_grade }} - {{ t.kl[ai.predicted_grade] }}</p>
+              <p class="grade-desc">{{ t.kl_desc[ai.predicted_grade] }}</p>
+            </div>
+          </div>
+          <dl class="kv-list">
+            <div class="kv"><dt>{{ t.confidence }}</dt><dd>{{ (ai.confidence * 100) | round | int }}%</dd></div>
+          </dl>
+          <h3 class="hint" style="margin-top:16px">{{ t.probs }}</h3>
+          <ul class="prob-list">
+            {% for p in probabilities %}
+            <li class="prob {{ 'top' if loop.index0 == ai.predicted_grade }}">
+              <span>KL{{ loop.index0 }}</span>
+              <span class="bar"><i style="width:{{ (p * 100) | round | int }}%"></i></span>
+              <span class="pct">{{ (p * 100) | round | int }}%</span>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">{{ t.no_ai }}</p>
+        {% endif %}
+      </section>
+
+      <!-- Case info -->
+      <section class="card" aria-labelledby="h-info">
+        <h2 id="h-info"><span class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></span><span>{{ t.case_info }}</span></h2>
+        <dl class="kv-list">
+          <div class="kv"><dt>{{ t.patient }}</dt><dd>{{ case.patient_name }}</dd></div>
+          <div class="kv"><dt>{{ t.health_id }}</dt><dd><bdi>{{ case.national_id }}</bdi></dd></div>
+          {% if age is not none %}<div class="kv"><dt>{{ t.age }}</dt><dd>{{ age }}</dd></div>{% endif %}
+          {% if case.gender %}<div class="kv"><dt>{{ t.gender }}</dt><dd>{{ t.genders[case.gender] }}</dd></div>{% endif %}
+          <div class="kv"><dt>{{ t.source }}</dt><dd>{{ t.src_patient if case.source == 'patient' else t.src_radiologist }}</dd></div>
+          <div class="kv"><dt>{{ t.submitted }}</dt><dd>{{ submitted }}</dd></div>
+          {% if ai %}<div class="kv"><dt>{{ t.priority }}</dt><dd><span class="badge badge-{{ ai.priority }}">{{ t[ai.priority] }}</span></dd></div>{% endif %}
+        </dl>
+      </section>
+
+      <!-- Medical history -->
+      <section class="card" aria-labelledby="h-history">
+        <h2 id="h-history"><span class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></span><span>{{ t.history }}</span></h2>
+        {% if history %}
+          {% for title, rows in history %}
+          <div class="history-block">
+            <h3>{{ title }}</h3>
+            <ul class="qa">
+              {% for question, answer in rows %}
+              <li><span>{{ question }}</span><span>{{ answer }}</span></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="muted">{{ t.no_history }}</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- Doctor decision: a normal HTML form, checked again on the server -->
+    {% if ai %}
+    <section class="card decision" aria-labelledby="h-decision">
+      <h2 id="h-decision"><span class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span><span>{{ t.decision }}</span></h2>
+
+      <form method="post" action="/cases/{{ case.case_id }}/review" novalidate>
+        <label for="final_grade" class="field-label">{{ t.final_grade }}</label>
+        <select id="final_grade" name="final_grade" class="field small {{ 'invalid' if errors.grade }}">
+          {% for g in range(5) %}
+          <option value="{{ g }}" {{ 'selected' if g == final_grade }}>KL{{ g }} - {{ t.kl[g] }}</option>
+          {% endfor %}
+        </select>
+        <p class="hint">{{ t.final_grade_hint }}</p>
+        {% if errors.grade %}<div class="error-msg" role="alert">{{ errors.grade }}</div>{% endif %}
+
+        <label for="notes" class="field-label" style="margin-top:16px">{{ t.notes }}</label>
+        <textarea id="notes" name="notes" class="field {{ 'invalid' if errors.notes }}" placeholder="{{ t.notes_ph }}" required>{{ notes }}</textarea>
+        <p class="hint">{{ t.notes_hint }}</p>
+        {% if errors.notes %}<div class="error-msg" role="alert">{{ errors.notes }}</div>{% endif %}
+
+        <div class="decision-foot">
+          <div class="hint">{{ t.pending_note }}</div>
+          <button type="submit" class="btn btn-primary">{{ t.confirm }}</button>
+        </div>
+      </form>
+    </section>
+    {% endif %}
+
+    <p class="disclaimer">{{ t.disclaimer }}</p>
+  </main>
+  </div>
+
+  {% include "_footer.html" %}
+</body>
+
+</html>
