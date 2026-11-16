@@ -16,6 +16,7 @@ import routes_admin
 import routes_auth
 import routes_complaints
 import routes_dashboard
+import routes_doctor
 import routes_new_case
 import routes_pages
 import routes_review
@@ -47,6 +48,7 @@ def db_test():
 app.include_router(routes_admin.router)      # /api/admin/... (the admin pages)
 app.include_router(routes_auth.router)        # /api/login, /api/register/...
 app.include_router(routes_dashboard.router)   # /dashboard-patient (built by the server)
+app.include_router(routes_doctor.router)      # /dashboard-doctor (built by the server)
 app.include_router(routes_complaints.router)  # /complaints (built by the server)
 app.include_router(routes_new_case.router)    # /new-case (built by the server)
 app.include_router(routes_review.router)      # /cases/{id}/review, /cases/{id}/report, /set-lang ...
