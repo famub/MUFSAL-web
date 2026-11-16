@@ -58,3 +58,67 @@
       <div class="banner-text">
         <span id="dashboard">{{ t.doc_badge }}</span>
         <h1>{{ page_title }}</h1>
+        <p class="subtitle">{{ page_sub }}</p>
+      </div>
+    </section>
+
+    <section class="card cases-card {{ 'pending-cases-card' if kind == 'pending' }}">
+      {% set rows = pending if kind == 'pending' else approved %}
+      {% if rows %}
+        <div class="cases-card-header">
+          <div class="toolbar">
+            <span class="footer-note">{{ t.total.format(total=rows|length) }}</span>
+            <input id="search" class="search-bar toolbar-search" type="search" placeholder="{{ t.search_ph }}" />
+          </div>
+        </div>
+
+        <div id="table-wrapper" class="table-responsive">
+          <table class="cases-table">
+            <thead>
+              <tr>
+                {% if kind == 'pending' %}
+                  <th>{{ t.th_patient }}</th><th>{{ t.th_source }}</th><th>{{ t.th_submitted }}</th>
+                  <th>{{ t.th_grade }}</th><th>{{ t.th_conf }}</th><th>{{ t.th_priority }}</th><th>{{ t.th_actions }}</th>
+                {% else %}
+                  <th>{{ t.th_patient }}</th><th>{{ t.th_source }}</th><th>{{ t.th_approved }}</th><th>{{ t.th_final_grade }}</th><th>{{ t.th_actions }}</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody id="cases-body">
+              {% if kind == 'pending' %}{% include "_doctor-pending-rows.html" %}{% else %}{% include "_doctor-approved-rows.html" %}{% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <div id="empty-state" class="empty-state is-hidden"><p>{{ t.no_match }}</p></div>
+      {% else %}
+        <div class="empty-state"><p>{{ t.no_pending if kind == 'pending' else t.no_approved }}</p></div>
+      {% endif %}
+    </section>
+
+  </main>
+  </div>
+
+  {% include "_footer.html" %}
+
+  <!-- Search: hides the rows that do not contain the typed text (Health ID, case, date...) -->
+  <script>
+    const search = document.getElementById('search');
+    if (search) {
+      const rows = document.querySelectorAll('#cases-body tr');
+      search.addEventListener('input', () => {
+        const q = search.value.trim().toLowerCase();
+        let shown = 0;
+        rows.forEach(row => {
+          const match = row.textContent.toLowerCase().includes(q);
+          row.classList.toggle('is-hidden', !match);
+          if (match) shown++;
+        });
+        document.getElementById('table-wrapper').classList.toggle('is-hidden', shown === 0);
+        document.getElementById('empty-state').classList.toggle('is-hidden', shown > 0);
+      });
+    }
+  </script>
+</body>
+
+</html>
