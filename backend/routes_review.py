@@ -1,4 +1,4 @@
-"""MUFSAL - doctor case review (review-case) and its images.
+"""MUFSAL - doctor case review (review-case), the report page (view-report) and their images.
 
 Pages rendered on the server with Jinja. The logged-in user comes from the
 server session: request.session["user_id"] and request.session["role"]
@@ -15,6 +15,7 @@ from psycopg import errors
 
 from db import get_connection
 from queries_cases import approve_case, get_case
+from texts_report import REPORT_TEXT
 from texts_review import TEXT
 
 router = APIRouter()
@@ -231,6 +232,72 @@ def confirm_case(request: Request, case_id: int,
         pass  # the form was sent twice: the report already exists
 
     return RedirectResponse(f"/cases/{case_id}/report?confirmed=1", status_code=303)
+
+
+@router.get("/cases/{case_id}/report")
+def view_report(request: Request, case_id: int, confirmed: int = 0):
+    """The report page: the case's doctor, its patient, or the radiologist who uploaded it.
+
+    Under review: only "your report is not ready yet" (NFR-R1) - the doctor gets a
+    button to the review page instead. Approved: the simplified report in the page's
+    language, plus a clinical summary for the doctor.
+    """
+    from auth_service import HOME   # where the logo and the back link go, per role
+
+    user = current_user(request)
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+
+    case = get_case(case_id)
+    if case is None:
+        return error_page(request, 404)
+    if not can_view_case(user, case):
+        return error_page(request, 403)
+
+    lang = get_lang(request)
+    report = case["report"]
+    ai = case["ai_result"]
+    approved = case["status"] == "approved" and report is not None
+
+    report_text, confidence = None, None
+    has_xray = has_gradcam = False
+    if approved:
+        report_text = report["report_ar"] if lang == "ar" else report["report_en"]
+        if ai is not None:
+            confidence = round(float(ai["confidence"]) * 100)
+        xray_file = safe_upload_path(case["xray_image_path"])
+        gradcam_file = safe_upload_path(ai["gradcam_image_path"]) if ai else None
+        has_xray = xray_file is not None and xray_file.is_file()
+        has_gradcam = gradcam_file is not None and gradcam_file.is_file()
+
+    def long_date(value):
+        """15 November 2026 / 15 نوفمبر 2026"""
+        if value is None:
+            return ""
+        return f"{value.day} {REPORT_TEXT[lang]['months'][value.month - 1]} {value.year}"
+
+    return templates.TemplateResponse(
+        request, "view_report.html",
+        {
+            "lang": lang,
+            "direction": "rtl" if lang == "ar" else "ltr",
+            "t": REPORT_TEXT[lang],
+            "role": user["role"],
+            "home": HOME.get(user["role"], "/"),
+            "case": case,
+            "approved": approved,
+            "report": report,
+            "ai": ai,
+            "report_text": report_text,
+            "confidence": confidence,
+            "has_xray": has_xray,
+            "has_gradcam": has_gradcam,
+            "submitted": long_date(case["submitted_at"]),
+            "approved_on": long_date(report["approved_at"]) if report else "",
+            # the green "Result confirmed" banner: only for the doctor who just confirmed
+            "confirmed": bool(confirmed) and user["role"] == "doctor" and approved,
+        },
+    )
 
 
 @router.get("/cases/{case_id}/image/{kind}")
