@@ -18,8 +18,8 @@ def get_doctor_stats(doctor_id):
         ).fetchone()
 
 
-def get_doctor_approved(doctor_id, limit=5):
-    """The doctor's most recently approved cases, newest approval first."""
+def get_doctor_approved(doctor_id, limit=None):
+    """The doctor's approved cases, newest approval first (all of them when limit is None)."""
     with get_connection() as conn:
         return conn.execute(
             """
