@@ -86,11 +86,22 @@ function setupCard(card) {
     const fieldsAreCorrect = checkFields(form);
     const answersAreCorrect = questionnaire ? checkAnswers(questionnaire) : true;
 
-    // The card goes back to the view only if everything is correct
-    if (fieldsAreCorrect && answersAreCorrect) {
-      stampUpdatedDate(card);
-      closeEditMode(card, form);
+    if (!fieldsAreCorrect || !answersAreCorrect) {
+      return;
     }
+
+    // A card whose form has an action is saved on the server: send it.
+    // form.submit() does not fire this handler again, so there is no loop.
+    // The fields are still enabled here, so their values are sent.
+    if (form.getAttribute('action')) {
+      form.submit();
+      return;
+    }
+
+    // No action: the card is not connected to the server yet, so the page
+    // just goes back to the view as before.
+    stampUpdatedDate(card);
+    closeEditMode(card, form);
   });
 }
 
