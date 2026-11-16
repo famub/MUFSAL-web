@@ -71,19 +71,12 @@
         <div class="xray-box">
           {% if has_xray %}
             <img src="/cases/{{ case.case_id }}/image/xray" alt="{{ t.xray }}" />
-            {% if has_gradcam %}
-              <img src="/cases/{{ case.case_id }}/image/gradcam" class="heat" alt="Grad-CAM" />
-            {% endif %}
+            
           {% else %}
             <div class="xray-placeholder">{{ t.no_image }}</div>
           {% endif %}
         </div>
-        {% if has_gradcam %}
-        <div class="viewer-controls">
-          <label class="switch"><input type="checkbox" id="heat-toggle" /><span>{{ t.show_heat }}</span></label>
-        </div>
-        <p class="hint">{{ t.heat_hint }}</p>
-        {% endif %}
+       
       </section>
 
       <!-- AI result -->
