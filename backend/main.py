@@ -19,6 +19,7 @@ import routes_dashboard
 import routes_doctor
 import routes_new_case
 import routes_pages
+import routes_patient
 import routes_profile
 import routes_review
 import session_guard
@@ -48,7 +49,8 @@ def db_test():
 # The order matters: specific routes first, the page server (routes_pages) LAST.
 app.include_router(routes_admin.router)      # /api/admin/... (the admin pages)
 app.include_router(routes_auth.router)        # /api/login, /api/register/...
-app.include_router(routes_dashboard.router)   # /dashboard-patient (built by the server)
+app.include_router(routes_patient.router)     # the patient's new pages - must come BEFORE routes_dashboard
+app.include_router(routes_dashboard.router)   # the older patient pages that have not moved over yet
 app.include_router(routes_doctor.router)      # /dashboard-doctor (built by the server)
 app.include_router(routes_complaints.router)  # /complaints (built by the server)
 app.include_router(routes_new_case.router)    # /new-case (built by the server)

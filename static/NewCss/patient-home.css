@@ -1,0 +1,153 @@
+/* ============================================================
+   MUFSAL — patient-home
+   Only what this page needs. Everything else (colours, the
+   side header, cards, buttons, tags, fields) comes from
+   mufsal-ui.css, which is linked before this file.
+   ============================================================ */
+
+/* ============================================================
+     MUFSAL - patient home (design study)
+     Same palette as landing-v1.html.
+     Left rail: profile + my cases. Home shows only the case in
+     progress; everything older lives in My history.
+     ============================================================ */
+:root {
+  --deep:#0a2547;
+  --sky:#4ea8ff;
+  --shadow-lg:0 34px 80px -40px rgba(6, 24, 47, .5);
+}
+.topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 34px; }
+.topbar .spacer { margin-inline-start: auto; }
+.pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--white); border-radius: 999px; padding: 9px 16px;
+    font-size: .88rem; color: var(--body); box-shadow: 0 6px 18px -10px rgba(6, 24, 47, .25);
+    border: none;
+  }
+.pill:hover { color: var(--ink); }
+.hello h1 { font-size: clamp(1.7rem, 3.2vw, 2.3rem); letter-spacing: -.02em; line-height: 1.15; }
+.hello p { color: var(--grey); margin-top: 8px; }
+/* ---------- new case ---------- */
+.new-case {
+    margin-top: 30px; border-radius: var(--radius); padding: 30px 32px;
+    background: linear-gradient(135deg, var(--ink), var(--deep-2) 55%, var(--brand));
+    color: #fff; display: flex; align-items: center; gap: 26px;
+    box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
+  }
+.new-case::after {
+    content: ""; position: absolute; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(78, 168, 255, .45), transparent 65%);
+    inset-inline-end: -110px; top: -140px;
+    pointer-events: none;   /* it sat on top of the button and ate the click */
+  }
+.new-case .text { position: relative; }
+.new-case h2 { font-size: 1.35rem; letter-spacing: -.01em; }
+.new-case p { color: rgba(255, 255, 255, .72); font-size: .95rem; margin-top: 6px; max-width: 46ch; }
+.new-case .cta {
+    position: relative; z-index: 1; margin-inline-start: auto; flex: none;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; color: var(--ink); font-weight: 500;
+    border: none; border-radius: 999px; padding: 15px 28px;
+    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .6);
+    transition: transform .18s ease;
+  }
+.new-case .cta:hover { transform: translateY(-2px); }
+.new-case .cta svg { width: 18px; height: 18px; transition: transform .18s ease; }
+.new-case .cta:hover svg { transform: translateX(3px); }
+/* when a case is already open, the button is out of reach */
+.new-case.is-locked { background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
+.new-case.is-locked::after { display: none; }
+.new-case.is-locked p { color: var(--grey); }
+.new-case.is-locked .cta { background: var(--line); color: var(--grey); box-shadow: none; cursor: not-allowed; }
+.new-case.is-locked .cta:hover { transform: none; }
+/* ---------- section heads ---------- */
+.sec-head { display: flex; align-items: baseline; gap: 12px; margin: 44px 0 16px; }
+.sec-head h2 { font-size: 1.15rem; letter-spacing: -.01em; }
+.sec-head a { margin-inline-start: auto; font-size: .9rem; color: var(--brand); font-weight: 500; }
+.sec-head a:hover { color: var(--brand-dark); }
+/* ---------- the active case ---------- */
+.case {
+    background: var(--white); border-radius: var(--radius); padding: 30px 32px;
+    box-shadow: var(--shadow);
+  }
+.case-top { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+.case-id { font-size: 1.22rem; font-weight: 700; letter-spacing: -.01em; }
+.case-sub { color: var(--grey); font-size: .9rem; margin-top: 4px; }
+.badge {
+    margin-inline-start: auto; display: inline-flex; align-items: center; gap: 8px;
+    background: var(--brand-soft); color: var(--brand-dark);
+    border-radius: 999px; padding: 8px 15px; font-size: .85rem; font-weight: 500;
+  }
+.badge .ping { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); position: relative; }
+.badge .ping::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--brand); opacity: .35; animation: ping 1.8s ease-out infinite;
+  }
+@keyframes ping {
+  0% { transform: scale(.6); opacity: .6; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+/* stepper */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 32px; }
+.stp { position: relative; padding-top: 34px; }
+.stp::before {
+    content: ""; position: absolute; top: 11px; inset-inline-start: 0; width: 100%; height: 3px;
+    background: var(--line);
+  }
+.stp:first-child::before { inset-inline-start: 50%; width: 50%; }
+.stp:last-child::before { width: 50%; }
+.stp .dot {
+    position: absolute; top: 4px; inset-inline-start: calc(50% - 9px);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--white); border: 3px solid var(--line);
+  }
+.stp.done::before, .stp.now::before { background: var(--brand); }
+.stp.done .dot { background: var(--brand); border-color: var(--brand); }
+.stp.now .dot { border-color: var(--brand); box-shadow: 0 0 0 5px var(--brand-soft); }
+.stp h4 { font-size: .92rem; font-weight: 500; text-align: center; }
+.stp p { font-size: .78rem; color: var(--grey); text-align: center; margin-top: 2px; }
+.stp.todo h4 { color: var(--grey); }
+/* wait note + delay button */
+.case-foot {
+    margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  }
+.wait { display: flex; gap: 12px; color: var(--body); font-size: .92rem; }
+.wait svg { width: 19px; height: 19px; color: var(--brand); flex: none; margin-top: 2px; }
+.wait span { display: block; color: var(--grey); font-size: .82rem; }
+.btn-delay {
+    margin-inline-start: auto; background: var(--white); color: var(--grey);
+    border: 1px solid var(--line); border-radius: 999px; padding: 11px 20px; font-size: .9rem;
+    display: inline-flex; align-items: center; gap: 9px; cursor: not-allowed;
+  }
+.btn-delay svg { width: 16px; height: 16px; }
+.btn-delay.is-on {
+    color: var(--red); border-color: rgba(228, 76, 76, .4); background: var(--red-pale);
+    cursor: pointer;
+  }
+.btn-delay.is-on:hover { background: #fbdede; }
+/* ---------- empty state (no open case) ---------- */
+.empty {
+    background: var(--white); border-radius: var(--radius); padding: 54px 32px;
+    text-align: center; box-shadow: var(--shadow);
+  }
+.empty .art { width: 74px; height: 74px; margin: 0 auto 20px; border-radius: 22px; background: var(--brand-soft); display: grid; place-items: center; color: var(--brand); }
+.empty .art svg { width: 34px; height: 34px; }
+.empty h3 { font-size: 1.1rem; }
+.empty p { color: var(--grey); font-size: .93rem; margin-top: 8px; }
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .new-case { flex-direction: column; align-items: flex-start; }
+  .new-case .cta { margin-inline-start: 0; }
+  .steps { grid-template-columns: 1fr 1fr; gap: 22px 0; }
+  .case-foot .btn-delay { margin-inline-start: 0; }
+}
+@media (max-width: 560px) {
+  .rail-link span.txt { display: none; }
+  .steps { grid-template-columns: 1fr; }
+  .stp::before { display: none; }
+  .stp { padding-top: 0; padding-inline-start: 34px; }
+  .stp .dot { inset-inline-start: 0; top: 3px; }
+  .stp h4, .stp p { text-align: start; }
+  .case, .new-case, .empty { padding: 24px 20px; }
+}
