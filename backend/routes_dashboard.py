@@ -3,6 +3,7 @@
 Reads the logged-in user from the server session:
 request.session["user_id"] and request.session["role"] (written by the login, routes_auth.py).
 """
+from typing import Optional  # Python 3.9 friendly (instead of int | None)
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -110,8 +111,8 @@ def patient_id_or_redirect(request):
 # ---------------------------------------------------------------- pages
 
 @router.get("/dashboard-patient", include_in_schema=False)
-def dashboard_patient(request: Request, delay_sent: int | None = None,
-                      delay_error: str | None = None, case_created: int | None = None):
+def dashboard_patient(request: Request, delay_sent: Optional[int] = None,
+                      delay_error: Optional[str] = None, case_created: Optional[int] = None):
     # 1. Only a logged-in patient may open this page
     user_id, redirect = patient_id_or_redirect(request)
     if redirect:
@@ -157,8 +158,8 @@ def dashboard_patient(request: Request, delay_sent: int | None = None,
 
 
 @router.get("/patient-cases", include_in_schema=False)
-def patient_cases(request: Request, delay_sent: int | None = None,
-                  delay_error: str | None = None):
+def patient_cases(request: Request, delay_sent: Optional[int] = None,
+                  delay_error: Optional[str] = None):
     """"My X-ray cases": ALL the patient's cases (the dashboard shows only the newest 5).
 
     The filter chips and the search box work in the browser (JavaScript in the page).
