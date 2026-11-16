@@ -106,16 +106,14 @@
 
           <div class="report-grid">
             <section>
-              <h3>{{ t.r_heat_title }}</h3>
-              <div class="xray-box small show-heat">
+             <h3>{{ t.r_xray_title }}</h3>
+              <div class="xray-box small">
                 {% if has_xray %}
-                  <img src="/cases/{{ case.case_id }}/image/xray" alt="{{ t.r_heat_ph }}" />
-                  {% if has_gradcam %}<img src="/cases/{{ case.case_id }}/image/gradcam" class="heat" alt="Grad-CAM" />{% endif %}
+                  <img src="/cases/{{ case.case_id }}/image/xray" alt="{{ t.r_xray_title }}" />
                 {% else %}
-                  <div class="xray-placeholder">{{ t.r_heat_ph }}</div>
+                  <div class="xray-placeholder">{{ t.r_xray_ph }}</div>
                 {% endif %}
               </div>
-              <p class="hint">{{ t.r_heat_text }}</p>
             </section>
             <section>
               {% if confidence is not none %}
