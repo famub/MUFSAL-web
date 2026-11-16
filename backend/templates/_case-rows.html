@@ -1,0 +1,70 @@
+{# The rows of the patient's cases table, shared by the dashboard and "My X-ray cases".
+   Needs: cases, t, back_to ('dashboard' or 'cases' - where Report a delay returns to). #}
+            {% for c in cases %}
+            <tr data-filter-value="{{ 'approved' if c.status == 'approved' else 'review' }}">
+              <td>
+                <div class="case-id-cell">
+                  <div class="icon-box icon-box--sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <strong>#{{ c.case_id }}</strong>
+                </div>
+              </td>
+
+              <td>
+                <div class="date-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>{{ c.date }}</span>
+                </div>
+              </td>
+
+              <td>
+                <div class="status-cell">
+                  {% if c.status == 'approved' %}
+                    <span class="status-pill status-approved">{{ t.approved }}</span>
+                  {% else %}
+                    <span class="status-pill status-review">{{ t.under_review }}</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                <div class="grade-cell">
+                  {% if c.grade is not none %}
+                    <span class="grade-pill grade-{{ c.grade }}">KL {{ c.grade }}</span>
+                  {% else %}
+                    <span class="grade-pill">-</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                <div class="actions-cell">
+                  {% if c.status == 'approved' %}
+                    <span class="view-report">
+                      <a href="/cases/{{ c.case_id }}/report">{{ t.view_report }}</a>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  {% elif c.delay == 'can_report' %}
+                    <form method="post" action="/cases/{{ c.case_id }}/report-delay">
+                      <input type="hidden" name="back" value="{{ back_to }}" />
+                      <button type="submit" class="btn-complain">{{ t.complain_delay }}</button>
+                    </form>
+                  {% elif c.delay == 'reported' %}
+                    <span class="status-pill delay-reported">{{ t.delay_reported }}</span>
+                  {% else %}
+                    <div class="complain-wait">
+                      <button type="button" class="btn-complain" disabled>{{ t.complain_delay }}</button>
+                      <small>{{ t.complain_from.format(date=c.delay_from) }}</small>
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}

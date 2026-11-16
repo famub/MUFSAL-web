@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL - {{ t.page_title }}</title>
+
+  <link rel="stylesheet" href="/static/css/global.css" />
+  <link rel="stylesheet" href="/static/css/header.css" />
+  <link rel="stylesheet" href="/static/css/dashboards.css" />
+  <link rel="stylesheet" href="/static/css/new-case.css" />
+  <link rel="stylesheet" href="/static/css/footer.css" />
+</head>
+
+<body class="has-footer">
+  {% include "_header.html" %}
+
+  {# One question with round "pill" choices.
+     options = {value saved in the database: text the patient sees} #}
+  {% macro radios(name, question, options) %}
+    <div class="question-group {{ 'question-group--error' if name in errors }}" data-question="{{ name }}">
+      <span class="question-label" id="q-{{ name }}">{{ question }} *</span>
+      <div class="option-pills" role="radiogroup" aria-labelledby="q-{{ name }}">
+        {% for value, label in options.items() %}
+          <label class="option-pill">
+            <input type="radio" name="{{ name }}" value="{{ value }}" {{ 'checked' if a.get(name) == value }} />
+            <span>{{ label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+  {% endmacro %}
+
+  <main class="dashboard-container">
+
+    <!-- Top banner -->
+    <section class="dashboard-banner">
+      <div class="banner-text">
+        <span id="dashboard">{{ t.dashboard }}</span>
+        <h1>{{ t.title }}</h1>
+        <p class="subtitle">{{ t.subtitle }}</p>
+      </div>
+
+      <a href="/dashboard-patient" class="btn-view-all">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        {{ t.back_dashboard }}
+      </a>
+    </section>
+
+    <!-- 3-step progress stepper (the script below moves it) -->
+    <nav class="stepper" aria-label="{{ t.title }}">
+      {% for label in t.steps %}
+        <div class="step-item {{ 'is-completed' if loop.index < open_step }} {{ 'is-active' if loop.index == open_step }}"
+             data-step-indicator="{{ loop.index }}">
+          <span class="step-circle">{{ loop.index }}</span>
+          <span class="step-label">{{ label }}</span>
+        </div>
+      {% endfor %}
+    </nav>
+
+    <!-- ONE form for the three steps. enctype="multipart/form-data" is what lets it send the FILE. -->
+    <form id="new-case-form" action="/new-case" method="post" enctype="multipart/form-data" novalidate>
+
+      <!-- =========================================================
+           STEP 1: UPLOAD X-RAY
+           ========================================================= -->
+      <section id="step-1" class="card upload-card step-panel {{ 'is-hidden' if open_step != 1 }}">
+        <div class="upload-card-header">
+          <h2>{{ t.s1_title }}</h2>
+          <p class="subtitle">{{ t.s1_sub }}</p>
+        </div>
+
+        <div class="upload-dropzone upload-dropzone--active {{ 'upload-dropzone--error' if file_error }}" id="dropzone-box">
+          <div class="dropzone-info">
+            <div class="icon-box" id="dropzone-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+            </div>
+            <div>
+              <h3 id="file-title">{{ t.drop_title }}</h3>
+              <p class="subtitle" id="file-subtitle">{{ t.drop_hint }}</p>
+            </div>
+          </div>
+
+          <label class="btn-choose-file btn-choose-file--active">
+            {{ t.choose_file }}
+            <input type="file" id="xray-file-input" name="xray_file" accept=".jpg,.jpeg,.png" hidden />
+          </label>
+        </div>
+
+        <div id="step-1-error" class="step-error {{ '' if file_error else 'is-hidden' }}" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <span id="step-1-error-text">{{ t.s1_err[file_error] if file_error else '' }}</span>
+        </div>
+
+        <div class="upload-meta">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+          </svg>
+          <span>{{ t.formats }}</span>
+        </div>
+
+        <div class="step-actions step-actions--end">
+          <button type="button" class="btn-primary" id="to-step-2">
+            {{ t.next_questions }}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           STEP 2: CLINICAL QUESTIONS
+           ========================================================= -->
+      <section id="step-2" class="card upload-card step-panel {{ 'is-hidden' if open_step != 2 }}">
+        <div class="upload-card-header">
+          <h2>{{ t.s2_title }}</h2>
+          <p class="subtitle">{{ t.s2_sub }}</p>
+        </div>
+
+        <div class="questions-grid">
+          <div class="question-group question-group--full {{ 'question-group--error' if 'medications' in errors }}">
+            <label class="question-label" for="medications">{{ t.q_meds }}</label>
+            <input type="text" id="medications" name="medications" class="form-input" maxlength="500"
+                   placeholder="{{ t.meds_ph }}" value="{{ a.get('medications', '') }}" />
+          </div>
+
+          {{ radios("knee", t.q_knee, t.knee) }}
+          {{ radios("pain_with_use", t.q_pain, t.yes_no) }}
+          {{ radios("rising_difficulty", t.q_rising, t.severity) }}
+          {{ radios("stiffness_duration", t.q_stiffness, t.stiffness) }}
+          {{ radios("stairs_pain", t.q_stairs, t.severity) }}
+          {{ radios("prior_injury", t.q_prior, t.yes_no) }}
+
+          <div class="measurements-row">
+            <div class="question-group {{ 'question-group--error' if 'height_cm' in errors }}" data-question="height_cm">
+              <label class="question-label" for="height">{{ t.q_height }} *</label>
+              <input type="number" id="height" name="height_cm" class="form-input" min="100" max="250" step="1"
+                     placeholder="{{ t.height_ph }}" value="{{ a.get('height_cm', '') }}" />
+            </div>
+            <div class="question-group {{ 'question-group--error' if 'weight_kg' in errors }}" data-question="weight_kg">
+              <label class="question-label" for="weight">{{ t.q_weight }} *</label>
+              <input type="number" id="weight" name="weight_kg" class="form-input" min="20" max="400" step="any"
+                     placeholder="{{ t.weight_ph }}" value="{{ a.get('weight_kg', '') }}" />
+            </div>
+          </div>
+
+          <div class="question-group question-group--full {{ 'question-group--error' if 'warnings' in errors }}" data-question="warnings">
+            <span class="question-label" id="q-warnings">{{ t.q_warnings }} *</span>
+            <div class="option-pills" role="group" aria-labelledby="q-warnings">
+              {% for name, label in t.warnings.items() %}
+                <label class="option-pill">
+                  <input type="checkbox" name="{{ name }}" class="warning-box" {{ 'checked' if a.get(name) }} />
+                  <span>{{ label }}</span>
+                </label>
+              {% endfor %}
+              <label class="option-pill">
+                <input type="checkbox" name="warning_none" id="warning-none" {{ 'checked' if a.get('warning_none') }} />
+                <span>{{ t.warning_none }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="question-group question-group--full {{ 'question-group--error' if 'other_symptoms' in errors }}">
+            <label class="question-label" for="notes">{{ t.q_other }}</label>
+            <textarea id="notes" name="other_symptoms" class="form-input" rows="3" maxlength="500"
+                      placeholder="{{ t.other_ph }}">{{ a.get('other_symptoms', '') }}</textarea>
+          </div>
+        </div>
+
+        <div id="step-2-error" class="step-error {{ '' if errors else 'is-hidden' }}" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <span>{{ t.s2_err }}</span>
+        </div>
+
+        <div class="step-actions">
+          <button type="button" class="btn-secondary" id="back-to-step-1">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            {{ t.back }}
+          </button>
+          <button type="button" class="btn-primary" id="to-step-3">
+            {{ t.next_review }}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           STEP 3: REVIEW & SUBMIT (filled in by the script below)
+           ========================================================= -->
+      <section id="step-3" class="card upload-card step-panel {{ 'is-hidden' if open_step != 3 }}">
+        <div class="upload-card-header">
+          <h2>{{ t.s3_title }}</h2>
+          <p class="subtitle">{{ t.s3_sub }}</p>
+        </div>
+
+        <div class="review-box">
+          <div class="review-box-header">
+            <h3>{{ t.uploaded_xray }}</h3>
+            <button type="button" class="btn-link" id="edit-step-1">{{ t.change_file }}</button>
+          </div>
+          <div class="case-id-cell">
+            <div class="icon-box icon-box--sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <strong id="summary-filename"><bdi>-</bdi></strong>
+              <p class="subtitle" id="summary-filesize">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-box">
+          <div class="review-box-header">
+            <h3>{{ t.clinical }}</h3>
+            <button type="button" class="btn-link" id="edit-step-2">{{ t.edit_answers }}</button>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-item summary-item--full"><span class="summary-label">{{ t.l_meds }}</span><strong id="summary-medications">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_knee }}</span><strong id="summary-knee">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_pain }}</span><strong id="summary-pain_with_use">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_rising }}</span><strong id="summary-rising_difficulty">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_stiffness }}</span><strong id="summary-stiffness_duration">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_stairs }}</span><strong id="summary-stairs_pain">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_prior }}</span><strong id="summary-prior_injury">-</strong></div>
+            <div class="summary-item"><span class="summary-label">{{ t.l_body }}</span><strong id="summary-body">-</strong></div>
+            <div class="summary-item summary-item--full"><span class="summary-label">{{ t.l_warnings }}</span><strong id="summary-warnings">-</strong></div>
+            <div class="summary-item summary-item--full"><span class="summary-label">{{ t.l_other }}</span><strong id="summary-other_symptoms">-</strong></div>
+          </div>
+        </div>
+
+        {% if save_failed %}
+        <div class="step-error" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <span>{{ t.s3_err.save_failed }}</span>
+        </div>
+        {% endif %}
+
+        <div class="step-actions">
+          <button type="button" class="btn-secondary" id="back-to-step-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            {{ t.back }}
+          </button>
+          <button type="submit" class="btn-primary" id="submit-btn">
+            {{ t.submit }}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+    </form>
+  </main>
+
+  {% include "_footer.html" %}
+
+  <!-- Moves between the 3 steps and checks the answers BEFORE sending, so the
+       patient sees mistakes at once. The server checks everything again. -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Texts in the page's language, written by the server
+      const T = {
+        noFile: {{ t.s1_err.no_file | tojson }},
+        tooBig: {{ t.s1_err.too_big | tojson }},
+        badType: {{ t.s1_err.bad_type | tojson }},
+        fileReady: {{ t.file_ready | tojson }},
+        readyAi: {{ t.ready_ai | tojson }},
+        noneProvided: {{ t.none_provided | tojson }},
+        cm: {{ t.cm | tojson }},
+        kg: {{ t.kg | tojson }},
+        listSep: {{ ('، ' if lang == 'ar' else ', ') | tojson }},
+      };
+      const MAX_BYTES = 20 * 1024 * 1024;
+      const HEIGHT = [100, 250];   // the same limits as the database
+      const WEIGHT = [20, 400];
+
+      const steps = { 1: document.getElementById('step-1'),
+                      2: document.getElementById('step-2'),
+                      3: document.getElementById('step-3') };
+      const indicators = document.querySelectorAll('.step-item');
+
+      const fileInput = document.getElementById('xray-file-input');
+      const dropzoneBox = document.getElementById('dropzone-box');
+      const dropzoneIcon = document.getElementById('dropzone-icon');
+      const step1Error = document.getElementById('step-1-error');
+      const step1ErrorText = document.getElementById('step-1-error-text');
+
+      const requiredRadios = ['knee', 'pain_with_use', 'rising_difficulty',
+                              'stiffness_duration', 'stairs_pain', 'prior_injury'];
+      const heightInput = document.getElementById('height');
+      const weightInput = document.getElementById('weight');
+      const warningBoxes = document.querySelectorAll('.warning-box');
+      const warningNone = document.getElementById('warning-none');
+      const step2Error = document.getElementById('step-2-error');
+      const group = name => document.querySelector(`.question-group[data-question="${name}"]`);
+
+      function goToStep(n) {
+        Object.entries(steps).forEach(([num, panel]) => panel.classList.toggle('is-hidden', Number(num) !== n));
+        indicators.forEach(item => {
+          const s = Number(item.dataset.stepIndicator);
+          item.classList.toggle('is-active', s === n);
+          item.classList.toggle('is-completed', s < n);
+        });
+        if (n === 3) updateSummary();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showFileError(text) {
+        step1ErrorText.textContent = text;
+        step1Error.classList.remove('is-hidden');
+        dropzoneBox.classList.add('upload-dropzone--error');
+      }
+
+      function validateStep1() {
+        const file = fileInput.files[0];
+        if (!file) { showFileError(T.noFile); return false; }
+        if (file.size > MAX_BYTES) { showFileError(T.tooBig); return false; }
+        if (!/\.(jpe?g|png)$/i.test(file.name)) { showFileError(T.badType); return false; }
+        step1Error.classList.add('is-hidden');
+        dropzoneBox.classList.remove('upload-dropzone--error');
+        return true;
+      }
+
+      function markGroup(name, ok) {
+        const g = group(name);
+        if (g) g.classList.toggle('question-group--error', !ok);
+        return ok;
+      }
+
+      function inRange(input, [low, high]) {
+        const v = Number(input.value);
+        return input.value.trim() !== '' && v >= low && v <= high;
+      }
+
+      function validateStep2() {
+        let ok = true;
+        requiredRadios.forEach(name => {
+          ok = markGroup(name, !!document.querySelector(`input[name="${name}"]:checked`)) && ok;
+        });
+        const anyWarning = Array.from(warningBoxes).some(b => b.checked) || warningNone.checked;
+        ok = markGroup('warnings', anyWarning) && ok;
+        ok = markGroup('height_cm', inRange(heightInput, HEIGHT)) && ok;
+        ok = markGroup('weight_kg', inRange(weightInput, WEIGHT)) && ok;
+        step2Error.classList.toggle('is-hidden', ok);
+        return ok;
+      }
+
+      // "None of these" and the five warning signs cannot be ticked together
+      warningNone.addEventListener('change', () => {
+        if (warningNone.checked) warningBoxes.forEach(b => { b.checked = false; });
+        markGroup('warnings', true);
+      });
+      warningBoxes.forEach(b => b.addEventListener('change', () => {
+        if (b.checked) warningNone.checked = false;
+        markGroup('warnings', true);
+      }));
+
+      // Remove the red as soon as a question is answered
+      requiredRadios.forEach(name => {
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r =>
+          r.addEventListener('change', () => markGroup(name, true)));
+      });
+      heightInput.addEventListener('input', () => markGroup('height_cm', true));
+      weightInput.addEventListener('input', () => markGroup('weight_kg', true));
+
+      // Show the chosen file
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const mb = (file.size / (1024 * 1024)).toFixed(2);
+        document.getElementById('file-title').textContent = file.name;
+        document.getElementById('file-subtitle').textContent = T.fileReady.replace('{mb}', mb);
+        document.getElementById('summary-filename').textContent = file.name;
+        document.getElementById('summary-filesize').textContent = T.readyAi.replace('{mb}', mb);
+        dropzoneBox.classList.add('upload-dropzone--uploaded');
+        dropzoneIcon.classList.add('icon-box--success');
+        validateStep1();
+      });
+
+      // Step 3: copy the answers into the summary (the TEXT of the chosen pill, so it is in the page's language)
+      function updateSummary() {
+        const chosen = name => {
+          const el = document.querySelector(`input[name="${name}"]:checked`);
+          return el ? el.closest('label').querySelector('span').textContent : '-';
+        };
+        requiredRadios.forEach(name => {
+          document.getElementById(`summary-${name}`).textContent = chosen(name);
+        });
+        document.getElementById('summary-body').textContent =
+          `${heightInput.value.trim()} ${T.cm} · ${weightInput.value.trim()} ${T.kg}`;
+
+        const ticked = Array.from(warningBoxes).filter(b => b.checked)
+          .map(b => b.closest('label').querySelector('span').textContent);
+        document.getElementById('summary-warnings').textContent = ticked.length
+          ? ticked.join(T.listSep)
+          : warningNone.closest('label').querySelector('span').textContent;
+
+        ['medications', 'other_symptoms'].forEach(name => {
+          const value = document.querySelector(`[name="${name}"]`).value.trim();
+          document.getElementById(`summary-${name}`).textContent = value || T.noneProvided;
+        });
+      }
+
+      document.getElementById('to-step-2').addEventListener('click', () => { if (validateStep1()) goToStep(2); });
+      document.getElementById('to-step-3').addEventListener('click', () => { if (validateStep2()) goToStep(3); });
+      document.getElementById('back-to-step-1').addEventListener('click', () => goToStep(1));
+      document.getElementById('back-to-step-2').addEventListener('click', () => goToStep(2));
+      document.getElementById('edit-step-1').addEventListener('click', () => goToStep(1));
+      document.getElementById('edit-step-2').addEventListener('click', () => goToStep(2));
+
+      document.getElementById('new-case-form').addEventListener('submit', e => {
+        if (!validateStep1()) { e.preventDefault(); goToStep(1); return; }
+        if (!validateStep2()) { e.preventDefault(); goToStep(2); return; }
+        document.getElementById('submit-btn').disabled = true;   // no double submit
+      });
+
+      // When the server sent the page back on step 3, fill the summary
+      if (!steps[3].classList.contains('is-hidden')) updateSummary();
+    });
+  </script>
+</body>
+
+</html>

@@ -6,7 +6,7 @@ request.session["user_id"] and request.session["role"] (written by the login, ro
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -19,6 +19,9 @@ router = APIRouter()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 RECENT_LIMIT = 5   # how many cases the dashboard table shows
+
+# Where "Report a delay" goes back to, depending on which page it was pressed on
+BACK_PAGES = {"dashboard": "/dashboard-patient", "cases": "/patient-cases"}
 
 # Messages after pressing "Report a delay" (the keys are the error codes of
 # create_delay_complaint in queries_delays.py)
@@ -66,28 +69,10 @@ def delay_state(case, user_id):
     return "reported"
 
 
-# ---------------------------------------------------------------- page
-
-@router.get("/dashboard-patient", include_in_schema=False)
-def dashboard_patient(request: Request, delay_sent: int | None = None,
-                      delay_error: str | None = None):
-    # 1. Only a logged-in patient may open this page
-    user_id = request.session.get("user_id")
-    if user_id is None:
-        return RedirectResponse("/login", status_code=303)
-    if request.session.get("role") != "patient":
-        return RedirectResponse("/", status_code=303)
-
-    lang = get_lang(request)
-    t = DASHBOARD_TEXT[lang]
-
-    # 2. Get the data from the database
-    all_cases = get_patient_cases(user_id)           # newest first
-    first_name = get_full_name(user_id).split(" ")[0]
-
-    # 3. Prepare it for the page
+def build_rows(cases, user_id, lang):
+    """Turn the database rows into what the cases table shows."""
     rows = []
-    for c in all_cases[:RECENT_LIMIT]:
+    for c in cases:
         row = {
             "case_id": c["case_id"],
             "date": format_date(c["submitted_at"], lang),
@@ -98,6 +83,49 @@ def dashboard_patient(request: Request, delay_sent: int | None = None,
             row["delay"] = delay_state(c, user_id)
             row["delay_from"] = format_date(c["submitted_at"] + timedelta(days=DELAY_DAYS), lang)
         rows.append(row)
+    return rows
+
+
+def page_message(t, case_created=None, delay_sent=None, delay_error=None):
+    """The green or red message at the top of the page. Returns (text, is_ok)."""
+    if case_created is not None:
+        return t["case_created_msg"].format(case_id=case_created), True
+    if delay_sent is not None:
+        return t["delay_sent_msg"].format(case_id=delay_sent), True
+    if delay_error in DELAY_ERRORS:
+        return t["delay_err"][delay_error], False
+    return None, True
+
+
+def patient_id_or_redirect(request):
+    """Return (user_id, None) for a logged-in patient, or (None, redirect)."""
+    user_id = request.session.get("user_id")
+    if user_id is None:
+        return None, RedirectResponse("/login", status_code=303)
+    if request.session.get("role") != "patient":
+        return None, RedirectResponse("/", status_code=303)
+    return user_id, None
+
+
+# ---------------------------------------------------------------- pages
+
+@router.get("/dashboard-patient", include_in_schema=False)
+def dashboard_patient(request: Request, delay_sent: int | None = None,
+                      delay_error: str | None = None, case_created: int | None = None):
+    # 1. Only a logged-in patient may open this page
+    user_id, redirect = patient_id_or_redirect(request)
+    if redirect:
+        return redirect
+
+    lang = get_lang(request)
+    t = DASHBOARD_TEXT[lang]
+
+    # 2. Get the data from the database
+    all_cases = get_patient_cases(user_id)           # newest first
+    first_name = get_full_name(user_id).split(" ")[0]
+
+    # 3. Prepare it for the page: only the newest few cases here
+    rows = build_rows(all_cases[:RECENT_LIMIT], user_id, lang)
 
     # A patient can have only one case under review at a time
     open_case = next((c for c in all_cases if c["status"] == "under_review"), None)
@@ -108,12 +136,8 @@ def dashboard_patient(request: Request, delay_sent: int | None = None,
             date=format_date(open_case["submitted_at"], lang),
         )
 
-    # Message after pressing "Report a delay"
-    message, message_ok = None, True
-    if delay_sent is not None:
-        message = t["delay_sent_msg"].format(case_id=delay_sent)
-    elif delay_error in DELAY_ERRORS:
-        message, message_ok = t["delay_err"][delay_error], False
+    # Message after submitting a new case, or after pressing "Report a delay"
+    message, message_ok = page_message(t, case_created, delay_sent, delay_error)
 
     return templates.TemplateResponse(
         request, "dashboard-patient.html",
@@ -132,20 +156,46 @@ def dashboard_patient(request: Request, delay_sent: int | None = None,
     )
 
 
+@router.get("/patient-cases", include_in_schema=False)
+def patient_cases(request: Request, delay_sent: int | None = None,
+                  delay_error: str | None = None):
+    """"My X-ray cases": ALL the patient's cases (the dashboard shows only the newest 5).
+
+    The filter chips and the search box work in the browser (JavaScript in the page).
+    """
+    user_id, redirect = patient_id_or_redirect(request)
+    if redirect:
+        return redirect
+
+    lang = get_lang(request)
+    t = DASHBOARD_TEXT[lang]
+    message, message_ok = page_message(t, delay_sent=delay_sent, delay_error=delay_error)
+
+    return templates.TemplateResponse(
+        request, "patient-cases.html",
+        {
+            "lang": lang,
+            "direction": "rtl" if lang == "ar" else "ltr",
+            "t": t,
+            "cases": build_rows(get_patient_cases(user_id), user_id, lang),
+            "message": message,
+            "message_ok": message_ok,
+        },
+    )
+
+
 @router.post("/cases/{case_id}/report-delay", include_in_schema=False)
-def report_delay(request: Request, case_id: int):
+def report_delay(request: Request, case_id: int, back: str = Form("dashboard")):
     """The "Report a delay" button: one click, no text to type."""
-    user_id = request.session.get("user_id")
-    if user_id is None:
-        return RedirectResponse("/login", status_code=303)
-    if request.session.get("role") != "patient":
-        return RedirectResponse("/", status_code=303)
+    user_id, redirect = patient_id_or_redirect(request)
+    if redirect:
+        return redirect
+    page = BACK_PAGES.get(back, "/dashboard-patient")   # only these two pages, never any URL
 
     # create_delay_complaint checks everything again on the server: the case is
     # this patient's, still under review, 10 days have passed, not reported yet.
     result = create_delay_complaint(case_id, user_id)
 
     if isinstance(result, dict):                       # {"error": "..."}
-        return RedirectResponse(f"/dashboard-patient?delay_error={result['error']}",
-                                status_code=303)
-    return RedirectResponse(f"/dashboard-patient?delay_sent={case_id}", status_code=303)
+        return RedirectResponse(f"{page}?delay_error={result['error']}", status_code=303)
+    return RedirectResponse(f"{page}?delay_sent={case_id}", status_code=303)

@@ -13,6 +13,7 @@ DASHBOARD_TEXT = {
         "add_case_title": "Add a new case",
         "add_case_sub": "It takes about 3 minutes. You can review everything before submitting.",
         "add_case_btn": "Add new case",
+        "case_created_msg": "Your case #{case_id} was submitted. A doctor will review it and your report will appear here.",
         "waiting_title": "You already have a case waiting for the doctor's approval",
         "waiting_text": "Case #{case_id}, submitted on {date}. You can add a new case as soon as the doctor approves it.",
         "locked_title": "Uploading is paused",
@@ -41,6 +42,13 @@ DASHBOARD_TEXT = {
         "no_cases": "You have not submitted any cases yet.",
         "showing": "Showing {shown} of {total} submissions",
         "view_all": "View all my cases",
+        "all_title": "My X-ray cases",
+        "all_sub": "All your knee X-ray submissions and assessment reports, newest first.",
+        "back_dashboard": "Back to dashboard",
+        "filter_label": "Status filter",
+        "filter_all": "All",
+        "search_ph": "Search by case ID or date",
+        "no_match": "No cases match your filter.",
 
         # ---- complaints page
         "c_page_title": "My complaints",
@@ -77,6 +85,7 @@ DASHBOARD_TEXT = {
         "add_case_title": "إضافة حالة جديدة",
         "add_case_sub": "تستغرق حوالي 3 دقائق، ويمكنك مراجعة كل شيء قبل الإرسال.",
         "add_case_btn": "إضافة حالة جديدة",
+        "case_created_msg": "تم إرسال حالتك #{case_id}. سيراجعها طبيب وسيظهر تقريرك هنا.",
         "waiting_title": "لديك حالة بانتظار اعتماد الطبيب",
         "waiting_text": "الحالة #{case_id}، أُرسلت في {date}. يمكنك إضافة حالة جديدة فور اعتماد الطبيب لها.",
         "locked_title": "الرفع متوقف مؤقتاً",
@@ -105,6 +114,13 @@ DASHBOARD_TEXT = {
         "no_cases": "لم ترسل أي حالة بعد.",
         "showing": "عرض {shown} من {total} طلبات",
         "view_all": "عرض جميع حالاتي",
+        "all_title": "حالات الأشعة الخاصة بي",
+        "all_sub": "جميع صور أشعة الركبة التي أرسلتها وتقارير تقييمها، الأحدث أولاً.",
+        "back_dashboard": "العودة إلى لوحة التحكم",
+        "filter_label": "تصفية حسب الحالة",
+        "filter_all": "الكل",
+        "search_ph": "ابحث برقم الحالة أو التاريخ",
+        "no_match": "لا توجد حالات تطابق التصفية.",
 
         # ---- complaints page
         "c_page_title": "شكاواي",
