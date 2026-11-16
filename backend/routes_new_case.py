@@ -11,11 +11,13 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from psycopg import errors as pg_errors
 from starlette.datastructures import UploadFile
 
+from ai_analysis import analyze_case
 from queries_cases import create_case, get_patient_cases
 from routes_dashboard import get_lang
 from texts_new_case import NEW_CASE_TEXT
@@ -189,8 +191,7 @@ async def submit_new_case(request: Request):
         return render(request, 400, a=answers, file_error="choose_again",
                       open_step=3, save_failed=True)
 
-    # TODO (AI teammate): run the knee model on `file` here, then call
-    # save_ai_result(case_id, grade, confidence, probabilities, priority, gradcam_path)
-    # from queries_cases.py. Until then the doctor sees "AI analysis not ready yet".
+    # Run the knee model and save its result. If it fails the case stays "AI analysis not ready yet".
+    await run_in_threadpool(analyze_case, case_id, file)
 
     return RedirectResponse(f"/dashboard-patient?case_created={case_id}", status_code=303)
