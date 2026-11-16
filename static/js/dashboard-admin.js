@@ -2,7 +2,7 @@
   'use strict';
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const H = 36e5, T0 = Date.now(), ago = h => T0 - h * H;
+  const H = 36e5;
   const fmt = t => new Date(t).toLocaleDateString(document.documentElement.lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const hrs = t => Math.floor((Date.now() - t) / H);
   const dur = t => { const h = hrs(t); return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : `${h}h`; };
@@ -23,38 +23,56 @@
   const idCell = id => `<div class="case-id-cell"><div class="icon-box icon-box--sm">${ic('doc')}</div><strong>${esc(id)}</strong></div>`;
   const dateCell = t => `<div class="date-cell">${ic('cal')}<span>${fmt(t)}</span></div>`;
   const prio = p => `<span class="badge badge-${p}">${p[0].toUpperCase() + p.slice(1)}</span>`;
-  const ST = { open: ['open', 'status-approved'], pending: ['pending review', 'status-review'], investigating: ['under investigation', 'pill-info'] };
+  const ST = { pending: ['pending', 'status-review'], handled: ['handled', 'status-approved'] }; // delayed requests: only these two statuses exist in the database
   const CST = { open: ['open', 'status-review'], investigating: ['under investigation', 'pill-info'], resolved: ['resolved', 'status-approved'] };
   const ROLE = { doctor: 'doctor', radiologist: 'radiologist' };     // registration roles (as in the backlog)
   const WHO = { doctor: 'doctor', radiologist: 'radiologist', patient: 'patient' }; // complainant roles
 
-  // TODO: Connect to backend API. Replace this mock object with fetch() calls (suggested endpoint above each list).
-  const DB = {
-    delayed: [ // GET /api/admin/requests/delayed  (log = what happened so far: GET /api/admin/requests/:id/activity)
-      { id: 'C-240318', src: 'patient', dr: 'Dr. Reem Alharbi', at: ago(80), st: 'pending', log: [{ t: ago(79), txt: 'case submitted and assigned to Dr. Reem Alharbi.' }, { t: ago(30), txt: 'review is overdue. status set to pending review.' }] },
-      { id: 'C-240322', src: 'radiologist', dr: 'Dr. Khalid Alzahrani', at: ago(52), st: 'open', log: [{ t: ago(51), txt: 'case submitted and assigned to Dr. Khalid Alzahrani.' }] },
-      { id: 'C-240329', src: 'doctor', dr: 'Dr. Reem Alharbi', at: ago(30), st: 'pending', log: [{ t: ago(29), txt: 'case submitted and assigned to Dr. Reem Alharbi.' }] },
-      { id: 'C-240331', src: 'radiologist', dr: 'Dr. Maha Alsaif', at: ago(27), st: 'investigating', log: [{ t: ago(26), txt: 'case submitted and assigned to Dr. Salma Alotaibi.' }, { t: ago(12), txt: 'reassigned from Dr. Salma Alotaibi to Dr. Maha Alsaif.' }, { t: ago(6), txt: 'status changed to under investigation. note: checking why the review stalled.' }] },
-      { id: 'C-240340', src: 'patient', dr: 'Dr. Khalid Alzahrani', at: ago(25), st: 'open', log: [{ t: ago(24), txt: 'case submitted and assigned to Dr. Khalid Alzahrani.' }] }],
-    pending: [ // GET /api/admin/registrations?status=pending
-      { id: 'R-101', name: 'Dr. Haya Alotaibi', role: 'doctor', scfhs: '12-H-48213', nid: '1098765421', email: 'haya.o@example.com', at: ago(30), exp: '2027-03-01', st: 'pending' },
-      { id: 'R-102', name: 'Sara Almutairi', role: 'radiologist', scfhs: '09-R-30177', nid: '2145678903', email: 'sara.m@example.com', at: ago(75), exp: '2026-12-15', st: 'pending' },
-      { id: 'R-103', name: 'Dr. Omar Alqahtani', role: 'doctor', scfhs: '15-H-52090', nid: '1076543218', email: 'omar.q@example.com', at: ago(5), exp: '2028-01-20', st: 'pending' }],
-    history: [ // GET /api/admin/registrations/history
-      { name: 'Dr. Lina Alshehri', role: 'doctor', d: 'approved', why: '', at: ago(200) },
-      { name: 'Fahad Aldosari', role: 'radiologist', d: 'rejected', why: 'SCFHS license number could not be verified.', at: ago(150) }],
-    accounts: [ // GET /api/admin/accounts
-      { id: 'A-1', name: 'Dr. Lina Alshehri', role: 'doctor', scfhs: '11-H-40021', at: ago(200) },
-      { id: 'A-2', name: 'Dr. Reem Alharbi', role: 'doctor', scfhs: '10-H-39877', at: ago(900) },
-      { id: 'A-3', name: 'Noura Alghamdi', role: 'radiologist', scfhs: '08-R-28811', at: ago(700) }],
-    cmp: [ // GET /api/admin/complaints
-      { id: 'T-501', who: 'patient', name: 'Sarah', sub: 'The report was hard to understand', body: 'I received my report but the severity explanation still has medical terms I do not understand.', urg: 'medium', st: 'open', at: ago(20), th: [] },
-      { id: 'T-502', who: 'patient', name: 'Fahad', sub: 'Case status has not changed for days', body: 'My case is still under review after four days. Can someone check?', urg: 'high', st: 'investigating', at: ago(96), th: [{ t: ago(70), txt: 'We are checking with the assigned doctor.' }] },
-      { id: 'T-503', who: 'doctor', name: 'Dr. Reem Alharbi', sub: 'Heatmap overlay is too faint', body: 'On some X-rays the heatmap is hard to see. Please review the contrast.', urg: 'low', st: 'open', at: ago(40), th: [] },
-      { id: 'T-504', who: 'doctor', name: 'Dr. Khalid Alzahrani', sub: 'Priority list order looks wrong', body: 'A grade 4 case appeared below a grade 2 case in my queue.', urg: 'high', st: 'open', at: ago(8), th: [] },
-      { id: 'T-505', who: 'radiologist', name: 'Noura Alghamdi', sub: 'Cannot link a case to a registered patient', body: 'The Health ID search says not found for a patient who is registered.', urg: 'high', st: 'investigating', at: ago(30), th: [] },
-      { id: 'T-506', who: 'radiologist', name: 'Sara Almutairi', sub: 'Upload page is slow', body: 'Uploading takes more than a minute on the hospital network.', urg: 'medium', st: 'resolved', at: ago(300), th: [{ t: ago(280), txt: 'Fixed in the latest update. Thank you.' }] }]
+  // ---- data: everything comes from the FastAPI backend (backend/routes_admin.py and routes_auth.py) ----
+  const DB = { delayed: [], pending: [], history: [], accounts: [], cmp: [], summary: { delayed: 0, licenses: 0, complaints: 0 } };
+  const ts = v => (v ? Date.parse(v) : 0);
+
+  async function api(url, method = 'GET', body) {
+    let res;
+    try {
+      res = await fetch(url, { method, credentials: 'same-origin', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+    } catch (e) { toast('could not reach the server.'); return null; }
+    if (res.status === 401 || res.status === 403) { location.href = '/login'; return null; }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) { toast('something went wrong: ' + (data.error || res.status)); return null; }
+    return data;
+  }
+
+  const EVENT = { assigned: 'assigned to', reassigned: 'reassigned to', approved: 'approved by' };
+  const LOAD = {
+    async summary() { const d = await api('/api/admin/summary'); if (d) DB.summary = d; },
+    async delayed() {
+      const d = await api('/api/admin/delayed'); if (!d) return;
+      DB.delayed = d.delayed.map(r => {
+        const log = r.log.map(e => ({ t: ts(e.created_at), txt: `${EVENT[e.event_type] || e.event_type} ${e.doctor_name || '-'}.` + (e.note ? ' ' + e.note : '') }));
+        log.push({ t: ts(r.reported_at), txt: `delay reported by ${r.raised_by} (${r.source}).` });
+        if (r.handled_at) log.push({ t: ts(r.handled_at), txt: 'marked as handled.' });
+        return { id: String(r.delay_complaint_id), no: 'C-' + r.case_id, src: r.source, dr: r.doctor_name || 'not assigned', at: ts(r.submitted_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
+      });
+    },
+    async pending() {
+      const d = await api('/api/admin/requests'); if (!d) return;
+      DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, phone: r.phone, at: ts(r.created_at) }));
+    },
+    async history() {
+      const d = await api('/api/admin/decisions'); if (!d) return;
+      DB.history = d.decisions.map(r => ({ name: r.applicant_name, role: r.applicant_role, d: r.decision, why: r.reason || '', at: ts(r.decided_at) }));
+    },
+    async accounts() {
+      const d = await api('/api/admin/accounts'); if (!d) return;
+      DB.accounts = d.accounts.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, at: ts(r.approved_at) }));
+    },
+    async complaints() {
+      const d = await api('/api/admin/complaints'); if (!d) return;
+      DB.cmp = d.complaints.map(c => ({ id: String(c.complaint_id), no: 'T-' + c.complaint_id, who: c.complainant_role, name: c.complainant, sub: c.subject, body: c.body, st: c.status, at: ts(c.created_at), th: c.replies.map(m => ({ t: ts(m.created_at), txt: m.body })) }));
+    }
   };
+  const reload = (...names) => Promise.all(names.map(n => LOAD[n]())).then(() => draw());
 
   const PAGE = document.body.dataset.page || 'home'; // home | delayed | licenses | complaints (one HTML page each)
   const S = { tab: PAGE, sub: PAGE === 'licenses' && location.hash === '#accounts' ? 'accounts' : 'pending', who: '', f: {} };
@@ -63,7 +81,7 @@
   const has = (txt, q) => !q || txt.toLowerCase().includes(q.toLowerCase());
 
   const BAR = {
-    delayed: () => inp('q', 'search case or doctor') + sel('src', [['patient', 'patient'], ['doctor', 'doctor'], ['radiologist', 'radiologist']], 'all sources') + sel('s', Object.entries(ST).map(([k, v]) => [k, v[0]]), 'all statuses'),
+    delayed: () => inp('q', 'search case or doctor') + sel('src', [['patient', 'patient'], ['radiologist', 'radiologist']], 'all sources') + sel('s', Object.entries(ST).map(([k, v]) => [k, v[0]]), 'all statuses'),
     licenses: () => `<div class="seg">${[['pending', 'pending requests'], ['history', 'decision history'], ['accounts', 'active accounts']].map(([k, l]) => `<button type="button" data-act="sub" data-id="${k}" aria-pressed="${S.sub === k}">${l}</button>`).join('')}</div>` +
       (S.sub === 'pending' ? sel('r', Object.entries(ROLE), 'all roles') : '') +
       (S.sub === 'history' ? inp('q', 'search applicant') + sel('d', [['approved', 'approved'], ['rejected', 'rejected']], 'all decisions') + inp('from', 'from date', 'date') + inp('to', 'to date', 'date') : '') +
@@ -73,8 +91,8 @@
 
   const OUT = {
     delayed(lim) {
-      const f = S.f, rows = DB.delayed.filter(r => (!f.src || r.src === f.src) && (!f.s || r.st === f.s) && has(r.id + r.dr, f.q)).sort((a, b) => a.at - b.at).slice(0, lim || 999).map(r => `<tr>
-        <td>${idCell(r.id)}</td><td>${esc(r.src)}</td><td>${esc(r.dr)}</td><td>${dateCell(r.at)}</td>
+      const f = S.f, rows = DB.delayed.filter(r => (!f.src || r.src === f.src) && (!f.s || r.st === f.s) && has(r.no + r.dr, f.q)).sort((a, b) => a.at - b.at).slice(0, lim || 999).map(r => `<tr>
+        <td>${idCell(r.no)}</td><td>${esc(r.src)}</td><td>${esc(r.dr)}</td><td>${dateCell(r.at)}</td>
         <td>${pill(dur(r.at), hrs(r.at) > 48 ? 'pill-bad' : 'status-review')}</td><td>${pill(...ST[r.st])}</td>
         <td><div class="actions-cell">${ib('reas', r.id, 'swap', 'reassign')}${ib('dview', r.id, 'eye', 'view details')}</div></td></tr>`).join('');
       return tbl(['case id', 'source', 'assigned doctor', 'submitted', 'delay', 'status', 'actions'], rows) || empty('no delayed requests. everything is on schedule.');
@@ -83,7 +101,7 @@
       const f = S.f;
       if (S.sub === 'pending') {
         const rows = DB.pending.filter(r => !f.r || r.role === f.r).sort((a, b) => a.at - b.at).slice(0, lim || 999).map(r => `<tr><td>${idCell(r.name)}<small>${esc(r.email)}</small></td><td>${pill(ROLE[r.role], 'pill-mute')}</td><td>${esc(r.scfhs)}</td><td>${esc(r.nid)}</td><td>${dateCell(r.at)}</td>
-          <td>${r.st === 'info' ? pill('more info requested', 'pill-info') : pill('pending', 'status-review')}</td>
+          <td>${pill('pending', 'status-review')}</td>
           <td><div class="actions-cell">${ib('lview', r.id, 'eye', 'view details')}${ib('appr', r.id, 'ok', 'approve', 'ok')}${ib('rej', r.id, 'no', 'reject', 'bad')}</div></td></tr>`).join('');
         return tbl(['applicant', 'role', 'SCFHS file number', 'national ID / iqama', 'submitted', 'status', 'actions'], rows) || empty('no pending requests. all requests have been reviewed.');
       }
@@ -97,13 +115,13 @@
     },
     complaints(lim) {
       const f = S.f, rows = DB.cmp.filter(c => (!f.w || c.who === f.w) && (!f.s || c.st === f.s) && has(c.sub + c.name, f.q)).sort((a, b) => b.at - a.at).slice(0, lim || 999)
-        .map(c => `<tr><td>${idCell(c.id)}</td><td><strong>${esc(c.name)}</strong> ${pill(WHO[c.who], 'pill-mute')}</td><td>${esc(c.sub)}</td><td>${pill(...CST[c.st])}</td><td>${dateCell(c.at)}</td><td><div class="actions-cell">${ib('cview', c.id, 'eye', 'view and respond')}</div></td></tr>`).join('');
+        .map(c => `<tr><td>${idCell(c.no)}</td><td><strong>${esc(c.name)}</strong> ${pill(WHO[c.who], 'pill-mute')}</td><td>${esc(c.sub)}</td><td>${pill(...CST[c.st])}</td><td>${dateCell(c.at)}</td><td><div class="actions-cell">${ib('cview', c.id, 'eye', 'view and respond')}</div></td></tr>`).join('');
       return tbl(['ticket', 'complainant', 'subject', 'status', 'submitted', 'actions'], rows) || empty('no complaints match these filters.');
     }
   };
 
   function draw(full = true) {
-    const n = { delayed: DB.delayed.length, licenses: DB.pending.length, complaints: DB.cmp.filter(c => c.st !== 'resolved').length };
+    const n = DB.summary;
     const ICO = { // same icon style as the doctor dashboard (heroicons outline)
       delayed: ['', 'M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z'],
       licenses: ['', 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z'],
@@ -133,66 +151,62 @@
     if (!panel.open) panel.showModal();
   }
   const kv = o => `<dl class="kv">${Object.entries(o).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
-  const doctors = () => [...new Set([...DB.delayed.map(r => r.dr), ...DB.accounts.filter(a => a.role === 'doctor').map(a => a.name)])];
+  let DOCTORS = []; // approved doctors, loaded when the reassign dialog opens
   const by = (arr, id) => arr.find(x => x.id === id);
 
-  function decide(r, d, why = '') { // TODO: POST /api/admin/registrations/:id/{approve|reject}  (approve also activates the account and notifies the applicant)
-    DB.pending = DB.pending.filter(x => x.id !== r.id);
-    DB.history.push({ name: r.name, role: r.role, d, why, at: Date.now() });
-    if (d === 'approved') DB.accounts.push({ id: 'A-' + r.id, name: r.name, role: r.role, scfhs: r.scfhs, at: Date.now() });
+  async function decide(r, d, why = '') {
+    const res = await api(`/api/admin/requests/${r.id}/${d === 'approved' ? 'approve' : 'reject'}`, 'POST', d === 'rejected' ? { reason: why } : {});
+    if (!res) return;
     toast(d === 'approved' ? `${r.name} approved. they can now log in.` : `${r.name} rejected. the reason was saved.`);
-    panel.open && panel.close(); draw();
+    panel.open && panel.close(); reload('pending', 'history', 'accounts');
   }
   function openDelayed(id) {
     const r = by(DB.delayed, id);
-    openPanel(`${r.id} · delayed request`, kv({ source: r.src, 'assigned doctor': r.dr, submitted: fmt(r.at), delay: dur(r.at), status: ST[r.st][0] }) +
+    openPanel(`${r.no} · delayed request`, kv({ source: r.src, 'reported by': r.by, patient: r.pt, 'assigned doctor': r.dr, submitted: fmt(r.at), delay: dur(r.at), status: ST[r.st][0] }) +
       `<h3>what happened</h3>${[...r.log].reverse().map(m => `<div class="msg"><small>${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}
-      <label>status<select id="d-st">${Object.entries(ST).map(([k, v]) => `<option value="${k}"${k === r.st ? ' selected' : ''}>${v[0]}</option>`).join('')}</select></label>
-      <label>note (optional)<textarea id="d-note" rows="3"></textarea></label><small class="err" hidden>change the status or write a note first.</small>
-      <div class="panel-actions"><button type="button" class="btn btn-primary" data-act="dsave" data-id="${r.id}">save update</button></div>`);
+      ${r.st === 'pending' ? `<div class="panel-actions"><button type="button" class="btn btn-primary" data-act="dhandled" data-id="${r.id}">mark as handled</button></div>` : ''}`);
   }
   function openComplaint(id) {
     const c = by(DB.cmp, id);
     openPanel(`${c.id} · ${c.sub}`, kv({ complainant: `${c.name} (${WHO[c.who]})`, status: CST[c.st][0], submitted: fmt(c.at) }) +
       `<div class="msg">${esc(c.body)}</div>${c.th.map(m => `<div class="msg"><small>admin · ${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}
       <label>status<select id="c-st">${Object.entries(CST).map(([k, v]) => `<option value="${k}"${k === c.st ? ' selected' : ''}>${v[0]}</option>`).join('')}</select></label>
-      <label>your response<textarea id="c-txt" rows="4"></textarea></label><small class="err" hidden>write a response before sending.</small>
+      <label>your response<textarea id="c-txt" rows="4"></textarea></label><small class="err" hidden>write a response or change the status first.</small>
       <div class="panel-actions"><button type="button" class="btn btn-primary" data-act="reply" data-id="${c.id}">send response</button></div>`);
   }
 
   const A = {
     sub: id => { S.sub = id; S.f = {}; draw(); },
     pclose: () => panel.close(),
-    reas: id => { const r = by(DB.delayed, id); ask({ title: `reassign ${id}`, text: `currently assigned to ${r.dr}.`, ok: 'reassign', field: 'new doctor', opts: doctors().filter(d => d !== r.dr) }, v => { r.log.push({ t: Date.now(), txt: `reassigned from ${r.dr} to ${v}.` }); r.dr = v; r.st = 'pending'; /* TODO: POST /api/admin/requests/:id/reassign */ toast(`${id} reassigned to ${v}`); draw(false); }); },
-    dview: id => openDelayed(id),
-    dsave: id => {
-      const r = by(DB.delayed, id), st = $('#d-st', panel).value, note = $('#d-note', panel).value.trim();
-      if (st === r.st && !note) { $('.err', panel).hidden = false; return; }
-      if (st !== r.st) r.log.push({ t: Date.now(), txt: `status changed to ${ST[st][0]}.${note ? ' note: ' + note : ''}` }); else r.log.push({ t: Date.now(), txt: `note: ${note}` });
-      r.st = st; /* TODO: PATCH /api/admin/requests/:id  { status, note } */
-      toast('update saved'); openDelayed(id); draw(false);
+    reas: async id => {
+      const r = by(DB.delayed, id), d = await api('/api/admin/doctors'); if (!d) return;
+      DOCTORS = d.doctors.filter(x => x.full_name !== r.dr);
+      ask({ title: `reassign ${r.no}`, text: `currently assigned to ${r.dr}.`, ok: 'reassign', field: 'new doctor', opts: DOCTORS.map(x => x.full_name) }, async v => {
+        const doc = DOCTORS.find(x => x.full_name === v); if (!doc) return;
+        if (await api(`/api/admin/delayed/${id}/reassign`, 'POST', { doctor_id: doc.user_id })) { toast(`${r.no} reassigned to ${v}.`); reload('delayed'); }
+      });
     },
+    dview: id => openDelayed(id),
+    dhandled: async id => { if (await api(`/api/admin/delayed/${id}/handled`, 'POST', {})) { toast('marked as handled'); await LOAD.delayed(); openDelayed(id); draw(false); } },
     lview: id => {
       const r = by(DB.pending, id);
-      openPanel(r.name, kv({ role: ROLE[r.role], 'SCFHS file number': r.scfhs, 'issuing authority': 'SCFHS', 'national ID / iqama': r.nid, email: r.email, submitted: fmt(r.at), 'license expiry': r.exp }) +
-        `<a class="doc-link" href="#" target="_blank" rel="noopener">${ic('doc')} license-${esc(r.scfhs)}.pdf</a><a class="doc-link" href="#" target="_blank" rel="noopener">${ic('doc')} national-id.pdf</a><!-- TODO: link to the uploaded files from the backend -->
-        <div class="panel-actions"><button type="button" class="btn btn-primary" data-act="appr" data-id="${id}">approve</button><button type="button" class="btn btn-danger" data-act="rej" data-id="${id}">reject</button><button type="button" class="btn btn-ghost" data-act="info" data-id="${id}">request more info</button></div>`);
+      openPanel(r.name, kv({ role: ROLE[r.role], 'SCFHS file number': r.scfhs, 'national ID / iqama': r.nid, email: r.email, phone: r.phone, submitted: fmt(r.at) }) +
+        `<div class="panel-actions"><button type="button" class="btn btn-primary" data-act="appr" data-id="${id}">approve</button><button type="button" class="btn btn-danger" data-act="rej" data-id="${id}">reject</button></div>`);
     },
     appr: id => decide(by(DB.pending, id), 'approved'),
     rej: id => { const r = by(DB.pending, id); ask({ title: `reject ${r.name}`, text: 'the applicant will see this reason and can submit a new request.', ok: 'reject', danger: true, field: 'rejection reason', req: true }, v => decide(r, 'rejected', v)); },
-    info: id => { const r = by(DB.pending, id); ask({ title: 'request more information', text: `send a message to ${r.name}.`, ok: 'send request', field: 'message', req: true }, () => { r.st = 'info'; /* TODO: POST /api/admin/registrations/:id/request-info */ toast('request sent'); panel.open && panel.close(); draw(); }); },
-    del: id => { const r = by(DB.accounts, id); ask({ title: `delete ${r.name}?`, text: 'this permanently removes the account, ends any active session, and blocks future logins with these credentials.', ok: 'delete account', danger: true }, () => { DB.accounts = DB.accounts.filter(x => x.id !== id); /* TODO: DELETE /api/admin/accounts/:id */ toast('account deleted and sessions revoked'); draw(); }); },
+    del: id => { const r = by(DB.accounts, id); ask({ title: `delete ${r.name}?`, text: 'this permanently removes the account and blocks future logins with these credentials.', ok: 'delete account', danger: true }, async () => { if (await api(`/api/admin/accounts/${id}`, 'DELETE')) { toast('account deleted'); reload('accounts'); } }); },
     cview: openComplaint,
-    reply: id => {
-      const c = by(DB.cmp, id), txt = $('#c-txt', panel).value.trim();
-      if (!txt) { $('.err', panel).hidden = false; return; }
-      c.th.push({ t: Date.now(), txt }); c.st = $('#c-st', panel).value; /* TODO: POST /api/admin/complaints/:id/respond */
-      toast('response sent'); openComplaint(id); draw(false);
+    reply: async id => {
+      const c = by(DB.cmp, id), txt = $('#c-txt', panel).value.trim(), st = $('#c-st', panel).value;
+      if (!txt && st === c.st) { $('.err', panel).hidden = false; return; }
+      if (await api(`/api/admin/complaints/${id}/respond`, 'POST', { status: st, reply: txt })) { toast(txt ? 'response sent' : 'status updated'); await LOAD.complaints(); openComplaint(id); draw(false); }
     }
   };
 
   document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && A[b.dataset.act]) A[b.dataset.act](b.dataset.id); });
   document.addEventListener('input', e => { const f = e.target.dataset.f; if (f) { S.f[f] = e.target.value; draw(false); } });
   window.AdminUI = { redraw: () => draw() };
-  draw();
+  draw(); // empty tables while the data loads
+  reload(...({ home: ['summary'], delayed: ['delayed'], licenses: ['pending', 'history', 'accounts'], complaints: ['complaints'] }[PAGE]));
 })();
