@@ -5,6 +5,8 @@
 
 Include this router in main.py BEFORE routes_pages.
 """
+from typing import Optional  # Python 3.9 friendly (instead of int | None) 
+
 from pathlib import Path
 
 from fastapi import APIRouter, Form, Request
@@ -38,7 +40,7 @@ def doctor_or_redirect(request):
 
 
 @router.get("/profile-doctor", include_in_schema=False)
-def profile_doctor(request: Request, saved: int | None = None, error: str | None = None):
+def profile_doctor(request: Request, saved: Optional[int] = None, error: Optional[str] = None):
     user_id, redirect = doctor_or_redirect(request)
     if redirect:
         return redirect
