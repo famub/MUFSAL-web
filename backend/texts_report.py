@@ -47,6 +47,8 @@ REPORT_TEXT = {
         "r_heat_title": "Where the AI looked",
         "r_heat_text": "The coloured areas on your X-ray show the parts of the knee that influenced the result most.",
         "r_heat_ph": "X-ray with heatmap",
+        "r_xray_title": "Your X-ray",
+        "r_xray_ph": "X-ray image",
         "r_report_title": "Your report",
         "r_words_title": "Words explained",
         "r_words": [
@@ -104,6 +106,8 @@ REPORT_TEXT = {
         "r_heat_title": "أين نظر الذكاء الاصطناعي؟",
         "r_heat_text": "المناطق الملوّنة على الأشعة هي أكثر الأجزاء تأثيراً في النتيجة.",
         "r_heat_ph": "الأشعة مع الخريطة الحرارية",
+        "r_xray_title": "صورة الأشعة",
+        "r_xray_ph": "صورة الأشعة",
         "r_report_title": "تقريرك",
         "r_words_title": "شرح المصطلحات",
         "r_words": [
