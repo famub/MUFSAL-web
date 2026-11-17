@@ -41,7 +41,7 @@ from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
                              check_file)
 from queries_cases import create_case
 from queries_patient import (create_complaint, email_belongs_to_someone_else,
-                             get_all_cases, get_case_choices,
+                             get_all_cases, get_case_choices, get_latest_case,
                              get_delay_complaints, get_open_case,
                              get_patient_header, get_profile,
                              get_written_complaints, update_profile)
@@ -155,16 +155,27 @@ def waiting_line(days):
     return f"Waiting {days} days so far"
 
 
-def build_open_case(row):
-    """Turn the database row into the handful of values the page prints."""
+def build_latest_case(row):
+    """Turn the newest case into the handful of values the card prints.
+
+    Two shapes come out of here: a case still being read, with how long it
+    has waited and the delay button, and a case whose report is signed,
+    which carries the way in to that report instead.
+    """
     if row is None:
         return None
+
+    done = row["status"] == "approved" and row["final_grade"] is not None
 
     return {
         "case_id": row["case_id"],
         "knee": knee_label(row["knee"]),
         "submitted_long": long_date(row["submitted_at"]),
         "submitted_short": short_date(row["submitted_at"]),
+        "done": done,
+        "grade": row["final_grade"],
+        "approved_short": short_date(row["approved_at"]),
+        "approved_long": long_date(row["approved_at"]),
         "waiting": waiting_line(row["days_waited"]),
         # the delay button has three faces: open, already used, or not yet
         "delay_ready": bool(row["delay_ready"]) and not row["delay_open"],
@@ -191,7 +202,9 @@ def home(request: Request,
         return redirect
 
     header = get_patient_header(user_id)
-    open_case = build_open_case(get_open_case(user_id))
+    latest = build_latest_case(get_latest_case(user_id))
+    # a case still being read is what locks "Start a new case"
+    waiting_on_a_case = bool(latest and not latest["done"])
 
     # one green or red line at the top of the page, when there is one to say
     message, message_ok = None, True
@@ -207,7 +220,8 @@ def home(request: Request,
         page_context(request, {
             "first_name": header["first_name"] if header else "",
             "total_cases": header["total_cases"] if header else 0,
-            "open_case": open_case,
+            "latest": latest,
+            "waiting_on_a_case": waiting_on_a_case,
             "message": message,
             "message_ok": message_ok,
         }),

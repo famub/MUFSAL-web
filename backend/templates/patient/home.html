@@ -11,9 +11,9 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
 
   <!-- shared across every MUFSAL page -->
-  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=4" />
+  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=6" />
   <!-- only what this page needs on top of it -->
-  <link rel="stylesheet" href="/static/NewCss/patient-home.css?v=4" />
+  <link rel="stylesheet" href="/static/NewCss/patient-home.css?v=6" />
 </head>
 
 <body>
@@ -49,17 +49,17 @@
       <!-- ---------- start a new case ---------- -->
       <!-- A patient may have one case under review at a time, so while a
            case is open this card wears its locked face. -->
-      <section class="new-case{{ ' is-locked' if open_case }}">
+      <section class="new-case{{ ' is-locked' if waiting_on_a_case }}">
         <div class="text">
           <h2>Start a new case</h2>
-          {% if open_case %}
+          {% if waiting_on_a_case %}
           <p>You already have a case with a doctor. You can upload another X-ray once that report is ready.</p>
           {% else %}
           <p>Upload one knee X-ray and answer a few questions. A doctor reads it before you get anything back.</p>
           {% endif %}
         </div>
 
-        {% if open_case %}
+        {% if waiting_on_a_case %}
         <span class="cta">
           One case at a time
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -77,24 +77,31 @@
         {% endif %}
       </section>
 
-      <!-- ---------- the case in progress ---------- -->
+      <!-- ---------- the newest case ---------- -->
       <div class="sec-head">
-        <h2>In progress</h2>
+        <h2>{{ 'Your latest report' if latest and latest.done else 'In progress' }}</h2>
         <a href="/patient-cases">See all my cases &rarr;</a>
       </div>
 
-      {% if open_case %}
-      <section class="case">
+      {% if latest %}
+      <section class="case{{ ' is-done' if latest.done }}">
         <div class="case-top">
           <div>
-            <p class="case-id">Case #{{ open_case.case_id }}</p>
-            <p class="case-sub">{{ open_case.knee }} &middot; uploaded {{ open_case.submitted_long }}</p>
+            <p class="case-id">Case #{{ latest.case_id }}</p>
+            <p class="case-sub">{{ latest.knee }} &middot; uploaded {{ latest.submitted_long }}</p>
           </div>
 
+          {% if latest.done %}
+          <span class="badge ok">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            Report ready
+          </span>
+          {% else %}
           <span class="badge">
             <span class="ping"></span>
             With your doctor
           </span>
+          {% endif %}
         </div>
 
         <!-- where the case has reached -->
@@ -102,37 +109,64 @@
           <div class="stp done">
             <span class="dot"></span>
             <h4>X-ray uploaded</h4>
-            <p>{{ open_case.submitted_short }}</p>
+            <p>{{ latest.submitted_short }}</p>
           </div>
 
-          <div class="stp now">
+          <div class="stp {{ 'done' if latest.done else 'now' }}">
             <span class="dot"></span>
             <h4>Doctor review</h4>
-            <p>In progress</p>
+            <p>{{ latest.approved_short if latest.done else 'In progress' }}</p>
           </div>
 
-          <div class="stp todo">
+          <div class="stp {{ 'done' if latest.done else 'todo' }}">
             <span class="dot"></span>
             <h4>Report ready</h4>
-            <p>Not yet</p>
+            <p>{{ latest.approved_short if latest.done else 'Not yet' }}</p>
           </div>
         </div>
 
         <div class="case-foot">
+          {% if latest.done %}
+          <p class="wait">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span style="color:var(--body)">
+              Signed by your doctor on {{ latest.approved_long }}
+              <span>The grade and what it means are in the report.</span>
+            </span>
+          </p>
+
+          <span class="done-side">
+            <!-- the grade keeps the colour it has everywhere else in MUFSAL -->
+            <span class="kl g-{{ latest.grade }}">
+              <strong>Grade {{ latest.grade }}</strong>
+              <span>on the Kellgren&ndash;Lawrence scale (0&ndash;4)</span>
+            </span>
+
+            <a class="btn-report" href="/cases/{{ latest.case_id }}/report">
+              Read your report
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 10h11m0 0-4-4m4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </span>
+          {% else %}
           <p class="wait">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 2" stroke-linecap="round" />
             </svg>
             <span style="color:var(--body)">
-              {{ open_case.waiting }}
+              {{ latest.waiting }}
               <span>Most reports come back within a few days. Nothing is released before a doctor signs it.</span>
             </span>
           </p>
 
-          {% if open_case.delay_ready %}
+          {% if latest.delay_ready %}
           <!-- ten days have passed and nothing has been reported yet -->
-          <form method="post" action="/cases/{{ open_case.case_id }}/report-delay">
+          <form method="post" action="/cases/{{ latest.case_id }}/report-delay">
             <input type="hidden" name="back" value="dashboard" />
             <button class="btn-delay is-on" type="submit">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -148,12 +182,13 @@
               <path d="M10 2.5 18.5 17h-17L10 2.5Z" stroke-linejoin="round" />
               <path d="M10 8v3.5M10 14.2v.1" stroke-linecap="round" />
             </svg>
-            {% if open_case.delay_open %}
+            {% if latest.delay_open %}
             Delay reported &mdash; with the team
             {% else %}
-            Report a delay &mdash; available {{ open_case.delay_date }}
+            Report a delay &mdash; available {{ latest.delay_date }}
             {% endif %}
           </button>
+          {% endif %}
           {% endif %}
         </div>
       </section>

@@ -135,6 +135,44 @@
     cursor: pointer;
   }
 .btn-delay.is-on:hover { background: #fbdede; }
+/* ---------- the same card once the report is signed ----------
+   The whole line turns green, the badge agrees with it, and the delay
+   button is replaced by the way in to the report. */
+
+.badge.ok { background: var(--ok-pale); color: var(--ok); }
+.badge.ok svg { width: 15px; height: 15px; }
+
+.case.is-done .stp.done::before { background: var(--ok); }
+.case.is-done .stp.done .dot { background: var(--ok); border-color: var(--ok); }
+.case.is-done .wait svg { color: var(--ok); }
+
+/* the grade and the button travel together on the far side */
+.done-side {
+    margin-inline-start: auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+
+/* The grade in its own colour - the same colour it has on every other page,
+   with the scale spelled out so it is not mistaken for a score out of five. */
+.kl {
+    display: inline-flex; flex-direction: column; gap: 1px;
+    border: 1px solid currentColor; border-radius: 16px; padding: 9px 16px;
+  }
+.kl strong { font-size: 1.02rem; font-weight: 700; letter-spacing: -.01em; }
+.kl > span { font-size: .72rem; opacity: .85; }
+.kl.g-0, .kl.g-1 { background: var(--ok-pale); border-color: rgba(31, 143, 95, .3); }
+.kl.g-2 { background: var(--amber-pale); border-color: rgba(217, 154, 60, .35); }
+.kl.g-3, .kl.g-4 { background: var(--red-pale); border-color: rgba(228, 76, 76, .3); }
+
+.btn-report {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--ok); color: #fff; border: none; border-radius: 999px;
+    padding: 12px 24px; font-size: .92rem; font-weight: 500; white-space: nowrap;
+    box-shadow: 0 14px 30px -16px rgba(31, 143, 95, .95);
+    transition: transform .16s ease, background .16s ease;
+  }
+.btn-report:hover { transform: translateY(-2px); background: #19764e; }
+.btn-report svg { width: 16px; height: 16px; }
+
 /* ---------- empty state (no open case) ---------- */
 .empty {
     background: var(--white); border-radius: var(--radius); padding: 54px 32px;

@@ -69,6 +69,39 @@ def get_open_case(patient_id):
         ).fetchone()
 
 
+def get_latest_case(patient_id):
+    """The newest case, whatever state it is in, or None.
+
+    The home page follows this one: while it is being read the page shows
+    how far it has got, and once the report is signed the same card turns
+    into the way in to that report.
+    """
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT c.case_id,
+                   c.status,
+                   c.submitted_at,
+                   h.knee,
+                   r.final_grade,
+                   r.approved_at,
+                   (CURRENT_DATE - c.submitted_at::date)                        AS days_waited,
+                   (c.submitted_at + make_interval(days => %(days)s))::date     AS delay_date,
+                   (CURRENT_TIMESTAMP - c.submitted_at)
+                        >= make_interval(days => %(days)s)                      AS delay_ready,
+                   EXISTS (SELECT 1 FROM delay_complaints d
+                           WHERE d.case_id = c.case_id AND d.status = 'pending') AS delay_open
+            FROM cases c
+            LEFT JOIN case_history h ON h.case_id = c.case_id
+            LEFT JOIN reports      r ON r.case_id = c.case_id
+            WHERE c.patient_id = %(patient)s
+            ORDER BY c.submitted_at DESC
+            LIMIT 1
+            """,
+            {"patient": patient_id, "days": DELAY_DAYS},
+        ).fetchone()
+
+
 # =============================================================== "My cases"
 
 def get_all_cases(patient_id):
