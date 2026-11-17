@@ -3,15 +3,22 @@
        {% set rail_role = "doctor" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
    rail_role:  doctor | patient | radiologist | admin   (default: doctor)
    nav_active: dashboard | pending | approved | complaints | profile | home | cases
-   It keeps its own English/Arabic texts and only reads `lang` and `request`. #}
+   nav_counts: optional numbers to show beside a link, keyed by the names
+               above, e.g. {'cases': 4} or {'pending': 7}. A missing key or
+               a zero shows nothing.
+   It keeps its own English/Arabic texts and only reads `lang`, `request`
+   and `nav_counts`. #}
 {% set ar = (lang | default('en')) == 'ar' %}
 {% set who = rail_role | default('doctor') %}
 {% set active = nav_active | default('') %}
 
-{% macro link(href, key, label) -%}
+{% set counts = nav_counts | default({}) %}
+
+{% macro link(href, key, label, count=None) -%}
   <a href="{{ href }}" class="rail-link{{ ' is-active' if active == key }}"{{ ' aria-current="page"' | safe if active == key }}>
     {{ caller() }}
     <span class="txt">{{ label }}</span>
+    {%- if count %}<span class="count">{{ count }}</span>{% endif %}
   </a>
 {%- endmacro %}
 
@@ -28,7 +35,7 @@
       {% call link('/dashboard-patient', 'home', 'الرئيسية' if ar else 'Home') %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
       {% endcall %}
-      {% call link('/patient-cases', 'cases', 'حالاتي' if ar else 'My cases') %}
+      {% call link('/patient-cases', 'cases', 'حالاتي' if ar else 'My cases', counts.get('cases')) %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round" /></svg>
       {% endcall %}
 
@@ -41,10 +48,10 @@
       {% call link('/dashboard-doctor', 'dashboard', 'لوحة التحكم' if ar else 'Dashboard') %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
       {% endcall %}
-      {% call link('/pending-cases', 'pending', 'الحالات المعلّقة' if ar else 'Pending cases') %}
+      {% call link('/pending-cases', 'pending', 'الحالات المعلّقة' if ar else 'Pending cases', counts.get('pending')) %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" /></svg>
       {% endcall %}
-      {% call link('/approved-cases', 'approved', 'الحالات المعتمدة' if ar else 'Approved cases') %}
+      {% call link('/approved-cases', 'approved', 'الحالات المعتمدة' if ar else 'Approved cases', counts.get('approved')) %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
       {% endcall %}
     {% endif %}

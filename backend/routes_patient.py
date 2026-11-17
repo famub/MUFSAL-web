@@ -219,7 +219,7 @@ def home(request: Request,
         request, "patient/home.html",
         page_context(request, {
             "first_name": header["first_name"] if header else "",
-            "total_cases": header["total_cases"] if header else 0,
+            "nav_counts": {"cases": header["total_cases"] if header else 0},
             "latest": latest,
             "waiting_on_a_case": waiting_on_a_case,
             "message": message,
@@ -264,7 +264,7 @@ def my_cases(request: Request,
         request, "patient/cases.html",
         page_context(request, {
             "cases": rows,
-            "total_cases": len(rows),
+            "nav_counts": {"cases": len(rows)},
             "message": message,
             "message_ok": message_ok,
         }),
@@ -296,7 +296,7 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
     return templates.TemplateResponse(
         request, "patient/profile.html",
         page_context(request, {
-            "total_cases": header["total_cases"] if header else 0,
+            "nav_counts": {"cases": header["total_cases"] if header else 0},
             "form": form,
             "errors": errors or {},
             "saved": saved,
@@ -404,7 +404,7 @@ def complaints_page(request, user_id, form=None, errors=None, sent=False, status
     return templates.TemplateResponse(
         request, "patient/complaints.html",
         page_context(request, {
-            "total_cases": header["total_cases"] if header else 0,
+            "nav_counts": {"cases": header["total_cases"] if header else 0},
             "kinds": COMPLAINT_SUBJECTS,
             "hints": COMPLAINT_HINTS,
             "choices": choices,
@@ -497,7 +497,7 @@ def new_case_page(request, user_id, a=None, errors=None, file_error=None,
     return templates.TemplateResponse(
         request, "patient/new-case.html",
         page_context(request, {
-            "total_cases": header["total_cases"] if header else 0,
+            "nav_counts": {"cases": header["total_cases"] if header else 0},
             "a": blank,
             "errors": errors or set(),
             "file_error": file_error,
