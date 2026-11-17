@@ -69,6 +69,7 @@
           <div class="who">
             <strong>Case #{{ c.case_id }}</strong>
             <p>{{ c.knee }} &middot; {{ c.date }}</p>
+            {% if c.by_radiologist %}<p class="by-radiologist" style="display:inline-block;margin:.35rem 0 0;padding:.3rem .75rem;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark);font-size:.85rem;font-weight:500;">A radiologist{% if c.uploader %}, {{ c.uploader }},{% endif %} uploaded this case for you</p>{% endif %}
           </div>
 
           {% if c.done %}

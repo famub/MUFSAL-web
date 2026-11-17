@@ -89,6 +89,7 @@
           <div>
             <p class="case-id">Case #{{ latest.case_id }}</p>
             <p class="case-sub">{{ latest.knee }} &middot; uploaded {{ latest.submitted_long }}</p>
+            {% if latest.by_radiologist %}<p class="by-radiologist" style="display:inline-block;margin:.5rem 0 0;padding:.3rem .75rem;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark);font-size:.85rem;font-weight:500;">A radiologist{% if latest.uploader %}, {{ latest.uploader }},{% endif %} uploaded this case for you</p>{% endif %}
           </div>
 
           {% if latest.done %}
