@@ -4,180 +4,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>MUFSAL - {{ t.doc_title }}</title>
-
-  <link rel="stylesheet" href="/static/css/global.css" />
-  <link rel="stylesheet" href="/static/css/header.css" />
-  <link rel="stylesheet" href="/static/css/dashboards.css" />
-  <link rel="stylesheet" href="/static/css/footer.css" />
-  <link rel="stylesheet" href="/static/css/doctor-nav.css" />
+  <title>MUFSAL — {{ t.doc_title }}</title>
+  {% include "_new-head.html" %}
 </head>
 
 <body>
-  <header>
-    <div class="header-inner">
-      <div id="header-logo-">
-        <a href="/dashboard-doctor" aria-label="MUFSAL home">
-          <img src="/assets/logo-light.png" alt="MUFSAL" class="logo-img" />
-        </a>
-      </div>
 
-      <div class="header-actions">
-        <form action="/set-lang" method="get">
-          <input type="hidden" name="lang" value="{{ 'en' if lang == 'ar' else 'ar' }}" />
-          <input type="hidden" name="next" value="{{ request.url.path }}" />
-          <button type="submit" id="lang-toggle">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-            </svg>
-            {{ t.lang_button }}
-          </button>
-        </form>
+  {% set rail_role = "doctor" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
 
+  <main class="main">
+    <div class="main-inner">
 
-        <span class="site-header__rule" aria-hidden="true"></span>
-
-        <a href="/logout" class="logout-link">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <div class="doctor-shell">
-  {% set nav_active = "dashboard" %}{% include "_doctor-nav.html" %}
-
-  <main class="dashboard-container">
-
-    <!-- Top banner -->
-    <section class="dashboard-banner">
-      <div class="banner-text">
-        <span id="dashboard">{{ t.doc_badge }}</span>
-        <h1>{{ t.welcome.format(name=name) }}</h1>
-        <p class="subtitle">{{ t.doc_subtitle }}</p>
-      </div>
-    </section>
-
-    <!-- Stats -->
-    <section class="stat-cards">
-      <div class="card stat-card">
-        <div class="icon-box">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-        </div>
-        <div class="stat-info">
-          <strong class="stat-number">{{ stats.pending }}</strong>
-          <span class="stat-label">{{ t.st_pending }}</span>
+      <div class="topbar">
+        <div>
+          <h1>{{ t.welcome.format(name=name) }}</h1>
+          <p>{{ t.doc_subtitle }}</p>
         </div>
       </div>
 
-      <div class="card stat-card">
-        <div class="icon-box icon-box--warning">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" /></svg>
+      <!-- ---------- numbers ---------- -->
+      <section class="stats">
+        <div class="card stat">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" /></svg></span>
+          <div><strong>{{ stats.pending }}</strong><span>{{ t.st_pending }}</span></div>
         </div>
-        <div class="stat-info">
-          <strong class="stat-number">{{ stats.high_priority }}</strong>
-          <span class="stat-label">{{ t.st_high }}</span>
+        <div class="card stat">
+          <span class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 21.5 19h-19L12 3Z" stroke-linejoin="round" /><path d="M12 10v4M12 16.6v.1" stroke-linecap="round" /></svg></span>
+          <div><strong>{{ stats.high_priority }}</strong><span>{{ t.st_high }}</span></div>
         </div>
-      </div>
+        <div class="card stat">
+          <span class="ico ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          <div><strong>{{ stats.approved }}</strong><span>{{ t.st_approved }}</span></div>
+        </div>
+      </section>
 
-      <div class="card stat-card">
-        <div class="icon-box icon-box--success">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-        </div>
-        <div class="stat-info">
-          <strong class="stat-number">{{ stats.approved }}</strong>
-          <span class="stat-label">{{ t.st_approved }}</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Pending cases -->
-    <section class="card cases-card pending-cases-card">
-      <div class="cases-card-header">
+      <!-- ---------- pending cases ---------- -->
+      <div class="sec-head">
         <h2>{{ t.pending_title }}</h2>
-        <p class="subtitle">{{ t.pending_sub }}</p>
+        <span>{{ t.showing.format(shown=pending|length, total=stats.pending) }}</span>
+        {% if stats.pending > pending|length %}<a href="/pending-cases">{{ t.all_pending }} {{ '&larr;' | safe if lang == 'ar' else '&rarr;' | safe }}</a>{% endif %}
       </div>
+      <p class="muted" style="margin:-10px 0 16px;font-size:.88rem">{{ t.pending_sub }}</p>
 
       {% if pending %}
-      <div class="table-responsive">
-        <table class="cases-table">
-          <thead>
-            <tr>
-              <th>{{ t.th_patient }}</th>
-              <th>{{ t.th_source }}</th>
-              <th>{{ t.th_submitted }}</th>
-              <th>{{ t.th_grade }}</th>
-              <th>{{ t.th_conf }}</th>
-              <th>{{ t.th_priority }}</th>
-              <th>{{ t.th_actions }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% include "_doctor-pending-rows.html" %}
-          </tbody>
-        </table>
-      </div>
+      <div class="case-list">{% include "_doctor-pending-rows.html" %}</div>
       {% else %}
-      <p class="subtitle" style="padding:16px 24px">{{ t.no_pending }}</p>
+      <div class="empty"><h3>{{ t.no_pending }}</h3></div>
       {% endif %}
 
-      <div class="card-footer">
-        <span class="footer-note">{{ t.showing.format(shown=pending|length, total=stats.pending) }}</span>
-        {% if stats.pending > pending|length %}
-        <a href="/pending-cases" class="btn-view-all">
-          {{ t.all_pending }}
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ 'M15 19l-7-7 7-7' if lang == 'ar' else 'M9 5l7 7-7 7' }}" /></svg>
-        </a>
-        {% endif %}
-      </div>
-    </section>
-
-    <!-- Approved cases -->
-    <section class="card cases-card">
-      <div class="cases-card-header">
+      <!-- ---------- recently approved ---------- -->
+      <div class="sec-head">
         <h2>{{ t.approved_title }}</h2>
-        <p class="subtitle">{{ t.approved_sub }}</p>
+        <span>{{ t.showing.format(shown=approved|length, total=stats.approved) }}</span>
+        {% if stats.approved > approved|length %}<a href="/approved-cases">{{ t.all_approved }} {{ '&larr;' | safe if lang == 'ar' else '&rarr;' | safe }}</a>{% endif %}
       </div>
 
       {% if approved %}
-      <div class="table-responsive">
-        <table class="cases-table">
-          <thead>
-            <tr>
-              <th>{{ t.th_patient }}</th>
-              <th>{{ t.th_source }}</th>
-              <th>{{ t.th_approved }}</th>
-              <th>{{ t.th_final_grade }}</th>
-              <th>{{ t.th_actions }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% include "_doctor-approved-rows.html" %}
-          </tbody>
-        </table>
-      </div>
+      <div class="case-list">{% include "_doctor-approved-rows.html" %}</div>
       {% else %}
-      <p class="subtitle" style="padding:16px 24px">{{ t.no_approved }}</p>
+      <div class="empty"><h3>{{ t.no_approved }}</h3></div>
       {% endif %}
 
-      <div class="card-footer">
-        <span class="footer-note">{{ t.showing.format(shown=approved|length, total=stats.approved) }}</span>
-        {% if stats.approved > approved|length %}
-        <a href="/approved-cases" class="btn-view-all">
-          {{ t.all_approved }}
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ 'M15 19l-7-7 7-7' if lang == 'ar' else 'M9 5l7 7-7 7' }}" /></svg>
-        </a>
-        {% endif %}
-      </div>
-    </section>
-
+      {% include "_page-foot.html" %}
+    </div>
   </main>
-  </div>
 
-  {% include "_footer.html" %}
 </body>
 
 </html>
