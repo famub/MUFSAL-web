@@ -21,6 +21,7 @@ import routes_new_case
 import routes_pages
 import routes_patient
 import routes_profile
+import routes_radiologist
 import routes_review
 import session_guard
 from db import get_connection
@@ -49,6 +50,7 @@ def db_test():
 # The order matters: specific routes first, the page server (routes_pages) LAST.
 app.include_router(routes_admin.router)      # /api/admin/... (the admin pages)
 app.include_router(routes_auth.router)        # /api/login, /api/register/...
+app.include_router(routes_radiologist.router)  # /new-case-radiologist (find the patient by ID, then upload)
 app.include_router(routes_patient.router)     # the patient's new pages - must come BEFORE routes_dashboard
 app.include_router(routes_dashboard.router)   # the older patient pages that have not moved over yet
 app.include_router(routes_doctor.router)      # /dashboard-doctor (built by the server)
