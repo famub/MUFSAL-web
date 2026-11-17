@@ -14,23 +14,32 @@ Pages finished so far:
     /patient-cases       every X-ray the patient has sent
     /profile-patient     the patient's details, and changing them
     /complaints          raising a complaint and following it
+    /new-case            uploading an X-ray and answering the questions
 
 /complaints belongs to every role, not only the patient, so the two
 handlers here hand a doctor or a radiologist straight back to the older
 page. Nothing changes for them.
 
 Still on the old pages (we move them one by one):
-    /new-case, /cases/{id}/report
+    /cases/{id}/report
 """
 import re
+import uuid
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from psycopg import errors as pg_errors
 
 import routes_complaints           # only to hand the other roles their own page
+# The checks for a new case were already written and work well, so they are
+# used as they are instead of being written a second time. Only the page
+# itself is new here.
+from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
+                             check_file)
+from queries_cases import create_case
 from queries_patient import (create_complaint, email_belongs_to_someone_else,
                              get_all_cases, get_case_choices,
                              get_delay_complaints, get_open_case,
@@ -85,6 +94,19 @@ PHONE_PATTERN = re.compile(r"^966[0-9]{9}$")
 
 
 # ------------------------------------------------------------------ helpers
+
+def get_lang(request: Request):
+    """The language the reader chose, kept in a cookie by /set-lang."""
+    return "ar" if request.cookies.get("lang") == "ar" else "en"
+
+
+def page_context(request: Request, extra):
+    """Everything every patient page needs, plus whatever that page adds."""
+    lang = get_lang(request)
+    context = {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr"}
+    context.update(extra)
+    return context
+
 
 def patient_or_redirect(request: Request):
     """Return the signed-in patient's user_id.
@@ -182,13 +204,13 @@ def home(request: Request,
 
     return templates.TemplateResponse(
         request, "patient/home.html",
-        {
+        page_context(request, {
             "first_name": header["first_name"] if header else "",
             "total_cases": header["total_cases"] if header else 0,
             "open_case": open_case,
             "message": message,
             "message_ok": message_ok,
-        },
+        }),
     )
 
 
@@ -226,12 +248,12 @@ def my_cases(request: Request,
 
     return templates.TemplateResponse(
         request, "patient/cases.html",
-        {
+        page_context(request, {
             "cases": rows,
             "total_cases": len(rows),
             "message": message,
             "message_ok": message_ok,
-        },
+        }),
     )
 
 
@@ -259,7 +281,7 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
 
     return templates.TemplateResponse(
         request, "patient/profile.html",
-        {
+        page_context(request, {
             "total_cases": header["total_cases"] if header else 0,
             "form": form,
             "errors": errors or {},
@@ -267,7 +289,7 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
             "national_id": mask_national_id(row["national_id"]),
             "date_of_birth": long_date(row["date_of_birth"]),
             "gender": (row["gender"] or "").capitalize(),
-        },
+        }),
         status_code=status_code,
     )
 
@@ -367,7 +389,7 @@ def complaints_page(request, user_id, form=None, errors=None, sent=False, status
 
     return templates.TemplateResponse(
         request, "patient/complaints.html",
-        {
+        page_context(request, {
             "total_cases": header["total_cases"] if header else 0,
             "kinds": COMPLAINT_SUBJECTS,
             "hints": COMPLAINT_HINTS,
@@ -377,7 +399,7 @@ def complaints_page(request, user_id, form=None, errors=None, sent=False, status
             "sent": sent,
             "body_max": BODY_MAX,
             "complaints": complaint_rows(user_id),
-        },
+        }),
         status_code=status_code,
     )
 
@@ -436,3 +458,112 @@ async def send_complaint(request: Request):
 
     create_complaint(user_id, COMPLAINT_SUBJECTS[form["kind"]], form["body"], case_id)
     return RedirectResponse("/complaints?sent=1", status_code=303)
+
+
+# ------------------------------------------------------------- new case
+
+# What the form sends back when an answer has to be filled in again.
+TYPED_FIELDS = list(CHOICES) + ["height_cm", "weight_kg", "medications", "other_symptoms"]
+
+
+def new_case_page(request, user_id, a=None, errors=None, file_error=None,
+                  open_step=1, save_failed=False, status_code=200):
+    """Draw the three-step page.
+
+    a / errors / file_error come back filled in when the server refused
+    something, so the patient sees their own answers again with the
+    questions that need another look marked in red.
+    """
+    header = get_patient_header(user_id)
+
+    blank = {name: "" for name in TYPED_FIELDS}
+    blank.update({w: False for w in WARNINGS + ("warning_none",)})
+    blank.update(a or {})
+
+    return templates.TemplateResponse(
+        request, "patient/new-case.html",
+        page_context(request, {
+            "total_cases": header["total_cases"] if header else 0,
+            "a": blank,
+            "errors": errors or set(),
+            "file_error": file_error,
+            "open_step": open_step,
+            "save_failed": save_failed,
+        }),
+        status_code=status_code,
+    )
+
+
+def may_start_a_case(request: Request):
+    """Like patient_or_redirect, and also stops a second case being opened.
+
+    One case under review at a time is the rule the home page shows, and
+    it is checked again here because a second tab or a double click would
+    otherwise slip past it.
+    """
+    user_id, redirect = patient_or_redirect(request)
+    if redirect:
+        return None, redirect
+    if get_open_case(user_id) is not None:
+        return None, RedirectResponse("/dashboard-patient", status_code=303)
+    return user_id, None
+
+
+@router.get("/new-case", include_in_schema=False)
+def new_case(request: Request):
+    user_id, redirect = may_start_a_case(request)
+    if redirect:
+        return redirect
+    return new_case_page(request, user_id)
+
+
+@router.post("/new-case", include_in_schema=False)
+async def submit_new_case(request: Request):
+    """Receive the X-ray and every answer at once, check them, and open the case."""
+    user_id, redirect = may_start_a_case(request)
+    if redirect:
+        return redirect
+
+    form = await request.form()
+    data, ext, file_error = await check_file(form.get("xray_file"))
+    answers, errors = check_answers(form)
+
+    if file_error or errors:
+        # A browser cannot put a chosen file back into a form after the page
+        # reloads, so the X-ray has to be chosen again whenever anything else
+        # was wrong.
+        typed = {name: (form.get(name) or "") for name in TYPED_FIELDS}
+        typed.update({w: form.get(w) == "on" for w in WARNINGS + ("warning_none",)})
+        return new_case_page(
+            request, user_id, a=typed, errors=errors,
+            file_error=file_error or "choose_again",
+            open_step=2 if errors else 1,
+            status_code=400,
+        )
+
+    # ---- the X-ray first, then the case ----
+    XRAYS_DIR.mkdir(parents=True, exist_ok=True)
+    stored = XRAYS_DIR / f"{uuid.uuid4().hex}{ext}"      # never trust the sent file name
+    stored.write_bytes(data)
+
+    history = dict(answers)
+    history["medications"] = history["medications"] or "-"   # the column cannot be empty
+
+    try:
+        case_id = create_case(
+            patient_id=user_id,
+            uploaded_by=user_id,
+            source="patient",
+            xray_image_path=f"uploads/xrays/{stored.name}",
+            history=history,
+        )
+    except (pg_errors.CheckViolation, pg_errors.NotNullViolation):
+        stored.unlink(missing_ok=True)
+        return new_case_page(request, user_id, a=answers, file_error="choose_again",
+                             open_step=3, save_failed=True, status_code=400)
+
+    # TODO (AI teammate): run the knee model on `stored` here, then call
+    # save_ai_result(case_id, grade, confidence, probabilities, priority, gradcam_path)
+    # from queries_cases.py. Until then the doctor sees "AI analysis not ready yet".
+
+    return RedirectResponse(f"/dashboard-patient?case_created={case_id}", status_code=303)

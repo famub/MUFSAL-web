@@ -56,7 +56,9 @@ textarea::placeholder { color: #9fadc4; }
 .step strong { display: block; font-size: .93rem; font-weight: 500; }
 .step p { color: rgba(255, 255, 255, .58); font-size: .82rem; line-height: 1.5; }
 .guide .note {
-    margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, .12);
+    /* .note is a light panel in the shared file - undo that on the dark card */
+    background: none; border-radius: 0; border-inline-start: none;
+    margin-top: 24px; padding: 20px 0 0; border-top: 1px solid rgba(255, 255, 255, .12);
     color: rgba(255, 255, 255, .62); font-size: .82rem; line-height: 1.6;
   }
 .guide .note strong { color: #fff; font-weight: 500; }

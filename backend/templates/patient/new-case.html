@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — New case</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
+
+  <!-- shared across every MUFSAL page -->
+  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css" />
+  <!-- only what this page needs on top of it -->
+  <link rel="stylesheet" href="/static/NewCss/new-case.css" />
+</head>
+
+<body>
+
+  {# the side rail every role shares - it knows the patient's links #}
+  {% set rail_role = "patient" %}{% set nav_active = "cases" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>Start a new case</h1>
+          <p>Three short steps. A doctor reads everything before you get a report.</p>
+        </div>
+      </div>
+
+      {% if file_error or errors or save_failed %}
+      <div class="banner banner-bad show">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7.5v5M12 16v.1" stroke-linecap="round" />
+        </svg>
+        <span>
+          {% if save_failed %}We could not save your case. Please check your answers and try again.
+          {% elif file_error == 'no_file' %}Please choose your X-ray before sending.
+          {% elif file_error == 'too_big' %}That file is larger than 10 MB. Please choose a smaller one.
+          {% elif file_error == 'bad_type' %}The X-ray has to be a JPG or a PNG.
+          {% elif file_error == 'choose_again' %}Some answers need a look. Your X-ray has to be chosen again - browsers do not keep a file after a page reloads.
+          {% else %}Some answers need a look.{% endif %}
+        </span>
+      </div>
+      {% endif %}
+
+      <div class="bar">
+        <div class="seg{{ ' now' if open_step == 1 }}{{ ' done' if open_step > 1 }}" data-seg="1">
+          <span class="nm">1 &middot; Your X-ray</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="seg{{ ' now' if open_step == 2 }}{{ ' done' if open_step > 2 }}" data-seg="2">
+          <span class="nm">2 &middot; About your knee</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="seg{{ ' now' if open_step == 3 }}" data-seg="3">
+          <span class="nm">3 &middot; One last look</span>
+          <span class="track"><i></i></span>
+        </div>
+      </div>
+
+      <!-- One form across the three steps: the steps are only what is shown,
+           so everything is sent together and checked together on the server. -->
+      <form class="card" method="post" action="/new-case" enctype="multipart/form-data" novalidate>
+
+        <!-- ============ step 1: the X-ray ============ -->
+        <section class="step{{ ' is-on' if open_step == 1 }}" data-step="1">
+          <h2>Your knee X-ray</h2>
+          <p class="hint">A photo of the film works, as long as the whole knee is in the frame and it is in focus.</p>
+
+          <input type="file" name="xray_file" id="xray" accept="image/png,image/jpeg" hidden />
+
+          <div class="drop" id="drop">
+            <span class="art">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 16V4m0 0L8 8m4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <strong>Drop your X-ray here</strong>
+            <p>JPG or PNG, up to 10 MB</p>
+            <button class="pick" type="button" id="pick">Choose a file</button>
+          </div>
+
+          <div class="picked" id="picked">
+            <span class="thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="m5 17 5-5 3 3 2-2 4 4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </span>
+            <span>
+              <strong id="picked-name">&nbsp;</strong>
+              <span id="picked-size">&nbsp;</span>
+            </span>
+            <button class="drop-it" type="button" id="undo">Remove</button>
+          </div>
+
+          <div class="q{{ ' bad' if 'knee' in errors }}" style="margin-top:28px;margin-bottom:0">
+            <p class="q-title">Which knee is this? <span class="note">One X-ray shows one knee.</span></p>
+            <div class="opts">
+              <label class="opt"><input type="radio" name="knee" value="right" {{ 'checked' if a.knee != 'left' }} /><span>Right knee</span></label>
+              <label class="opt"><input type="radio" name="knee" value="left" {{ 'checked' if a.knee == 'left' }} /><span>Left knee</span></label>
+            </div>
+          </div>
+
+          <div class="nav-btns">
+            <button class="btn-next" type="button" data-go="2">
+              Next
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h11m0 0-4-4m4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- ============ step 2: the questions ============ -->
+        <section class="step{{ ' is-on' if open_step == 2 }}" data-step="2">
+          <h2>About your knee</h2>
+          <p class="hint">The doctor reads these next to your X-ray. Answer them for the knee in the photo.</p>
+
+          <div class="q{{ ' bad' if 'pain_with_use' in errors }}">
+            <p class="q-title">Is the pain worse when you use the knee?</p>
+            <div class="opts">
+              {% for value, label in [('yes', 'Yes'), ('no', 'No')] %}
+              <label class="opt"><input type="radio" name="pain_with_use" value="{{ value }}" {{ 'checked' if a.pain_with_use == value }} /><span>{{ label }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="q{{ ' bad' if 'stiffness_duration' in errors }}">
+            <p class="q-title">How long is it stiff in the morning?</p>
+            <div class="opts">
+              {% for value, label in [('none', 'Not stiff'), ('le30', '30 minutes or less'), ('gt30', 'More than 30 minutes')] %}
+              <label class="opt"><input type="radio" name="stiffness_duration" value="{{ value }}" {{ 'checked' if a.stiffness_duration == value }} /><span>{{ label }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="q{{ ' bad' if 'stairs_pain' in errors }}">
+            <p class="q-title">Pain going up or down stairs?</p>
+            <div class="opts">
+              {% for value, label in [('none', 'None'), ('mild', 'Mild'), ('moderate', 'Moderate'), ('severe', 'Severe'), ('extreme', 'Extreme')] %}
+              <label class="opt"><input type="radio" name="stairs_pain" value="{{ value }}" {{ 'checked' if a.stairs_pain == value }} /><span>{{ label }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="q{{ ' bad' if 'rising_difficulty' in errors }}">
+            <p class="q-title">Difficulty getting up from sitting?</p>
+            <div class="opts">
+              {% for value, label in [('none', 'None'), ('mild', 'Mild'), ('moderate', 'Moderate'), ('severe', 'Severe'), ('extreme', 'Extreme')] %}
+              <label class="opt"><input type="radio" name="rising_difficulty" value="{{ value }}" {{ 'checked' if a.rising_difficulty == value }} /><span>{{ label }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- the warning signs and "anything else" are one question -->
+          <div class="q{{ ' bad' if 'warnings' in errors or 'other_symptoms' in errors }}">
+            <p class="q-title">Do you have any of these? <span class="note">Tick all that apply, or tick the last one.</span></p>
+            <div class="checks">
+              {% for name, label in [
+                   ('warning_injury', 'A recent injury or fall on this knee'),
+                   ('warning_hot_swollen', 'The knee is hot and swollen'),
+                   ('warning_fever', 'Fever'),
+                   ('warning_rapid_worsening', 'It has got much worse quickly'),
+                   ('warning_night_pain', 'Pain that wakes me at night')] %}
+              <label class="check"><input type="checkbox" name="{{ name }}" {{ 'checked' if a[name] }} /><span>{{ label }}</span></label>
+              {% endfor %}
+              <label class="check"><input type="checkbox" name="warning_none" id="warning-none" {{ 'checked' if a.warning_none }} /><span>None of these</span></label>
+            </div>
+            <textarea class="in" name="other_symptoms" maxlength="500" style="margin-top:12px"
+              placeholder="Anything else you want the doctor to know (optional)">{{ a.other_symptoms }}</textarea>
+          </div>
+
+          <div class="q{{ ' bad' if 'medications' in errors }}">
+            <label for="meds">Medicines you take for the knee</label>
+            <input class="in" type="text" id="meds" name="medications" maxlength="500" value="{{ a.medications }}"
+              placeholder="For example: paracetamol when needed &mdash; or write None" />
+          </div>
+
+          <div class="q{{ ' bad' if 'height_cm' in errors or 'weight_kg' in errors }}">
+            <p class="q-title">Height and weight <span class="note">Used to work out your BMI.</span></p>
+            <div class="two">
+              <input class="in" type="number" name="height_cm" min="100" max="250" step="1" value="{{ a.height_cm }}" placeholder="Height in cm" aria-label="Height in cm" />
+              <input class="in" type="number" name="weight_kg" min="20" max="400" step="0.1" value="{{ a.weight_kg }}" placeholder="Weight in kg" aria-label="Weight in kg" />
+            </div>
+          </div>
+
+          <div class="q{{ ' bad' if 'prior_injury' in errors }}" style="margin-bottom:0">
+            <p class="q-title">Have you injured this knee before?</p>
+            <div class="opts">
+              {% for value, label in [('yes', 'Yes'), ('no', 'No')] %}
+              <label class="opt"><input type="radio" name="prior_injury" value="{{ value }}" {{ 'checked' if a.prior_injury == value }} /><span>{{ label }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="nav-btns">
+            <button class="btn-back" type="button" data-go="1">Back</button>
+            <button class="btn-next" type="button" data-go="3">
+              Next
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h11m0 0-4-4m4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- ============ step 3: review ============ -->
+        <section class="step{{ ' is-on' if open_step == 3 }}" data-step="3">
+          <h2>One last look</h2>
+          <p class="hint">Check this is right. Once you send it, the case goes to a doctor.</p>
+
+          <!-- filled in by the page from the answers above, just before it is shown -->
+          <dl class="sum" id="sum"></dl>
+
+          <p class="promise">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z" stroke-linejoin="round" />
+              <path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Your X-ray is read by the model first, then by a doctor. Nothing reaches you until the doctor signs it.
+          </p>
+
+          <div class="nav-btns">
+            <button class="btn-back" type="button" data-go="2">Back</button>
+            <button class="btn-next btn-send" type="submit">
+              Send to a doctor
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+          </div>
+        </section>
+
+      </form>
+
+    </div>
+  </main>
+
+
+  <script>
+    /* Three things happen in this page, and none of them is a check:
+       every answer is checked again on the server, which has the last word.
+         1. moving between the three steps
+         2. showing which X-ray was chosen
+         3. writing the summary on the last step                        */
+
+    const form = document.querySelector('form.card');
+    const steps = [...document.querySelectorAll('.step')];
+    const segs = [...document.querySelectorAll('.seg')];
+
+    function show(n) {
+      if (n === 3) writeSummary();
+      steps.forEach(function (s) { s.classList.toggle('is-on', s.dataset.step === String(n)); });
+      segs.forEach(function (s) {
+        const i = Number(s.dataset.seg);
+        s.classList.toggle('done', i < n);
+        s.classList.toggle('now', i === n);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('[data-go]').forEach(function (btn) {
+      btn.addEventListener('click', function () { show(Number(btn.dataset.go)); });
+    });
+
+    /* ---------------- the X-ray ---------------- */
+
+    const file = document.getElementById('xray');
+    const drop = document.getElementById('drop');
+    const picked = document.getElementById('picked');
+
+    function showFile() {
+      const f = file.files[0];
+      if (!f) { picked.classList.remove('show'); drop.style.display = ''; return; }
+      document.getElementById('picked-name').textContent = f.name;
+      document.getElementById('picked-size').textContent =
+        (f.size / 1048576).toFixed(1) + ' MB · ready to send';
+      drop.style.display = 'none';
+      picked.classList.add('show');
+    }
+
+    document.getElementById('pick').addEventListener('click', function () { file.click(); });
+    drop.addEventListener('click', function (e) { if (e.target === drop) file.click(); });
+    file.addEventListener('change', showFile);
+
+    document.getElementById('undo').addEventListener('click', function () {
+      file.value = '';
+      showFile();
+    });
+
+    // dropping a file on the box is the same as choosing one
+    ['dragenter', 'dragover'].forEach(function (name) {
+      drop.addEventListener(name, function (e) { e.preventDefault(); drop.classList.add('over'); });
+    });
+    ['dragleave', 'drop'].forEach(function (name) {
+      drop.addEventListener(name, function (e) { e.preventDefault(); drop.classList.remove('over'); });
+    });
+    drop.addEventListener('drop', function (e) {
+      if (e.dataTransfer.files.length) { file.files = e.dataTransfer.files; showFile(); }
+    });
+
+    /* ---------------- "none of these" ---------------- */
+    // Ticking "None of these" clears the five signs, and ticking any sign
+    // clears "None of these" - the server refuses both together.
+    const none = document.getElementById('warning-none');
+    const signs = [...form.querySelectorAll('input[name^="warning_"]')]
+                  .filter(function (c) { return c !== none; });
+
+    none.addEventListener('change', function () {
+      if (none.checked) signs.forEach(function (c) { c.checked = false; });
+    });
+    signs.forEach(function (c) {
+      c.addEventListener('change', function () { if (c.checked) none.checked = false; });
+    });
+
+    /* ---------------- the summary ---------------- */
+
+    const LABELS = {
+      knee: 'Knee', pain_with_use: 'Worse with use', stiffness_duration: 'Morning stiffness',
+      stairs_pain: 'Stairs', rising_difficulty: 'Getting up', prior_injury: 'Previous injury'
+    };
+    const WORDS = {
+      right: 'Right', left: 'Left', yes: 'Yes', no: 'No', none: 'None',
+      le30: '30 minutes or less', gt30: 'More than 30 minutes', mild: 'Mild',
+      moderate: 'Moderate', severe: 'Severe', extreme: 'Extreme'
+    };
+
+    function line(term, value) {
+      return '<div><dt>' + term + '</dt><dd>' + (value || '—') + '</dd></div>';
+    }
+
+    function writeSummary() {
+      const data = new FormData(form);
+      let html = line('X-ray', file.files[0] ? file.files[0].name : 'Not chosen yet');
+
+      Object.keys(LABELS).forEach(function (name) {
+        const v = data.get(name);
+        if (name === 'stiffness_duration' && v === 'none') { html += line(LABELS[name], 'Not stiff'); return; }
+        html += line(LABELS[name], v ? (WORDS[v] || v) : 'Not answered');
+      });
+
+      const ticked = signs.filter(function (c) { return c.checked; })
+                          .map(function (c) { return c.nextElementSibling.textContent; });
+      html += line('Warning signs', none.checked ? 'None' :
+                   (ticked.length ? ticked.join(', ') : 'Not answered'));
+
+      const extra = (data.get('other_symptoms') || '').trim();
+      if (extra) html += line('Anything else', extra);
+
+      html += line('Medicines', (data.get('medications') || '').trim() || 'None');
+
+      const h = data.get('height_cm'), w = data.get('weight_kg');
+      html += line('Height and weight', (h && w) ? (h + ' cm · ' + w + ' kg') : 'Not answered');
+
+      document.getElementById('sum').innerHTML = html;
+    }
+  </script>
+
+
+</body>
+
+</html>
