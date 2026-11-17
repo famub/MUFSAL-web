@@ -1,7 +1,7 @@
 {# MUFSAL side rail (new design, styles in /static/NewCss/mufsal-ui.css).
    Use it on any page:
        {% set rail_role = "doctor" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
-   rail_role:  doctor | patient | radiologist   (default: doctor)
+   rail_role:  doctor | patient | radiologist | admin   (default: doctor)
    nav_active: dashboard | pending | approved | complaints | profile | home | cases
    It keeps its own English/Arabic texts and only reads `lang` and `request`. #}
 {% set ar = (lang | default('en')) == 'ar' %}
@@ -16,7 +16,7 @@
 {%- endmacro %}
 
 <aside class="rail">
-  <a href="{{ '/dashboard-patient' if who == 'patient' else ('/dashboard-radiologist' if who == 'radiologist' else '/dashboard-doctor') }}" class="rail-brand">
+  <a href="/dashboard-{{ who }}" class="rail-brand">
     <img src="/assets/logo-light.png" alt="" />
     MUFSAL
   </a>
@@ -32,8 +32,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round" /></svg>
       {% endcall %}
 
-    {% elif who == 'radiologist' %}
-      {% call link('/dashboard-radiologist', 'dashboard', 'لوحة التحكم' if ar else 'Dashboard') %}
+    {% elif who in ('radiologist', 'admin') %}
+      {% call link('/dashboard-' ~ who, 'dashboard', 'لوحة التحكم' if ar else 'Dashboard') %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
       {% endcall %}
 
