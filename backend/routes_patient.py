@@ -441,7 +441,8 @@ async def send_complaint(request: Request):
     if request.session.get("role") != "patient":
         return routes_complaints.send_complaint(
             request,
-            subject=(data.get("subject") or ""),
+            kind=(data.get("kind") or ""),
+            case_id=(data.get("case_id") or ""),
             body=(data.get("body") or ""),
         )
 
