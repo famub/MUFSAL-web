@@ -308,8 +308,11 @@ button { font: inherit; cursor: pointer; }
 .warn { display: flex; align-items: flex-start; gap: 12px; background: var(--red-pale); color: #a13030; border-radius: 16px; padding: 16px 18px; font-size: .88rem; line-height: 1.6; }
 .warn svg { width: 20px; height: 20px; flex: none; margin-top: 2px; }
 
-/* grey side note inside a card */
-.note { background: var(--mint); border-radius: 15px; padding: 16px 18px; border-inline-start: 3px solid var(--brand); color: var(--body); font-size: .9rem; }
+/* a grey panel for a side remark inside a card */
+.note-panel { background: var(--mint); border-radius: 15px; padding: 16px 18px; border-inline-start: 3px solid var(--brand); color: var(--body); font-size: .9rem; }
+
+/* a few quiet words next to a title or a question - no panel, no box */
+.note { color: var(--grey); font-size: .84rem; font-weight: 400; }
 
 /* nothing to show yet */
 .empty { background: var(--white); border-radius: var(--radius); padding: 48px 24px; text-align: center; color: var(--grey); box-shadow: var(--shadow); }
