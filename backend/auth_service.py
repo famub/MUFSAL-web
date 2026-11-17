@@ -14,11 +14,10 @@ import time
 from psycopg import errors as pg_errors
 
 import auth_rules as rules
+import mailer
 import queries_accounts as db
 
-# Where each role goes after logging in (same addresses as HOME_BY_ROLE in routes_complaints.py).
-# The patient dashboard is rendered by the server (routes_dashboard.py). The other three open the
-# static page until the team adds a server route with the same address, BEFORE routes_pages in main.py.
+# Where each role goes after logging in. The patient dashboard is rendered by the server (routes_dashboard.py).
 HOME = {
     "patient": "/dashboard-patient",
     "radiologist": "/dashboard-radiologist",
@@ -165,8 +164,10 @@ def forgot(data):
         token = secrets.token_urlsafe(32)
         db.create_password_reset(user["user_id"], _hash_token(token))
         link = f"/reset-password.html?token={token}"
-        print(f"[password reset] {email}: {link}")          # TODO: send this link by email
-        if os.getenv("DEV_LOGIN") == "1":                   # development only: there is no email service yet
+        sent = mailer.send_reset_link(email, user["full_name"], link)   # real e-mail (see mailer.py)
+        if not sent:
+            print(f"[password reset] {email}: {link}")      # mail is not set up: only the server window shows it
+        if os.getenv("DEV_LOGIN") == "1":                   # development only: show the link on the page too
             answer["devLink"] = link
     return 200, answer
 
@@ -185,6 +186,32 @@ def reset_password(data):
         return _err(problem)
     db.complete_password_reset(row["reset_id"], row["user_id"], password)
     return 200, {"ok": True}
+
+
+# ---------------------------------------------------------------- radiologist: find a patient by ID
+
+LOOKUP_MAX = 20               # searches per radiologist ...
+LOOKUP_WINDOW = 10 * 60       # ... in 10 minutes (stops someone from trying every ID)
+_lookups = {}
+_lookups_lock = threading.Lock()
+
+
+def find_patient(national_id, requester_id):
+    """A radiologist types the patient's National ID / Iqama number; the case is then linked to that patient."""
+    national_id = rules.clean(national_id)
+    with _lookups_lock:
+        recent = [t for t in _lookups.get(requester_id, []) if time.time() - t < LOOKUP_WINDOW]
+        if len(recent) >= LOOKUP_MAX:
+            _lookups[requester_id] = recent
+            return _err("too_many_searches", 429)
+        recent.append(time.time())
+        _lookups[requester_id] = recent
+    if rules.national_id_error(national_id):
+        return _err("national_id_invalid")
+    patient = db.find_patient_by_national_id(national_id)
+    if patient is None:
+        return _err("patient_not_found", 404)
+    return 200, {"ok": True, "patient": {"patientId": patient["patient_id"], "name": patient["full_name"]}}
 
 
 # ---------------------------------------------------------------- admin: registration requests

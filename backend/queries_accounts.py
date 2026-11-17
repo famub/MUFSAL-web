@@ -57,6 +57,20 @@ def create_professional(full_name, email, password, phone, national_id,
     return row["user_id"]
 
 
+def find_patient_by_national_id(national_id):
+    """The approved patient with this National ID / Iqama number, or None.
+    Only what the radiologist needs to link a case to the patient: the id and the name."""
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT u.user_id AS patient_id, u.full_name
+            FROM users u JOIN patients p ON p.user_id = u.user_id
+            WHERE u.national_id = %s AND u.status = 'approved'
+            """,
+            (national_id,),
+        ).fetchone()
+
+
 def get_user_by_email(email):
     """Return the account with this email, or None."""
     with get_connection() as conn:

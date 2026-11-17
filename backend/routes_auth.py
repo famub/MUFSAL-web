@@ -94,6 +94,18 @@ async def reset(request: Request):
     return answer(await run_in_threadpool(service.reset_password, await read_json(request)))
 
 
+# ---------------------------------------------------------------- radiologist: find a patient by National ID
+# The upload page calls this, shows the name to confirm, then saves the case with this patient_id
+# (queries_cases.create_case(patient_id, uploaded_by=radiologist, source="radiologist", ...)).
+
+@router.get("/api/patients/lookup")
+async def patient_lookup(request: Request):
+    if request.session.get("role") != "radiologist" or request.session.get("user_id") is None:
+        return JSONResponse(NOT_ADMIN, status_code=403)
+    return answer(await run_in_threadpool(
+        service.find_patient, request.query_params.get("nationalId", ""), request.session["user_id"]))
+
+
 # ---------------------------------------------------------------- admin: doctor / radiologist requests
 # The admin page (admin-license-verification.html) will call these three.
 
