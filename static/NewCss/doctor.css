@@ -1,0 +1,168 @@
+/* ============================================================
+   MUFSAL — doctor pages + the case report (Sara)
+   dashboard-doctor, doctor-cases, review_case, view_report, profile-doctor.
+   Only what these pages need. Colours, the side rail, cards, buttons,
+   tags and fields come from mufsal-ui.css, which is linked before this file.
+   ============================================================ */
+
+/* Arabic: DM Sans has no Arabic letters, so Arabic pages use IBM Plex Sans Arabic */
+html[lang="ar"] body { font-family: "IBM Plex Sans Arabic", "DM Sans", system-ui, sans-serif; }
+/* arrows point the other way in Arabic */
+[dir="rtl"] .flip { transform: scaleX(-1); }
+
+[hidden] { display: none !important; }
+.muted { color: var(--grey); }
+bdi { unicode-bidi: isolate; }
+
+/* ---------- stat cards (dashboard) ---------- */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.stat { display: flex; align-items: center; gap: 16px; padding: 22px 24px; }
+.stat .ico { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; flex: none; background: var(--brand-soft); color: var(--brand); }
+.stat .ico svg { width: 22px; height: 22px; }
+.stat .ico.red { background: var(--red-pale); color: var(--red); }
+.stat .ico.ok { background: var(--ok-pale); color: var(--ok); }
+.stat strong { display: block; font-size: 1.9rem; line-height: 1.1; letter-spacing: -.02em; }
+.stat span { color: var(--grey); font-size: .88rem; }
+
+/* ---------- list of cases (dashboard + pending/approved pages) ---------- */
+.case-list { display: grid; gap: 12px; }
+.case-row {
+  display: grid; align-items: center; gap: 18px;
+  grid-template-columns: minmax(180px, 1.6fr) 1fr 90px 90px 110px auto;   /* pending */
+}
+.case-row.is-approved { grid-template-columns: minmax(180px, 1.6fr) 1fr 1fr 90px auto; }
+.case-row .who { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.case-row .avatar { width: 42px; height: 42px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand-dark); font-weight: 700; }
+.case-row .who strong { display: block; font-size: 1rem; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.case-row .who p, .case-row .cell p { color: var(--grey); font-size: .82rem; }
+.case-row .cell { font-size: .9rem; color: var(--body); }
+.case-row .lbl { display: block; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--grey); }
+.case-row .num { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.case-row .btn { justify-self: end; }
+.case-row.is-hidden { display: none; }
+
+/* priority tags */
+.tag-high { background: var(--red-pale); color: var(--red); }
+.tag-medium { background: var(--amber-pale); color: var(--amber); }
+.tag-low { background: var(--ok-pale); color: var(--ok); }
+.tag-source { background: var(--mint); color: var(--body); }
+
+/* search box above a list */
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.toolbar .count { color: var(--grey); font-size: .9rem; }
+.search { margin-inline-start: auto; position: relative; }
+.search svg { position: absolute; inset-inline-start: 15px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--grey); }
+.search input {
+  font: inherit; font-size: .9rem; color: var(--ink); width: 340px;
+  background: var(--white); border: none; border-radius: 999px;
+  padding: 11px 18px; padding-inline-start: 42px; box-shadow: var(--shadow-sm);
+}
+.search input:focus { outline: 2px solid var(--brand-soft); outline-offset: 1px; }
+.none { display: none; }
+.none.show { display: block; }
+
+/* ---------- review + report layout ---------- */
+.title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.title-row .tags { display: flex; gap: 8px; margin-inline-start: auto; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.two-col + .two-col, .two-col + .card, .card + .card, .card + form { margin-top: 20px; }
+.stats > .card, .two-col > .card, .with-side > .card { margin-top: 0; }   /* cards side by side stay level */
+.card h2.h { display: flex; align-items: center; gap: 12px; font-size: 1.12rem; margin-bottom: 20px; }
+.card h2.h .ico { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); flex: none; }
+.card h2.h .ico svg { width: 19px; height: 19px; }
+.card h3.sub { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--grey); margin: 22px 0 10px; }
+
+/* the X-ray */
+.xray { background: var(--ink); border-radius: 16px; aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden; }
+.xray img { width: 100%; height: 100%; object-fit: contain; }
+.xray .ph { color: rgba(255, 255, 255, .5); font-size: .9rem; padding: 20px; text-align: center; }
+.xray.small { aspect-ratio: 1 / 1; max-width: 320px; }
+
+/* the grade circle */
+.grade-row { display: flex; align-items: center; gap: 18px; }
+.dial {
+  width: 92px; height: 92px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; text-align: center;
+  background: var(--mint); border: 6px solid currentColor;
+}
+.dial small { display: block; font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--grey); }
+.dial strong { display: block; font-size: 1.9rem; line-height: 1; color: var(--ink); }
+.grade-name { font-weight: 700; font-size: 1.06rem; }
+.grade-desc { color: var(--body); font-size: .9rem; margin-top: 4px; }
+
+/* probability bars */
+.probs { list-style: none; display: grid; gap: 9px; }
+.probs li { display: grid; grid-template-columns: 44px 1fr 46px; align-items: center; gap: 12px; font-size: .86rem; color: var(--body); }
+.probs .bar { height: 9px; background: var(--mint); border-radius: 999px; overflow: hidden; }
+.probs .bar i { display: block; height: 100%; background: #c3d0e4; border-radius: 999px; }
+.probs li.top { color: var(--ink); font-weight: 700; }
+.probs li.top .bar i { background: var(--brand); }
+.probs .pct { text-align: end; }
+
+/* label / value list */
+.kv { display: grid; gap: 0; }
+.kv > div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+.kv > div:last-child { border-bottom: none; }
+.kv dt { color: var(--grey); }
+.kv dd { color: var(--ink); font-weight: 500; text-align: end; }
+
+/* medical history questions */
+.qa { list-style: none; display: grid; gap: 0; }
+.qa li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; }
+.qa li:last-child { border-bottom: none; }
+.qa li span:first-child { color: var(--body); }
+.qa li span:last-child { color: var(--ink); font-weight: 500; text-align: end; }
+
+/* the doctor's decision */
+.decision .grid-2 { align-items: start; }
+.field .hint { color: var(--grey); font-size: .8rem; margin-top: 6px; }
+.field.bad input, .field.bad select, .field.bad textarea { border-color: var(--red); background: var(--white); }
+.field .err { color: var(--red); font-size: .82rem; margin-top: 6px; }
+.decision-foot { display: flex; align-items: center; gap: 18px; margin-top: 6px; flex-wrap: wrap; }
+.decision-foot .muted { flex: 1; font-size: .86rem; }
+
+/* waiting card (report not approved yet) */
+.wait-card { text-align: center; padding: 48px 30px; }
+.wait-card .ico { width: 62px; height: 62px; border-radius: 50%; margin: 0 auto 16px; display: grid; place-items: center; background: var(--amber-pale); color: var(--amber); }
+.wait-card .ico svg { width: 28px; height: 28px; }
+.wait-card h2 { font-size: 1.25rem; margin-bottom: 6px; }
+.wait-card p { color: var(--grey); max-width: 46ch; margin: 0 auto 20px; }
+
+/* the report itself */
+.report-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; margin-top: 24px; }
+.report-text { color: var(--body); white-space: pre-line; }
+.words { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.words div { background: var(--mint); border-radius: 13px; padding: 12px 14px; }
+.words dt { font-weight: 700; font-size: .9rem; }
+.words dd { color: var(--body); font-size: .85rem; }
+.with-side { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
+.notes-text { color: var(--body); white-space: pre-line; }
+
+/* small print under every page: the AI disclaimer and the complaints link */
+.page-foot { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; gap: 16px; flex-wrap: wrap; color: var(--grey); font-size: .82rem; }
+.page-foot a { margin-inline-start: auto; color: var(--brand); }
+
+/* language button in the rail looks like the other rail links */
+.rail-foot form { display: contents; }
+.rail-lang { background: none; border: none; width: 100%; text-align: start; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .case-row, .case-row.is-approved { grid-template-columns: 1fr auto auto; }
+  .case-row .hide-sm { display: none; }
+  .with-side, .report-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .stats, .two-col { grid-template-columns: 1fr; }
+  .search, .search input { width: 100%; }
+  .rail-label { display: none; }
+}
+
+/* ---------- printing the report (Save as PDF) ---------- */
+@media print {
+  .rail, .no-print, .page-foot, .back { display: none !important; }
+  .main { margin: 0; padding: 0; }
+  body { background: #fff; }
+  .card { box-shadow: none; border: 1px solid var(--line); }
+}
