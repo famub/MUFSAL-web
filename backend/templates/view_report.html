@@ -94,7 +94,11 @@
                 </div>
               </section>
               <section>
-                {% if confidence is not none %}
+                {# How sure the model was is for the people reading the X-ray,
+                   not for the patient: a percentage next to her own result
+                   invites her to weigh the model against her doctor, and the
+                   doctor's signature is what the result rests on. #}
+                {% if confidence is not none and role != 'patient' %}
                 <h3 class="sub" style="margin-top:0">{{ t.r_conf_title }}</h3>
                 <p class="report-text">{{ t.r_conf.format(p=confidence) }}</p>
                 {% endif %}
