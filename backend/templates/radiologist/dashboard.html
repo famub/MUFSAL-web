@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ t.dash_title }}</title>
+  {% include "_new-head.html" %}
+</head>
+
+<body>
+
+  {% set rail_role = "radiologist" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>{{ t.welcome.format(name=name) }}</h1>
+          <p>{{ t.dash_sub }}</p>
+        </div>
+      </div>
+
+      {% if created %}
+      <div class="banner banner-ok show" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span>{{ t.created.format(id=created) }}</span>
+      </div>
+      {% endif %}
+
+      <section class="card card-dark" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:22px">
+        <div style="flex:1;min-width:240px">
+          <h2 style="font-size:1.3rem">{{ t.start_title }}</h2>
+          <p style="margin-top:6px">{{ t.start_text }}</p>
+        </div>
+        <a class="btn btn-primary btn-lg" href="/new-case-radiologist">{{ t.start_btn }}</a>
+      </section>
+
+      <section class="stats">
+        <div class="card stat">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round" /></svg></span>
+          <div><strong>{{ stats.total }}</strong><span>{{ t.st_total }}</span></div>
+        </div>
+        <div class="card stat">
+          <span class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          <div><strong>{{ stats.waiting }}</strong><span>{{ t.st_waiting }}</span></div>
+        </div>
+        <div class="card stat">
+          <span class="ico ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          <div><strong>{{ stats.approved }}</strong><span>{{ t.st_approved }}</span></div>
+        </div>
+      </section>
+
+      <div class="sec-head">
+        <h2>{{ t.recent_title }}</h2>
+        <span>{{ t.showing.format(shown=cases|length, total=stats.total) }}</span>
+        {% if stats.total > cases|length %}<a href="/radiologist-cases">{{ t.all_cases }} {{ '&larr;' | safe if lang == 'ar' else '&rarr;' | safe }}</a>{% endif %}
+      </div>
+
+      {% if cases %}
+      <div class="case-list">{% include "radiologist/_rows.html" %}</div>
+      {% else %}
+      <div class="empty"><h3>{{ t.none }}</h3></div>
+      {% endif %}
+
+      {% include "_page-foot.html" %}
+    </div>
+  </main>
+
+</body>
+
+</html>
