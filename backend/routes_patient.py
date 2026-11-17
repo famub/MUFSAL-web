@@ -39,6 +39,7 @@ import routes_complaints           # only to hand the other roles their own page
 # itself is new here.
 from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
                              check_file)
+from auth_service import HOME
 from queries_cases import create_case
 from queries_patient import (create_complaint, email_belongs_to_someone_else,
                              get_all_cases, get_case_choices, get_latest_case,
@@ -182,6 +183,22 @@ def build_latest_case(row):
         "delay_open": bool(row["delay_open"]),
         "delay_date": short_date(row["delay_date"]),
     }
+
+
+# ------------------------------------------------------- the public page
+
+@router.get("/", include_in_schema=False)
+def landing(request: Request):
+    """What a visitor sees before signing in: what MUFSAL is, who it is for,
+    and the two ways in.
+
+    Anyone already signed in is sent to their own home page instead, which is
+    what the address did before this page existed.
+    """
+    role = request.session.get("role")
+    if role:
+        return RedirectResponse(HOME.get(role, "/login"), status_code=303)
+    return templates.TemplateResponse(request, "landing.html", {})
 
 
 # ---------------------------------------------------------- the home page
