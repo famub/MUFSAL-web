@@ -171,6 +171,8 @@ def build_latest_case(row):
     return {
         "case_id": row["case_id"],
         "knee": knee_label(row["knee"]),
+        "by_radiologist": row["source"] == "radiologist",     # a radiologist uploaded it for the patient
+        "uploader": row["uploaded_by_name"],
         "submitted_long": long_date(row["submitted_at"]),
         "submitted_short": short_date(row["submitted_at"]),
         "done": done,
@@ -266,6 +268,8 @@ def my_cases(request: Request,
         rows.append({
             "case_id": case["case_id"],
             "knee": knee_label(case["knee"]),
+            "by_radiologist": case["source"] == "radiologist",
+            "uploader": case["uploaded_by_name"],
             "date": long_date(case["submitted_at"]),
             "done": done,
             "grade": case["final_grade"],

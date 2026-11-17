@@ -83,6 +83,8 @@ def get_latest_case(patient_id):
                    c.status,
                    c.submitted_at,
                    h.knee,
+                   c.source,
+                   up.full_name                                                 AS uploaded_by_name,
                    r.final_grade,
                    r.approved_at,
                    (CURRENT_DATE - c.submitted_at::date)                        AS days_waited,
@@ -94,6 +96,7 @@ def get_latest_case(patient_id):
             FROM cases c
             LEFT JOIN case_history h ON h.case_id = c.case_id
             LEFT JOIN reports      r ON r.case_id = c.case_id
+            LEFT JOIN users       up ON up.user_id = c.uploaded_by
             WHERE c.patient_id = %(patient)s
             ORDER BY c.submitted_at DESC
             LIMIT 1
@@ -117,11 +120,14 @@ def get_all_cases(patient_id):
                    c.status,
                    c.submitted_at,
                    h.knee,
+                   c.source,
+                   up.full_name AS uploaded_by_name,
                    r.final_grade,
                    r.approved_at
             FROM cases c
             LEFT JOIN case_history h ON h.case_id = c.case_id
             LEFT JOIN reports      r ON r.case_id = c.case_id
+            LEFT JOIN users       up ON up.user_id = c.uploaded_by
             WHERE c.patient_id = %s
             ORDER BY c.submitted_at DESC
             """,
