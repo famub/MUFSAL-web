@@ -109,6 +109,12 @@ button { font: inherit; cursor: pointer; }
 /* small number on the right of a link, e.g. how many open cases */
 .rail-link .count { margin-inline-start: auto; font-size: .76rem; font-weight: 500; background: rgba(255, 255, 255, .16); border-radius: 999px; padding: 2px 9px; }
 
+/* The language button sits inside a <form>, so the form steps out of the way
+   and the button is dressed as a rail link. _rail.html draws it on every page
+   of every role, so the rule belongs here and not in one role's stylesheet. */
+.rail-foot form { display: contents; }
+.rail-lang { background: none; border: none; width: 100%; text-align: start; }
+
 /* pinned to the bottom — Log out lives here */
 .rail-foot { margin-top: auto; display: grid; gap: 4px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, .1); }
 
