@@ -23,23 +23,22 @@
       </div>
 
       {% set rows = pending if kind == 'pending' else approved %}
+      {% set ar = lang == 'ar' %}
+
+      {% if kind == 'pending' and has_cases %}
+      <!-- Priority buttons: ordinary links, the server shows only that priority (?priority=high) -->
+      <nav class="chips" aria-label="{{ 'الأولوية' if ar else 'Priority' }}">
+        {% for p, en, arabic in [('all', 'All', 'الكل'), ('high', 'High', 'عالية'), ('medium', 'Medium', 'متوسطة'), ('low', 'Low', 'منخفضة')] %}
+        <a href="?priority={{ p }}" class="chip chip-{{ p }}{{ ' is-on' if priority == p }}"{{ ' aria-current="true"' | safe if priority == p }}>
+          {% if p != 'all' %}<i class="dot" aria-hidden="true"></i>{% endif %}{{ arabic if ar else en }}
+        </a>
+        {% endfor %}
+      </nav>
+      {% endif %}
+
       {% if rows %}
         <div class="toolbar">
-          <span class="count">{{ t.total.format(total=rows|length) }}</span> 
-          
-          {% if kind == 'pending' %}
-          <!-- Sort by: an ordinary form, the server sorts the list (?sort=priority|newest|oldest) -->
-          {% set ar = lang == 'ar' %}
-          <form class="sort" method="get" action="/pending-cases">
-            <label for="sort">{{ 'ترتيب حسب' if ar else 'Sort by' }}</label>
-            <select id="sort" name="sort" onchange="this.form.submit()">
-              <option value="priority" {{ 'selected' if sort == 'priority' }}>{{ 'الأولوية (الأعلى أولاً)' if ar else 'Priority (high first)' }}</option>
-              <option value="newest" {{ 'selected' if sort == 'newest' }}>{{ 'الأحدث أولاً' if ar else 'Newest first' }}</option>
-              <option value="oldest" {{ 'selected' if sort == 'oldest' }}>{{ 'الأقدم أولاً' if ar else 'Oldest first' }}</option>
-            </select>
-            <noscript><button type="submit" class="btn btn-soft btn-sm">{{ 'تطبيق' if ar else 'Apply' }}</button></noscript>
-          </form>
-          {% endif %}
+          <span class="count">{{ t.total.format(total=rows|length) }}</span>
           <label class="search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
             <input id="search" type="search" placeholder="{{ t.search_ph }}" aria-label="{{ t.search_ph }}" />
@@ -51,6 +50,8 @@
         </div>
 
         <div id="none" class="empty none"><h3>{{ t.no_match }}</h3></div>
+      {% elif kind == 'pending' and has_cases %}
+        <div class="empty"><h3>{{ 'لا توجد حالات بهذه الأولوية.' if ar else 'No cases with this priority.' }}</h3></div>
       {% else %}
         <div class="empty"><h3>{{ t.no_pending if kind == 'pending' else t.no_approved }}</h3></div>
       {% endif %}
