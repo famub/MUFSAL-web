@@ -1,5 +1,6 @@
 """MUFSAL - case queries: upload, AI result, doctor review and reports."""
 from db import get_connection
+import filestore
 
 
 def _yes_no(value):
@@ -89,6 +90,7 @@ def create_case(patient_id, uploaded_by, source, xray_image_path, history):
                 (case["case_id"], doctor["full_name"]),
             )
 
+    filestore.save(xray_image_path)   # keep a copy of the X-ray in the database
     return case["case_id"]
 
 
@@ -109,6 +111,7 @@ def save_ai_result(case_id, predicted_grade, confidence, probabilities,
              probabilities[3], probabilities[4],
              priority, gradcam_image_path),
         )
+    filestore.save(gradcam_image_path)   # keep a copy of the heatmap in the database
 
 
 def get_doctor_cases(doctor_id, status="under_review"):

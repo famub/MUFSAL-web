@@ -10,6 +10,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import FileResponse, RedirectResponse
+
+import filestore
 from fastapi.templating import Jinja2Templates
 from psycopg import errors
 
@@ -119,6 +121,7 @@ def safe_upload_path(relative_path):
     full = (Path(__file__).parent / relative_path).resolve()
     if UPLOADS_DIR not in full.parents:
         return None
+    filestore.restore(full)      # the host may have wiped the disk: bring the file back from the database
     return full
 
 
