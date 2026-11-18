@@ -8,6 +8,7 @@ Two ways to send (the first one that is set up is used):
  2. SMTP_HOST ...                - any SMTP service. For Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587 and an
     "App password" (Google account -> Security -> 2-Step Verification -> App passwords) as SMTP_PASSWORD.
 """
+import html
 import json
 import os
 import smtplib
@@ -54,6 +55,25 @@ def build_reset_message(to_email, name, link):
         f"{link}\n\n"
         "إذا لم تطلب ذلك فتجاهل هذه الرسالة، وستبقى كلمة مرورك كما هي.\n"
     )
+    safe = html.escape(link, quote=True)
+    btn = ('display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;'
+           'padding:12px 24px;border-radius:8px;font-weight:bold')
+    page = (
+        '<div style="font-family:Arial,Tahoma,sans-serif;font-size:15px;line-height:1.7;color:#222">'
+        f'<p>Hello {html.escape(name)},</p>'
+        '<p>We received a request to reset your MUFSAL password. '
+        'Click the button to choose a new one (it works once and expires in 1 hour).</p>'
+        f'<p><a href="{safe}" style="{btn}">Reset password | إعادة تعيين كلمة المرور</a></p>'
+        '<p style="color:#666;font-size:13px">If you did not ask for this, you can ignore this e-mail; '
+        'your password stays the same.</p>'
+        '<hr style="border:none;border-top:1px solid #ddd">'
+        f'<div dir="rtl" style="text-align:right"><p>مرحبًا {html.escape(name)}،</p>'
+        '<p>وصلنا طلب لإعادة تعيين كلمة مرور حسابك في مفصل. اضغط الزر أعلاه لاختيار كلمة مرور جديدة '
+        '(يعمل مرة واحدة وتنتهي صلاحيته بعد ساعة).</p>'
+        '<p style="color:#666;font-size:13px">إذا لم تطلب ذلك فتجاهل هذه الرسالة، وستبقى كلمة مرورك كما هي.</p></div>'
+        '</div>'
+    )
+    msg.add_alternative(page, subtype="html")
     return msg
 
 
@@ -65,7 +85,8 @@ def _send_api(msg):
         "sender": {"name": "MUFSAL", "email": sender},
         "to": [{"email": to_email}],
         "subject": msg["Subject"],
-        "textContent": msg.get_content(),
+        "textContent": msg.get_body(("plain",)).get_content(),
+        "htmlContent": msg.get_body(("html",)).get_content(),
     }
     req = urllib.request.Request(
         "https://api.brevo.com/v3/smtp/email",
