@@ -19,6 +19,7 @@ from psycopg import errors as pg_errors
 from starlette.concurrency import run_in_threadpool
 
 import auth_service
+from ai_analysis import analyze_case_later
 from queries_cases import create_case
 from queries_patient import get_open_case
 from routes_new_case import (WARNINGS, XRAYS_DIR, CHOICES, check_answers,
@@ -134,7 +135,8 @@ async def submit(request: Request):
         stored.unlink(missing_ok=True)
         return page(request, a=answers, patient=patient, file_error="choose_again",
                     open_step=4, save_failed=True, status_code=400)
-
+    # the knee model grades the X-ray in the background; the doctor sees the result a few seconds later
+    analyze_case_later(case_id, stored)
     return RedirectResponse(f"/dashboard-radiologist?case_created={case_id}", status_code=303)
 
 
