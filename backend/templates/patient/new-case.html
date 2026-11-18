@@ -100,7 +100,9 @@
           <div class="q{{ ' bad' if 'knee' in errors }}" style="margin-top:28px;margin-bottom:0">
             <p class="q-title">Which knee is this? <span class="req" aria-hidden="true">*</span> <span class="note">One X-ray shows one knee.</span></p>
             <div class="opts">
-              <label class="opt"><input type="radio" name="knee" value="right" {{ 'checked' if a.knee != 'left' }} /><span>Right knee</span></label>
+              <!-- neither side is ticked until the patient picks one: a knee
+                   chosen for her could send the report for the wrong knee -->
+              <label class="opt"><input type="radio" name="knee" value="right" {{ 'checked' if a.knee == 'right' }} /><span>Right knee</span></label>
               <label class="opt"><input type="radio" name="knee" value="left" {{ 'checked' if a.knee == 'left' }} /><span>Left knee</span></label>
             </div>
           </div>
