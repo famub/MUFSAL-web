@@ -443,9 +443,12 @@ def complaints_page(request, user_id, form=None, errors=None, sent=False, status
 @router.get("/complaints", include_in_schema=False)
 def complaints(request: Request, sent: int = 0):
     """The patient's complaints page. A doctor or a radiologist gets the
-    older page, which is still theirs."""
+    older page, which is still theirs. The admin reads complaints rather
+    than writing them, so he is sent to the page that lists them all."""
     if request.session.get("user_id") is None:
         return RedirectResponse("/login", status_code=303)
+    if request.session.get("role") == "admin":
+        return RedirectResponse("/admin-complaints", status_code=303)
     if request.session.get("role") != "patient":
         return routes_complaints.complaints_page(request, sent=sent)
 
@@ -457,6 +460,8 @@ async def send_complaint(request: Request):
     """Save a complaint, then redirect so a refresh cannot send it twice."""
     if request.session.get("user_id") is None:
         return RedirectResponse("/login", status_code=303)
+    if request.session.get("role") == "admin":
+        return RedirectResponse("/admin-complaints", status_code=303)
 
     data = await request.form()
 

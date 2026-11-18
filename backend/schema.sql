@@ -54,12 +54,19 @@ CREATE TABLE cases (
     uploaded_by        INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
     source             VARCHAR(15)  NOT NULL,
     assigned_doctor_id INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
-    xray_image_path    VARCHAR(255) NOT NULL,
+    xray_image_path    VARCHAR(255) NOT NULL UNIQUE,
     status             VARCHAR(20)  NOT NULL DEFAULT 'under_review',
     submitted_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT cases_source_valid CHECK (source IN ('patient','radiologist')),
     CONSTRAINT cases_status_valid CHECK (status IN ('under_review','approved'))
 );
+
+-- Why `source` is stored and not worked out from `uploaded_by`:
+COMMENT ON COLUMN cases.source IS
+    'Kept on purpose, not worked out from uploaded_by. That column is ON DELETE SET NULL, so once the account that uploaded the X-ray is removed the source could no longer be told. Same reasoning as reports.doctor_name and registration_decisions.applicant_name.';
+
+COMMENT ON COLUMN cases.xray_image_path IS
+    'Where the file sits under backend/uploads. The file name is a random id, never the case number, so one patient cannot reach another patient''s X-ray by changing a number in the address.';
 
 CREATE TABLE case_history (
     case_id                 INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
@@ -105,7 +112,15 @@ CREATE TABLE ai_results (
     CONSTRAINT ai_confidence_valid CHECK (confidence BETWEEN 0 AND 1),
     CONSTRAINT ai_probabilities_valid CHECK (prob_grade_0 BETWEEN 0 AND 1 AND prob_grade_1 BETWEEN 0 AND 1 AND
         prob_grade_2 BETWEEN 0 AND 1 AND prob_grade_3 BETWEEN 0 AND 1 AND prob_grade_4 BETWEEN 0 AND 1)
+    -- NOT ADDED YET: a rule that the five chances add up to 1. A KL grade is one
+    -- of five that exclude each other, so they should, but what the model on the
+    -- Space actually returns has not been seen yet. Adding the rule before that
+    -- would make every real result fail to save, and the failure is silent.
+    -- Check one real analysis first - see db-changes-pending.md.
 );
+
+COMMENT ON COLUMN ai_results.priority IS
+    'Stored, not worked out on the fly: it is the triage decision taken under the rule in force when the X-ray was read. Recomputing it later would quietly rewrite decisions already made. The rule itself lives in priority.py.';
 
 CREATE TABLE reports (
     case_id      INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
