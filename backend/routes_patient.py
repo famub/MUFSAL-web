@@ -40,6 +40,7 @@ import routes_complaints           # only to hand the other roles their own page
 from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
                              check_file)
 from auth_service import HOME
+from ai_analysis import analyze_case_later
 from queries_cases import create_case
 from queries_patient import (create_complaint, email_belongs_to_someone_else,
                              get_all_cases, get_case_choices, get_latest_case,
@@ -598,8 +599,7 @@ async def submit_new_case(request: Request):
         return new_case_page(request, user_id, a=answers, file_error="choose_again",
                              open_step=3, save_failed=True, status_code=400)
 
-    # TODO (AI teammate): run the knee model on `stored` here, then call
-    # save_ai_result(case_id, grade, confidence, probabilities, priority, gradcam_path)
-    # from queries_cases.py. Until then the doctor sees "AI analysis not ready yet".
+       # the knee model grades the X-ray in the background; the doctor sees the result a few seconds later
+    analyze_case_later(case_id, stored)
 
     return RedirectResponse(f"/dashboard-patient?case_created={case_id}", status_code=303)
