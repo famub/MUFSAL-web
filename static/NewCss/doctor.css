@@ -166,3 +166,12 @@ bdi { unicode-bidi: isolate; }
   body { background: #fff; }
   .card { box-shadow: none; border: 1px solid var(--line); }
 }
+/* "Sort by" list on the pending cases page */
+.sort { display: flex; align-items: center; gap: 10px; }
+.sort label { color: var(--grey); font-size: .88rem; white-space: nowrap; }
+.sort select {
+  font: inherit; font-size: .9rem; color: var(--ink); cursor: pointer;
+  background: var(--white); border: none; border-radius: 999px;
+  padding: 10px 16px; box-shadow: var(--shadow-sm);
+}
+.sort select:focus { outline: 2px solid var(--brand-soft); outline-offset: 1px; }
