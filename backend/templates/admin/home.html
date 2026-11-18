@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+{% set ar = lang == "ar" %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ "لوحة المشرف" if ar else "Admin dashboard" }}</title>
+  {% include "_new-head.html" %}
+  <link rel="stylesheet" href="/static/NewCss/admin.css?v=4" />
+</head>
+
+<body data-page="home">
+
+  {% set rail_role = "admin" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>{{ 'مرحبًا بك، المشرف' if ar else 'Welcome back, Admin' }}</h1>
+          <p>{{ 'كل ما يحتاج متابعتك اليوم في مكان واحد.' if ar else 'Everything that needs your attention today, in one place.' }}</p>
+        </div>
+      </div>
+
+      <!-- ---------- numbers: each card opens its page (filled by admin-ui.js) ---------- -->
+      <section class="stats admin-stats" id="stats"></section>
+
+      <!-- ---------- what needs attention first (filled by admin-ui.js) ---------- -->
+      <div id="home"></div>
+
+      {% include "admin/_foot.html" %}
+    </div>
+  </main>
+
+  {% include "admin/_end.html" %}
+</body>
+
+</html>

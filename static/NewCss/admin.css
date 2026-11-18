@@ -1,0 +1,89 @@
+/* ============================================================
+   MUFSAL — administrator pages
+   Only what the admin pages need. Colours, the side rail, cards,
+   buttons, tags and fields come from mufsal-ui.css + doctor.css
+   (linked before this file by _new-head.html).
+   ============================================================ */
+
+/* ---------- dashboard: three link cards ---------- */
+.stats.admin-stats { grid-template-columns: repeat(3, 1fr); }
+a.stat { transition: transform .16s ease, box-shadow .16s ease; }
+a.stat:hover { transform: translateY(-3px); }
+a.stat .go { margin-inline-start: auto; width: 20px; height: 20px; color: var(--grey); flex: none; }
+[dir="rtl"] a.stat .go { transform: scaleX(-1); }
+.stat .ico.amber { background: var(--amber-pale); color: var(--amber); }
+
+/* ---------- filters above a list ---------- */
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+.filters .chip.is-on { background: var(--ink); color: #fff; }
+.filters .gap { flex: 1; }
+.filters select, .filters input[type="date"] {
+  font: inherit; font-size: .9rem; color: var(--ink); background: var(--white);
+  border: none; border-radius: 999px; padding: 10px 16px; box-shadow: var(--shadow-sm);
+}
+.filters .search { margin-inline-start: 0; }
+.filters .search input { width: 280px; }
+.filters select:focus, .filters input:focus { outline: 2px solid var(--brand-soft); outline-offset: 1px; }
+
+/* ---------- list rows ---------- */
+.a-list { display: grid; gap: 12px; }
+.a-row { display: grid; align-items: center; gap: 18px; grid-template-columns: var(--cols); }
+.a-row .who { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.a-row .avatar { width: 42px; height: 42px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand-dark); font-weight: 700; font-size: .9rem; }
+.a-row .who strong { display: block; font-size: 1rem; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.a-row .who p, .a-row .cell p { color: var(--grey); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; }
+.a-row .cell { font-size: .9rem; color: var(--body); min-width: 0; overflow-wrap: anywhere; }
+.a-row .lbl { display: block; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--grey); }
+.a-row .acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.tag-role { background: var(--mint); color: var(--body); }
+
+/* ---------- slide-over panel + dialog ---------- */
+dialog { border: none; border-radius: var(--radius); padding: 28px 30px; width: min(480px, 92vw); color: var(--ink); background: var(--white); box-shadow: var(--shadow); }
+dialog::backdrop { background: rgba(6, 24, 47, .45); }
+dialog h3 { font-size: 1.15rem; letter-spacing: -.01em; }
+dialog .sub { color: var(--grey); font-size: .88rem; margin: 6px 0 18px; }
+dialog .field { margin: 16px 0 0; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.slide-over { margin: 0; margin-inline: auto 0; inset-block: 0; height: 100dvh; max-height: 100dvh; width: min(520px, 100vw); border-radius: 0; overflow-y: auto; }
+.slide-over > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.slide-over > header h2 { font-size: 1.2rem; letter-spacing: -.01em; }
+.x-btn { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--mint); color: var(--body); display: grid; place-items: center; }
+.x-btn:hover { color: var(--ink); }
+.x-btn svg { width: 18px; height: 18px; }
+.panel-body h3.sub-h { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--grey); margin: 24px 0 10px; }
+.msg { background: var(--mint); border-radius: 15px; padding: 14px 16px; margin-bottom: 10px; font-size: .9rem; color: var(--body); border-inline-start: 3px solid var(--line); }
+.msg.admin { border-inline-start-color: var(--brand); }
+.msg small { display: block; color: var(--grey); font-size: .78rem; margin-bottom: 2px; }
+.panel-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.slide-over .field textarea, dialog .field textarea { min-height: 100px; }
+.err { color: var(--red); font-size: .82rem; margin-top: 6px; }
+
+/* ---------- toast ---------- */
+#toast { position: fixed; inset-block-end: 28px; inset-inline-start: 50%; translate: -50% 0; z-index: 20; }
+#toast span { display: block; padding: 12px 22px; border-radius: 999px; background: var(--ink); color: #fff; font-size: .9rem; box-shadow: var(--shadow); }
+[dir="rtl"] #toast { translate: 50% 0; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .a-row { grid-template-columns: 1fr auto !important; }
+  .a-row .hide-sm { display: none; }
+}
+@media (max-width: 900px) {
+  .stats.admin-stats { grid-template-columns: 1fr; }
+  .filters .search, .filters .search input { width: 100%; }
+}
+
+/* long titles (complaint subjects) wrap instead of running into the next column */
+.a-row .who > div { min-width: 0; }
+.a-row .who strong { white-space: normal; line-height: 1.35; }
+.a-row .cell .tag { margin-top: 2px; }
+
+/* the global reset removes the automatic centering of a dialog, so centre it again (the side panel keeps its own place) */
+dialog:not(.slide-over) { margin: auto; }
+
+/* every value takes the same height, so the small grey labels line up across the whole row */
+.a-row .cell .val { display: flex; align-items: center; min-height: 32px; }
+.a-row .cell .tag { display: inline-flex; align-items: center; min-height: 32px; margin-top: 0; }
+
+.a-row .cell { align-self: start; }
+.a-row .who, .a-row .acts { align-self: center; }

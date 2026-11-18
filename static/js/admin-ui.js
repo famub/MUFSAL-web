@@ -1,0 +1,278 @@
+/* MUFSAL - administrator pages (new design).
+   One script for the four pages; <body data-page="home|delayed|licenses|complaints"> picks the behaviour.
+   All data comes from the FastAPI backend (/api/admin/...). English + Arabic (reads <html lang>). */
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const AR = document.documentElement.lang === 'ar';
+
+  // ---------------------------------------------------------------- words (one place for every text)
+  const TXT = {
+    en: {
+      s_delayed: 'Delayed requests', s_licenses: 'Pending license requests', s_complaints: 'General complaints',
+      open: 'Open',
+      doctor: 'Doctor', radiologist: 'Radiologist', patient: 'Patient',
+      pending: 'Pending', handled: 'Handled', investigating: 'Investigating', resolved: 'Resolved', openst: 'Open',
+      approved: 'Approved', rejected: 'Rejected',
+      all_sources: 'All sources', all_status: 'All statuses', all_roles: 'All roles', all_decisions: 'All decisions', all_about: 'All topics',
+      k_report: 'Something in a report', k_site: 'A problem with the site', k_other: 'Something else',
+      search_case: 'Search case or doctor', search_name: 'Search name or SCFHS number', search_app: 'Search applicant', search_cmp: 'Search subject or name',
+      from: 'From', to: 'To',
+      c_pending: 'Pending requests', c_history: 'Decision history', c_accounts: 'Active accounts',
+      case: 'Case', source: 'Source', doctor_l: 'Assigned doctor', submitted: 'Submitted', delay: 'Delay', status: 'Status',
+      reassign: 'Reassign', view: 'View', approve: 'Approve', reject: 'Reject', del: 'Delete', respond: 'View & reply',
+      applicant: 'Applicant', role: 'Role', scfhs: 'SCFHS file number', nid: 'National ID / iqama', email: 'Email', phone: 'Phone',
+      decision: 'Decision', reason: 'Reason', date: 'Date', name: 'Name', approved_on: 'Approved on',
+      ticket: 'Ticket', complainant: 'Complainant', about: 'About', subject: 'Subject',
+      none_delayed: 'No delayed requests. Everything is on schedule.', none_pending: 'No pending requests. All requests have been reviewed.',
+      none_match: 'No matching records.', none_acc: 'No matching accounts.', none_cmp: 'No complaints match these filters.',
+      delayed_req: 'Delayed request', reported_by: 'Reported by', patient_l: 'Patient', what: 'What happened',
+      mark: 'Mark as handled', new_doc: 'New doctor', cancel: 'Cancel', close: 'Close',
+      reassign_t: id => `Reassign ${id}`, current: d => `Currently assigned to ${d}.`, not_assigned: 'Not assigned',
+      reassigned_ok: (id, d) => `${id} reassigned to ${d}.`, handled_ok: 'Marked as handled.',
+      approved_ok: n => `${n} approved. They can now log in.`, rejected_ok: n => `${n} rejected. The reason was saved.`,
+      reject_t: n => `Reject ${n}`, reject_s: 'The applicant will see this reason and can submit a new request.', reject_r: 'Rejection reason', required: 'This field is required.',
+      delete_t: n => `Delete ${n}?`, delete_s: 'This permanently removes the account and blocks future logins with these credentials.', delete_b: 'Delete account', deleted_ok: 'Account deleted.',
+      your_reply: 'Your reply', send: 'Send reply', write_first: 'Write a reply or change the status first.', sent_ok: 'Reply sent.', status_ok: 'Status updated.',
+      admin: 'Admin', ev: { assigned: 'Assigned to', reassigned: 'Reassigned to', approved: 'Approved by' },
+      reported_ev: (by, src) => `Delay reported by ${by} (${src}).`, handled_ev: 'Marked as handled.',
+      net: 'Could not reach the server.', fail: 'Something went wrong: ', none_dash: '-', review: 'Review', see_all: 'See all', showing: (a, b) => `Showing ${a} of ${b}`
+    },
+    ar: {
+      s_delayed: 'الطلبات المتأخرة', s_licenses: 'طلبات التراخيص المعلّقة', s_complaints: 'الشكاوى العامة',
+      open: 'فتح',
+      doctor: 'طبيب', radiologist: 'أخصائي أشعة', patient: 'مريض',
+      pending: 'قيد الانتظار', handled: 'تمت المعالجة', investigating: 'قيد المتابعة', resolved: 'تم الحل', openst: 'مفتوحة',
+      approved: 'مقبول', rejected: 'مرفوض',
+      all_sources: 'كل المصادر', all_status: 'كل الحالات', all_roles: 'كل الأدوار', all_decisions: 'كل القرارات', all_about: 'كل المواضيع',
+      k_report: 'شيء في أحد التقارير', k_site: 'مشكلة في الموقع', k_other: 'شيء آخر',
+      search_case: 'ابحث برقم الحالة أو الطبيب', search_name: 'ابحث بالاسم أو رقم هيئة التخصصات', search_app: 'ابحث عن مقدّم الطلب', search_cmp: 'ابحث بالموضوع أو الاسم',
+      from: 'من', to: 'إلى',
+      c_pending: 'الطلبات المعلّقة', c_history: 'سجل القرارات', c_accounts: 'الحسابات النشطة',
+      case: 'الحالة', source: 'المصدر', doctor_l: 'الطبيب المسؤول', submitted: 'تاريخ التقديم', delay: 'مدة التأخير', status: 'الحالة',
+      reassign: 'إعادة إسناد', view: 'عرض', approve: 'قبول', reject: 'رفض', del: 'حذف', respond: 'عرض والرد',
+      applicant: 'مقدّم الطلب', role: 'الدور', scfhs: 'رقم ملف هيئة التخصصات', nid: 'الهوية / الإقامة', email: 'البريد الإلكتروني', phone: 'الجوال',
+      decision: 'القرار', reason: 'السبب', date: 'التاريخ', name: 'الاسم', approved_on: 'تاريخ القبول',
+      ticket: 'الشكوى', complainant: 'مقدّم الشكوى', about: 'الموضوع', subject: 'العنوان',
+      none_delayed: 'لا توجد طلبات متأخرة. كل شيء في موعده.', none_pending: 'لا توجد طلبات معلّقة. تمت مراجعة كل الطلبات.',
+      none_match: 'لا توجد سجلات مطابقة.', none_acc: 'لا توجد حسابات مطابقة.', none_cmp: 'لا توجد شكاوى مطابقة لهذه التصفية.',
+      delayed_req: 'طلب متأخر', reported_by: 'أبلغ عنه', patient_l: 'المريض', what: 'ماذا حدث',
+      mark: 'تعليم كمعالَج', new_doc: 'الطبيب الجديد', cancel: 'إلغاء', close: 'إغلاق',
+      reassign_t: id => `إعادة إسناد ${id}`, current: d => `مُسندة حاليًا إلى ${d}.`, not_assigned: 'غير مُسندة',
+      reassigned_ok: (id, d) => `تمت إعادة إسناد ${id} إلى ${d}.`, handled_ok: 'تم تعليمها كمعالَجة.',
+      approved_ok: n => `تم قبول ${n}. يمكنه الآن تسجيل الدخول.`, rejected_ok: n => `تم رفض ${n}. حُفظ السبب.`,
+      reject_t: n => `رفض ${n}`, reject_s: 'سيرى مقدّم الطلب هذا السبب ويمكنه تقديم طلب جديد.', reject_r: 'سبب الرفض', required: 'هذا الحقل مطلوب.',
+      delete_t: n => `حذف ${n}؟`, delete_s: 'سيُحذف الحساب نهائيًا ولن يتمكن من تسجيل الدخول بهذه البيانات.', delete_b: 'حذف الحساب', deleted_ok: 'تم حذف الحساب.',
+      your_reply: 'ردّك', send: 'إرسال الرد', write_first: 'اكتب ردًا أو غيّر الحالة أولًا.', sent_ok: 'تم إرسال الرد.', status_ok: 'تم تحديث الحالة.',
+      admin: 'المشرف', ev: { assigned: 'أُسندت إلى', reassigned: 'أُعيد إسنادها إلى', approved: 'اعتمدها' },
+      reported_ev: (by, src) => `أبلغ عن التأخير ${by} (${src}).`, handled_ev: 'تم تعليمها كمعالَجة.',
+      net: 'تعذّر الوصول إلى الخادم.', fail: 'حدث خطأ: ', none_dash: '-', review: 'مراجعة', see_all: 'عرض الكل', showing: (a, b) => `عرض ${a} من ${b}`
+    }
+  }[AR ? 'ar' : 'en'];
+  const T = TXT;
+
+  const fmt = t => t ? new Date(t).toLocaleDateString(AR ? 'ar-SA-u-ca-gregory' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+  const H = 36e5, hrs = t => Math.max(0, Math.floor((Date.now() - t) / H));
+  const dur = t => { const h = hrs(t), d = Math.floor(h / 24); return AR ? (h >= 24 ? `${d} يوم ${h % 24} س` : `${h} س`) : (h >= 24 ? `${d}d ${h % 24}h` : `${h}h`); };
+  const ts = v => (v ? Date.parse(v) : 0);
+  const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
+  // ---------------------------------------------------------------- status -> tag colour (same tags as the other pages)
+  const DST = { pending: ['pending', 'tag-wait'], handled: ['handled', 'tag-done'] };
+  const CST = { open: ['openst', 'tag-wait'], investigating: ['investigating', 'tag-info'], resolved: ['resolved', 'tag-done'] };
+  const tag = (txt, cls) => `<span class="tag ${cls}">${esc(txt)}</span>`;
+  const roleTag = r => tag(T[r] || r, 'tag-role');
+  const kindOf = s => /report/i.test(s) ? 'report' : /site/i.test(s) ? 'site' : 'other';
+
+  // ---------------------------------------------------------------- talking to the server
+  function toast(m) { const t = $('#toast'); t.innerHTML = `<span>${esc(m)}</span>`; clearTimeout(toast.id); toast.id = setTimeout(() => { t.innerHTML = ''; }, 3500); }
+  async function api(url, method = 'GET', body) {
+    let res;
+    try { res = await fetch(url, { method, credentials: 'same-origin', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined }); }
+    catch (e) { toast(T.net); return null; }
+    if (res.status === 401 || res.status === 403) { location.href = '/login'; return null; }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) { toast(T.fail + (data.error || res.status)); return null; }
+    return data;
+  }
+
+  const DB = { delayed: [], pending: [], history: [], accounts: [], cmp: [], summary: { delayed: 0, licenses: 0, complaints: 0 } };
+  const LOAD = {
+    async summary() { const d = await api('/api/admin/summary'); if (d) DB.summary = d; },
+    async delayed() {
+      const d = await api('/api/admin/delayed'); if (!d) return;
+      DB.delayed = d.delayed.map(r => {
+        const log = r.log.map(e => ({ t: ts(e.created_at), txt: `${T.ev[e.event_type] || e.event_type} ${e.doctor_name || '-'}.` + (e.note ? ' ' + e.note : '') }));
+        log.push({ t: ts(r.reported_at), txt: T.reported_ev(r.raised_by, T[r.source] || r.source) });
+        if (r.handled_at) log.push({ t: ts(r.handled_at), txt: T.handled_ev });
+        return { id: String(r.delay_complaint_id), no: '#' + r.case_id, src: r.source, dr: r.doctor_name || '', at: ts(r.submitted_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
+      });
+    },
+    async pending() { const d = await api('/api/admin/requests'); if (d) DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, phone: r.phone, at: ts(r.created_at) })); },
+    async history() { const d = await api('/api/admin/decisions'); if (d) DB.history = d.decisions.map(r => ({ name: r.applicant_name, role: r.applicant_role, d: r.decision, why: r.reason || '', at: ts(r.decided_at) })); },
+    async accounts() { const d = await api('/api/admin/accounts'); if (d) DB.accounts = d.accounts.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, at: ts(r.approved_at) })); },
+    async complaints() { const d = await api('/api/admin/complaints'); if (d) DB.cmp = d.complaints.map(c => ({ id: String(c.complaint_id), no: '#' + c.complaint_id, who: c.complainant_role, name: c.complainant, sub: c.subject, kind: kindOf(c.subject), body: c.body, st: c.status, at: ts(c.created_at), th: c.replies.map(m => ({ t: ts(m.created_at), txt: m.body })) })); }
+  };
+  const reload = (...names) => Promise.all(names.map(n => LOAD[n]())).then(() => draw());
+
+  // ---------------------------------------------------------------- filters
+  const PAGE = document.body.dataset.page || 'home';
+  const S = { sub: PAGE === 'licenses' && location.hash === '#accounts' ? 'accounts' : 'pending', f: {} };
+  const SVG = {
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round"/></svg>',
+    go: '<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  const search = (f, ph) => `<label class="search">${SVG.search}<input data-f="${f}" type="search" placeholder="${esc(ph)}" aria-label="${esc(ph)}" value="${esc(S.f[f] || '')}"></label>`;
+  const sel = (f, opts, all) => `<select data-f="${f}" aria-label="${esc(all)}"><option value="">${esc(all)}</option>${opts.map(([v, l]) => `<option value="${v}"${S.f[f] === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+  const date = (f, ph) => `<input data-f="${f}" type="date" aria-label="${esc(ph)}" title="${esc(ph)}" value="${esc(S.f[f] || '')}">`;
+  const has = (txt, q) => !q || String(txt).toLowerCase().includes(q.toLowerCase());
+  const ROLES2 = [['doctor', T.doctor], ['radiologist', T.radiologist]];
+  const ROLES3 = [...ROLES2, ['patient', T.patient]];
+
+  const BAR = {
+    delayed: () => search('q', T.search_case) + sel('src', [['patient', T.patient], ['radiologist', T.radiologist]], T.all_sources) + sel('s', Object.entries(DST).map(([k, v]) => [k, T[v[0]]]), T.all_status),
+    licenses: () => [['pending', T.c_pending], ['history', T.c_history], ['accounts', T.c_accounts]].map(([k, l]) => `<button type="button" class="chip${S.sub === k ? ' is-on' : ''}" data-act="sub" data-id="${k}">${l}</button>`).join('') + '<span class="gap"></span>' +
+      (S.sub === 'pending' ? sel('r', ROLES2, T.all_roles) : '') +
+      (S.sub === 'history' ? search('q', T.search_app) + sel('d', [['approved', T.approved], ['rejected', T.rejected]], T.all_decisions) + date('from', T.from) + date('to', T.to) : '') +
+      (S.sub === 'accounts' ? search('q', T.search_name) + sel('r', ROLES2, T.all_roles) : ''),
+    complaints: () => search('q', T.search_cmp) + sel('w', ROLES3, T.all_roles) + sel('k', [['report', T.k_report], ['site', T.k_site], ['other', T.k_other]], T.all_about) + sel('s', Object.entries(CST).map(([k, v]) => [k, T[v[0]]]), T.all_status)
+  };
+
+  // ---------------------------------------------------------------- rows
+  const cell = (lbl, v, cls = '') => `<div class="cell ${cls}"><span class="lbl">${esc(lbl)}</span>${v.includes('class="tag') ? v : `<span class="val">${v}</span>`}</div>`;
+  const who = (title, sub, avatar) => `<div class="who"><span class="avatar">${esc(avatar)}</span><div><strong>${esc(title)}</strong><p>${esc(sub)}</p></div></div>`;
+  const btn = (act, id, label, cls) => `<button type="button" class="btn btn-sm ${cls}" data-act="${act}" data-id="${esc(id)}">${esc(label)}</button>`;
+  const row = (cols, inner) => `<article class="card row a-row" style="--cols:${cols}">${inner}</article>`;
+  const empty = m => `<div class="empty"><h3>${esc(m)}</h3></div>`;
+
+  const RD = (r, acts) => row('minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) 90px 110px 200px',
+    who(`${T.case} ${r.no}`, r.pt || '', '#') +
+    cell(T.source, roleTag(r.src), 'hide-sm') + cell(T.doctor_l, esc(r.dr || T.not_assigned), 'hide-sm') + cell(T.submitted, fmt(r.at), 'hide-sm') +
+    cell(T.delay, tag(dur(r.at), r.st === 'handled' ? 'tag-role' : hrs(r.at) > 48 ? 'tag-bad' : 'tag-wait'), 'hide-sm') + cell(T.status, tag(T[DST[r.st][0]], DST[r.st][1])) + `<div class="acts">${acts}</div>`);
+  const RL = (r, acts) => row('minmax(0,1.5fr) 110px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 270px',
+    who(r.name, r.email, initials(r.name)) + cell(T.role, roleTag(r.role), 'hide-sm') + cell(T.scfhs, esc(r.scfhs), 'hide-sm') + cell(T.nid, esc(r.nid), 'hide-sm') + cell(T.submitted, fmt(r.at), 'hide-sm') + `<div class="acts">${acts}</div>`);
+  const RC = (c, acts) => row('minmax(0,2fr) minmax(0,1.3fr) minmax(0,1.1fr) 120px minmax(0,1fr) 150px',
+    who(c.sub, `${T.ticket} ${c.no}`, '!') + cell(T.complainant, `${esc(c.name)}<br>${roleTag(c.who)}`, 'hide-sm') + cell(T.about, esc(T['k_' + c.kind]), 'hide-sm') + cell(T.status, tag(T[CST[c.st][0]], CST[c.st][1])) + cell(T.submitted, fmt(c.at), 'hide-sm') + `<div class="acts">${acts}</div>`);
+  const go = (href, label) => `<a class="btn btn-sm btn-dark" href="${href}">${esc(label)} <svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`;
+
+  const OUT = {
+    delayed() {
+      const f = S.f, list = DB.delayed.filter(r => (!f.src || r.src === f.src) && (!f.s || r.st === f.s) && has(r.no + r.dr, f.q)).sort((a, b) => (a.st === 'handled') - (b.st === 'handled') || a.at - b.at);   // pending first (oldest on top), handled at the bottom
+      return list.map(r => RD(r, (r.st === 'pending' ? btn('reas', r.id, T.reassign, 'btn-soft') : '') + btn('dview', r.id, T.view, 'btn-ghost'))).join('') || empty(T.none_delayed);
+    },
+    licenses() {
+      const f = S.f;
+      if (S.sub === 'pending') {
+        return DB.pending.filter(r => !f.r || r.role === f.r).sort((a, b) => a.at - b.at).map(r => RL(r, btn('lview', r.id, T.view, 'btn-ghost') + btn('appr', r.id, T.approve, 'btn-primary') + btn('rej', r.id, T.reject, 'btn-danger'))).join('') || empty(T.none_pending);
+      }
+      if (S.sub === 'history') {
+        return DB.history.filter(r => has(r.name, f.q) && (!f.d || r.d === f.d) && (!f.from || r.at >= new Date(f.from).getTime()) && (!f.to || r.at <= new Date(f.to).getTime() + 864e5 - 1)).sort((a, b) => b.at - a.at)
+          .map(r => row('minmax(0,1.4fr) 110px 110px minmax(0,1.6fr) minmax(0,1fr)',
+            who(r.name, '', initials(r.name)) + cell(T.role, roleTag(r.role), 'hide-sm') + cell(T.decision, tag(T[r.d], r.d === 'approved' ? 'tag-done' : 'tag-bad')) + cell(T.reason, esc(r.why || '-'), 'hide-sm') + cell(T.date, fmt(r.at), 'hide-sm'))).join('') || empty(T.none_match);
+      }
+      return DB.accounts.filter(r => has(r.name + r.scfhs, f.q) && (!f.r || r.role === f.r)).map(r => row('minmax(0,1.4fr) 110px minmax(0,1.2fr) minmax(0,1fr) 120px',
+        who(r.name, '', initials(r.name)) + cell(T.role, roleTag(r.role), 'hide-sm') + cell(T.scfhs, esc(r.scfhs), 'hide-sm') + cell(T.approved_on, fmt(r.at), 'hide-sm') +
+        `<div class="acts">${btn('del', r.id, T.del, 'btn-danger')}</div>`)).join('') || empty(T.none_acc);
+    },
+    complaints() {
+      const f = S.f;
+      return DB.cmp.filter(c => (!f.w || c.who === f.w) && (!f.k || c.kind === f.k) && (!f.s || c.st === f.s) && has(c.sub + c.name, f.q)).sort((a, b) => b.at - a.at)
+        .map(c => RC(c, btn('cview', c.id, T.respond, 'btn-soft'))).join('') || empty(T.none_cmp);
+    }
+  };
+
+  function draw(full = true) {
+    if (PAGE === 'home') {
+      const n = DB.summary;
+      const ico = {
+        delayed: ['', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/>'],
+        licenses: ['ok', '<path d="M12 3 4 6v6c0 4.4 3.4 8.3 8 9 4.6-.7 8-4.6 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m8.8 12.2 2.3 2.3 4.2-4.4" stroke-linecap="round" stroke-linejoin="round"/>'],
+        complaints: ['amber', '<path d="M4 14v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/><rect x="2.5" y="12.5" width="4.5" height="7.5" rx="2.2"/><rect x="17" y="12.5" width="4.5" height="7.5" rx="2.2"/>']
+      };
+      $('#stats').innerHTML = [['delayed', T.s_delayed, '/admin-delayed-requests'], ['licenses', T.s_licenses, '/admin-license-verification'], ['complaints', T.s_complaints, '/admin-complaints']]
+        .map(([k, l, href]) => `<a class="card stat" href="${href}"><span class="ico ${ico[k][0]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${ico[k][1]}</svg></span><div><strong>${n[k]}</strong><span>${l}</span></div>${SVG.go}</a>`).join('');
+      const sec = (title, total, shown, href, rows, none) => `<div class="sec-head"><h2>${title}</h2><span>${T.showing(shown, total)}</span>${total > shown ? `<a href="${href}">${T.see_all} ${AR ? '&larr;' : '&rarr;'}</a>` : ''}</div>` + (rows || empty(none));
+      const dl = DB.delayed.filter(r => r.st === 'pending').sort((a, b) => a.at - b.at), pl = [...DB.pending].sort((a, b) => a.at - b.at), cl = DB.cmp.filter(c => c.st !== 'resolved').sort((a, b) => a.at - b.at);
+      $('#home').innerHTML =
+        sec(T.s_delayed, dl.length, Math.min(3, dl.length), '/admin-delayed-requests', dl.slice(0, 3).map(r => RD(r, go('/admin-delayed-requests', T.review))).join(''), T.none_delayed) +
+        sec(T.s_licenses, pl.length, Math.min(3, pl.length), '/admin-license-verification', pl.slice(0, 3).map(r => RL(r, go('/admin-license-verification', T.review))).join(''), T.none_pending) +
+        sec(T.s_complaints, cl.length, Math.min(3, cl.length), '/admin-complaints', cl.slice(0, 3).map(c => RC(c, go('/admin-complaints', T.review))).join(''), T.none_cmp);
+      return;
+    }
+    if (full) $('#bar').innerHTML = BAR[PAGE]();
+    $('#list').innerHTML = OUT[PAGE]();
+  }
+
+  // ---------------------------------------------------------------- dialog + panel
+  const dlg = $('#dlg'), panel = $('#panel');
+  function ask({ title, text = '', ok, danger, field, opts, req }, cb) {
+    dlg.innerHTML = `<form method="dialog"><h3>${esc(title)}</h3><p class="sub">${esc(text)}</p>${field ? `<div class="field"><label>${esc(field)}</label>${opts ? `<select name="v">${opts.map(o => `<option>${esc(o)}</option>`).join('')}</select>` : '<textarea name="v" rows="3"></textarea>'}<p class="err" hidden>${T.required}</p></div>` : ''}<div class="dlg-actions"><button type="button" class="btn btn-ghost btn-sm" data-close>${T.cancel}</button><button class="btn btn-sm ${danger ? 'btn-danger' : 'btn-primary'}">${esc(ok)}</button></div></form>`;
+    const f = $('form', dlg);
+    f.onsubmit = e => { e.preventDefault(); const v = f.v ? f.v.value.trim() : ''; if (req && !v) { $('.err', dlg).hidden = false; return; } dlg.close(); cb(v); };
+    $('[data-close]', dlg).onclick = () => dlg.close();
+    dlg.showModal();
+  }
+  function openPanel(title, html) {
+    panel.innerHTML = `<header><h2>${esc(title)}</h2><button type="button" class="x-btn" data-act="pclose" aria-label="${T.close}">${SVG.x}</button></header><div class="panel-body">${html}</div>`;
+    if (!panel.open) panel.showModal();
+  }
+  const kv = o => `<dl class="kv">${Object.entries(o).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
+  const by = (arr, id) => arr.find(x => x.id === id);
+
+  async function decide(r, d, why = '') {
+    const res = await api(`/api/admin/requests/${r.id}/${d === 'approved' ? 'approve' : 'reject'}`, 'POST', d === 'rejected' ? { reason: why } : {});
+    if (!res) return;
+    toast(d === 'approved' ? T.approved_ok(r.name) : T.rejected_ok(r.name));
+    panel.open && panel.close(); reload('pending', 'history', 'accounts');
+  }
+  function openDelayed(id) {
+    const r = by(DB.delayed, id);
+    openPanel(`${T.delayed_req} ${r.no}`, kv({ [T.source]: T[r.src] || r.src, [T.reported_by]: r.by, [T.patient_l]: r.pt, [T.doctor_l]: r.dr || T.not_assigned, [T.submitted]: fmt(r.at), [T.delay]: dur(r.at), [T.status]: T[DST[r.st][0]] }) +
+      `<h3 class="sub-h">${T.what}</h3>${[...r.log].reverse().map(m => `<div class="msg"><small>${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}` +
+      (r.st === 'pending' ? `<div class="panel-actions">${btn('dhandled', r.id, T.mark, 'btn-primary')}</div>` : ''));
+  }
+  function openComplaint(id) {
+    const c = by(DB.cmp, id);
+    openPanel(`${T.ticket} ${c.no}`, kv({ [T.subject]: c.sub, [T.complainant]: `${c.name} (${T[c.who] || c.who})`, [T.status]: T[CST[c.st][0]], [T.submitted]: fmt(c.at) }) +
+      `<div class="msg">${esc(c.body)}</div>${c.th.map(m => `<div class="msg admin"><small>${T.admin} · ${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}
+      <div class="field"><label>${T.status}</label><select id="c-st">${Object.entries(CST).map(([k, v]) => `<option value="${k}"${k === c.st ? ' selected' : ''}>${T[v[0]]}</option>`).join('')}</select></div>
+      <div class="field"><label>${T.your_reply}</label><textarea id="c-txt" rows="4"></textarea><p class="err" hidden>${T.write_first}</p></div>
+      <div class="panel-actions">${btn('reply', c.id, T.send, 'btn-primary')}</div>`);
+  }
+
+  const A = {
+    sub: id => { S.sub = id; S.f = {}; draw(); },
+    pclose: () => panel.close(),
+    reas: async id => {
+      const r = by(DB.delayed, id), d = await api('/api/admin/doctors'); if (!d) return;
+      const docs = d.doctors.filter(x => x.full_name !== r.dr);
+      ask({ title: T.reassign_t(r.no), text: T.current(r.dr || T.not_assigned), ok: T.reassign, field: T.new_doc, opts: docs.map(x => x.full_name) }, async v => {
+        const doc = docs.find(x => x.full_name === v); if (!doc) return;
+        if (await api(`/api/admin/delayed/${id}/reassign`, 'POST', { doctor_id: doc.user_id })) { toast(T.reassigned_ok(r.no, v)); reload('delayed'); }
+      });
+    },
+    dview: id => openDelayed(id),
+    dhandled: async id => { if (await api(`/api/admin/delayed/${id}/handled`, 'POST', {})) { toast(T.handled_ok); await LOAD.delayed(); openDelayed(id); draw(false); } },
+    lview: id => {
+      const r = by(DB.pending, id);
+      openPanel(r.name, kv({ [T.role]: T[r.role] || r.role, [T.scfhs]: r.scfhs, [T.nid]: r.nid, [T.email]: r.email, [T.phone]: r.phone, [T.submitted]: fmt(r.at) }) +
+        `<div class="panel-actions">${btn('appr', id, T.approve, 'btn-primary')}${btn('rej', id, T.reject, 'btn-danger')}</div>`);
+    },
+    appr: id => decide(by(DB.pending, id), 'approved'),
+    rej: id => { const r = by(DB.pending, id); ask({ title: T.reject_t(r.name), text: T.reject_s, ok: T.reject, danger: true, field: T.reject_r, req: true }, v => decide(r, 'rejected', v)); },
+    del: id => { const r = by(DB.accounts, id); ask({ title: T.delete_t(r.name), text: T.delete_s, ok: T.delete_b, danger: true }, async () => { if (await api(`/api/admin/accounts/${id}`, 'DELETE')) { toast(T.deleted_ok); reload('accounts'); } }); },
+    cview: openComplaint,
+    reply: async id => {
+      const c = by(DB.cmp, id), txt = $('#c-txt', panel).value.trim(), st = $('#c-st', panel).value;
+      if (!txt && st === c.st) { $('.err', panel).hidden = false; return; }
+      if (await api(`/api/admin/complaints/${id}/respond`, 'POST', { status: st, reply: txt })) { toast(txt ? T.sent_ok : T.status_ok); await LOAD.complaints(); openComplaint(id); draw(false); }
+    }
+  };
+
+  document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && A[b.dataset.act]) A[b.dataset.act](b.dataset.id); });
+  document.addEventListener('input', e => { const f = e.target.dataset.f; if (f) { S.f[f] = e.target.value; draw(false); } });
+  draw();
+  reload(...({ home: ['summary', 'delayed', 'pending', 'complaints'], delayed: ['delayed'], licenses: ['pending', 'history', 'accounts'], complaints: ['complaints'] }[PAGE]));
+})();

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+{% set ar = lang == "ar" %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ "الطلبات المتأخرة" if ar else "Delayed requests" }}</title>
+  {% include "_new-head.html" %}
+  <link rel="stylesheet" href="/static/NewCss/admin.css?v=4" />
+</head>
+
+<body data-page="delayed">
+
+  {% set rail_role = "admin" %}{% set nav_active = "delayed" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>{{ 'الطلبات المتأخرة' if ar else 'Delayed requests' }}</h1>
+          <p>{{ 'بلاغات التأخير من المرضى وأخصائيي الأشعة. أعد إسناد الحالة إلى طبيب آخر أو علّمها كمعالَجة.' if ar else 'Delay reports from patients and radiologists. Move the case to another doctor, or mark it as handled.' }}</p>
+        </div>
+      </div>
+
+      <div class="filters" id="bar"></div>
+      <div class="a-list" id="list"></div>
+
+      {% include "admin/_foot.html" %}
+    </div>
+  </main>
+
+  {% include "admin/_end.html" %}
+</body>
+
+</html>
