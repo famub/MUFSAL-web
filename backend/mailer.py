@@ -3,18 +3,30 @@
 Settings come from .env (see env.example). If SMTP_HOST is not set, nothing is sent and the
 reset link is only printed in the server window (and shown on the page when DEV_LOGIN=1).
 
-Works with any SMTP service. For Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587 and an
-"App password" (Google account -> Security -> 2-Step Verification -> App passwords) as SMTP_PASSWORD.
+Two ways to send (the first one that is set up is used):
+ 1. BREVO_API_KEY (+ MAIL_FROM)  - sends over HTTPS. Use this on Render's free plan, which blocks SMTP.
+ 2. SMTP_HOST ...                - any SMTP service. For Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587 and an
+    "App password" (Google account -> Security -> 2-Step Verification -> App passwords) as SMTP_PASSWORD.
 """
+import json
 import os
 import smtplib
 import ssl
 import threading
+import urllib.request
 from email.message import EmailMessage
 
 
+def _use_api():
+    return bool(os.getenv("BREVO_API_KEY") and (os.getenv("MAIL_FROM") or os.getenv("SMTP_FROM") or os.getenv("SMTP_USER")))
+
+
 def is_configured():
-    return bool(os.getenv("SMTP_HOST") and (os.getenv("SMTP_FROM") or os.getenv("SMTP_USER")))
+    return _use_api() or bool(os.getenv("SMTP_HOST") and (os.getenv("SMTP_FROM") or os.getenv("SMTP_USER")))
+
+
+def _sender():
+    return os.getenv("MAIL_FROM") or os.getenv("SMTP_FROM") or os.getenv("SMTP_USER")
 
 
 def app_url():
@@ -23,7 +35,7 @@ def app_url():
 
 
 def build_reset_message(to_email, name, link):
-    sender = os.getenv("SMTP_FROM") or os.getenv("SMTP_USER")
+    sender = _sender()
     msg = EmailMessage()
     msg["Subject"] = "MUFSAL - Reset your password | إعادة تعيين كلمة المرور"
     msg["From"] = f"MUFSAL <{sender}>"
@@ -45,7 +57,30 @@ def build_reset_message(to_email, name, link):
     return msg
 
 
+def _send_api(msg):
+    """Send through Brevo's HTTPS API (no SMTP port needed)."""
+    to_email = msg["To"]
+    sender = _sender()
+    body = {
+        "sender": {"name": "MUFSAL", "email": sender},
+        "to": [{"email": to_email}],
+        "subject": msg["Subject"],
+        "textContent": msg.get_content(),
+    }
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(body).encode("utf-8"),
+        headers={"api-key": os.getenv("BREVO_API_KEY"), "content-type": "application/json",
+                 "accept": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        resp.read()
+
+
 def _send(msg):
+    if _use_api():
+        return _send_api(msg)
     host = os.getenv("SMTP_HOST")
     port = int(os.getenv("SMTP_PORT") or 587)
     security = (os.getenv("SMTP_SECURITY") or ("ssl" if port == 465 else "starttls")).lower()
