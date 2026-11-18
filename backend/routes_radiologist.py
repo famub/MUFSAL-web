@@ -122,7 +122,9 @@ async def submit(request: Request):
     stored.write_bytes(data)
 
     history = dict(answers)
-    history["medications"] = history["medications"] or "-"
+    # The question is optional, so "nothing written" is stored as NULL. The dash
+    # belongs on the page that reads it, not in the column.
+    history["medications"] = history["medications"] or None
     try:
         case_id = create_case(
             patient_id=patient["patientId"],

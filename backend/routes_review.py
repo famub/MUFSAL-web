@@ -97,7 +97,7 @@ def history_sections(history, lang):
             (t["h_prior"], t["yes_no"][history["prior_injury"]]),
         ]),
         (t["sec_other"], [
-            (t["h_medications"], history["medications"]),
+            (t["h_medications"], history["medications"] or "-"),
             (t["h_other"], history["other_symptoms"] or "-"),
         ]),
     ]

@@ -2,6 +2,19 @@
 from db import get_connection
 
 
+def _yes_no(value):
+    """The upload form sends 'yes' or 'no'; the two columns are BOOLEAN.
+
+    Translating here keeps the forms, their templates and their texts working
+    with the words the patient sees, while the database stores a real true or
+    false it can filter and count on. A value that is already a boolean, as the
+    tests send, passes through unchanged.
+    """
+    if isinstance(value, str):
+        return value == "yes"
+    return bool(value)
+
+
 def _pick_doctor(conn):
     """Return the approved doctor with the fewest open cases."""
     row = conn.execute(
@@ -49,7 +62,7 @@ def create_case(patient_id, uploaded_by, source, xray_image_path, history):
             (case["case_id"],
              history["medications"],
              history["knee"],
-             history["pain_with_use"],
+             _yes_no(history["pain_with_use"]),
              history["stiffness_duration"],
              history["stairs_pain"],
              history["rising_difficulty"],
@@ -61,7 +74,7 @@ def create_case(patient_id, uploaded_by, source, xray_image_path, history):
              history.get("other_symptoms"),
              history["height_cm"],
              history["weight_kg"],
-             history["prior_injury"]),
+             _yes_no(history["prior_injury"])),
         )
 
         if doctor_id is not None:

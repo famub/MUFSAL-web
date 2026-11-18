@@ -65,7 +65,8 @@ TEXT = {
         "sec_risk": "Risk factors",
         "sec_other": "Medications and other symptoms",
         "knee": {"right": "Right", "left": "Left"},
-        "yes_no": {"yes": "Yes", "no": "No"},
+        # keyed by the BOOLEAN the column holds, not by the word the form sent
+        "yes_no": {True: "Yes", False: "No"},
         "stiffness": {"none": "No stiffness", "le30": "30 minutes or less", "gt30": "More than 30 minutes"},
         "severity": {"none": "None", "mild": "Mild", "moderate": "Moderate", "severe": "Severe", "extreme": "Extreme"},
         "warnings": {
@@ -145,7 +146,8 @@ TEXT = {
         "sec_risk": "عوامل الخطر",
         "sec_other": "الأدوية وأعراض أخرى",
         "knee": {"right": "اليمنى", "left": "اليسرى"},
-        "yes_no": {"yes": "نعم", "no": "لا"},
+        # keyed by the BOOLEAN the column holds, not by the word the form sent
+        "yes_no": {True: "نعم", False: "لا"},
         "stiffness": {"none": "لا يوجد تيبّس", "le30": "30 دقيقة أو أقل", "gt30": "أكثر من 30 دقيقة"},
         "severity": {"none": "لا يوجد", "mild": "خفيف", "moderate": "متوسط", "severe": "شديد", "extreme": "شديد جداً"},
         "warnings": {

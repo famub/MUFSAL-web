@@ -70,9 +70,10 @@ COMMENT ON COLUMN cases.xray_image_path IS
 
 CREATE TABLE case_history (
     case_id                 INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
-    medications             TEXT         NOT NULL,
+    -- the question is optional, so nothing written is NULL, not a dash
+    medications             TEXT,
     knee                    VARCHAR(10)  NOT NULL,
-    pain_with_use           VARCHAR(3)   NOT NULL,
+    pain_with_use           BOOLEAN      NOT NULL,
     stiffness_duration      VARCHAR(10)  NOT NULL,
     stairs_pain             VARCHAR(10)  NOT NULL,
     rising_difficulty       VARCHAR(10)  NOT NULL,
@@ -84,13 +85,13 @@ CREATE TABLE case_history (
     other_symptoms          TEXT,
     height_cm               SMALLINT     NOT NULL,
     weight_kg               NUMERIC(5,2) NOT NULL,
-    prior_injury            VARCHAR(3)   NOT NULL,
+    prior_injury            BOOLEAN      NOT NULL,
     CONSTRAINT history_knee_valid CHECK (knee IN ('right','left')),
-    CONSTRAINT history_pain_with_use_valid CHECK (pain_with_use IN ('yes','no')),
+    -- pain_with_use and prior_injury need no CHECK: BOOLEAN already allows
+    -- nothing but true and false, the same as the five warning_* columns.
     CONSTRAINT history_stiffness_valid CHECK (stiffness_duration IN ('none','le30','gt30')),
     CONSTRAINT history_stairs_valid CHECK (stairs_pain IN ('none','mild','moderate','severe','extreme')),
     CONSTRAINT history_rising_valid CHECK (rising_difficulty IN ('none','mild','moderate','severe','extreme')),
-    CONSTRAINT history_prior_injury_valid CHECK (prior_injury IN ('yes','no')),
     CONSTRAINT history_height_range CHECK (height_cm BETWEEN 100 AND 250),
     CONSTRAINT history_weight_range CHECK (weight_kg BETWEEN 20 AND 400)
 );
