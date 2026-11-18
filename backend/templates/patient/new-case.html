@@ -105,6 +105,8 @@
             </div>
           </div>
 
+          <p class="err step-err" role="alert" hidden></p>
+
           <div class="nav-btns">
             <button class="btn-next" type="button" data-go="2">
               Next
@@ -195,6 +197,8 @@
             </div>
           </div>
 
+          <p class="err step-err" role="alert" hidden></p>
+
           <div class="nav-btns">
             <button class="btn-back" type="button" data-go="1">Back</button>
             <button class="btn-next" type="button" data-go="3">
@@ -257,8 +261,76 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    /* A step the person has not finished does not let them go forward. The
+       server checks everything again when the case is sent; this only saves
+       them from reaching the summary and reading "Not answered" there.
+       Going back is always allowed. */
+
+    const NEEDED = {
+      1: ['knee'],
+      2: ['pain_with_use', 'stiffness_duration', 'stairs_pain',
+          'rising_difficulty', 'height_cm', 'weight_kg', 'prior_injury']
+    };
+
+    let current = Number((steps.find(function (s) { return s.classList.contains('is-on'); })
+                          || steps[0]).dataset.step);
+
+    function whatIsMissing(step) {
+      const data = new FormData(form);
+      const missing = NEEDED[step].filter(function (name) {
+        return !String(data.get(name) || '').trim();
+      });
+      if (step === 1 && !file.files[0]) missing.unshift('xray');
+      if (step === 2 && !none.checked && !signs.some(function (c) { return c.checked; })) {
+        missing.push('warnings');
+      }
+      return missing;
+    }
+
+    function boxFor(name) {
+      if (name === 'xray') return drop;
+      if (name === 'warnings') return none.closest('.q');
+      const field = form.querySelector('[name="' + name + '"]');
+      return field ? field.closest('.q') : null;
+    }
+
+    function stepIsDone(step) {
+      if (!NEEDED[step]) return true;
+      const section = document.querySelector('.step[data-step="' + step + '"]');
+      const note = section.querySelector('.step-err');
+      section.querySelectorAll('.q.bad').forEach(function (q) { q.classList.remove('bad'); });
+
+      const missing = whatIsMissing(step);
+      if (!missing.length) { note.hidden = true; return true; }
+
+      let first = null;
+      missing.forEach(function (name) {
+        const box = boxFor(name);
+        if (!box) return;
+        if (box !== drop) box.classList.add('bad');
+        if (!first) first = box;
+      });
+      note.textContent = (missing.length === 1 && missing[0] === 'xray')
+        ? 'Please choose your X-ray before you go on.'
+        : 'Please answer the questions marked * before you go on.';
+      note.hidden = false;
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+
     document.querySelectorAll('[data-go]').forEach(function (btn) {
-      btn.addEventListener('click', function () { show(Number(btn.dataset.go)); });
+      btn.addEventListener('click', function () {
+        const target = Number(btn.dataset.go);
+        if (target > current && !stepIsDone(current)) return;
+        current = target;
+        show(target);
+      });
+    });
+
+    // once a question is answered it stops looking wrong
+    form.addEventListener('change', function (event) {
+      const q = event.target.closest && event.target.closest('.q');
+      if (q) q.classList.remove('bad');
     });
 
     /* ---------------- the X-ray ---------------- */
