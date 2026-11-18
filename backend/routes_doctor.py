@@ -85,18 +85,26 @@ def dashboard_doctor(request: Request):
     )
 
 
+SORTS = ("priority", "newest", "oldest")   # the "Sort by" list on /pending-cases
+
+
 @router.get("/pending-cases", include_in_schema=False)
-def all_pending(request: Request):
+def all_pending(request: Request, sort: str = "priority"):
     user_id, redirect = doctor_id_or_redirect(request)
     if redirect:
         return redirect
     lang = get_lang(request)
     t = DOCTOR_TEXT[lang]
+    if sort not in SORTS:            # anything typed in the address bar -> the default order
+        sort = "priority"
+    rows = pending_rows(user_id, lang)          # already most urgent first (priority, grade, confidence)
+    if sort != "priority":
+        rows.sort(key=lambda r: r["submitted_at"], reverse=(sort == "newest"))
     return templates.TemplateResponse(
         request, "doctor-cases.html",
         {**base_context(request, lang), "kind": "pending",
          "page_title": t["all_pending_title"], "page_sub": t["all_pending_sub"],
-         "pending": pending_rows(user_id, lang)},
+         "pending": rows, "sort": sort},
     )
 
 
