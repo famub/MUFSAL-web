@@ -62,7 +62,7 @@
       {% endcall %}
 
 {% else %}
-      {% call link('/dashboard-doctor', 'dashboard', 'لوحة التحكم' if ar else 'Dashboard') %}
+      {% call link('/dashboard-doctor', 'dashboard', 'الرئيسية' if ar else 'Home') %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
       {% endcall %}
       {% call link('/pending-cases', 'pending', 'الحالات المعلّقة' if ar else 'Pending cases', counts.get('pending')) %}
