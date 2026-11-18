@@ -25,7 +25,21 @@
       {% set rows = pending if kind == 'pending' else approved %}
       {% if rows %}
         <div class="toolbar">
-          <span class="count">{{ t.total.format(total=rows|length) }}</span>
+          <span class="count">{{ t.total.format(total=rows|length) }}</span> 
+          
+          {% if kind == 'pending' %}
+          <!-- Sort by: an ordinary form, the server sorts the list (?sort=priority|newest|oldest) -->
+          {% set ar = lang == 'ar' %}
+          <form class="sort" method="get" action="/pending-cases">
+            <label for="sort">{{ 'ترتيب حسب' if ar else 'Sort by' }}</label>
+            <select id="sort" name="sort" onchange="this.form.submit()">
+              <option value="priority" {{ 'selected' if sort == 'priority' }}>{{ 'الأولوية (الأعلى أولاً)' if ar else 'Priority (high first)' }}</option>
+              <option value="newest" {{ 'selected' if sort == 'newest' }}>{{ 'الأحدث أولاً' if ar else 'Newest first' }}</option>
+              <option value="oldest" {{ 'selected' if sort == 'oldest' }}>{{ 'الأقدم أولاً' if ar else 'Oldest first' }}</option>
+            </select>
+            <noscript><button type="submit" class="btn btn-soft btn-sm">{{ 'تطبيق' if ar else 'Apply' }}</button></noscript>
+          </form>
+          {% endif %}
           <label class="search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
             <input id="search" type="search" placeholder="{{ t.search_ph }}" aria-label="{{ t.search_ph }}" />
