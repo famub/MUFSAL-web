@@ -79,7 +79,8 @@ COMPLAINT_HINTS = {
     "site": "Upload failed, page not loading",
     "other": "Anything not listed here",
 }
-BODY_MAX = 600
+BODY_MAX_WORDS = 120     # the limit the person sees and the page counts
+BODY_MAX = 2000          # a safety net in characters, so nothing huge is posted
 
 # How a complaint's status is shown. 'open' and 'investigating' come from
 # the complaints table, 'pending' and 'handled' from delay complaints.
@@ -434,6 +435,7 @@ def complaints_page(request, user_id, form=None, errors=None, sent=False, status
             "errors": errors or {},
             "sent": sent,
             "body_max": BODY_MAX,
+            "body_max_words": BODY_MAX_WORDS,
             "complaints": complaint_rows(user_id),
         }),
         status_code=status_code,
@@ -483,8 +485,12 @@ async def send_complaint(request: Request):
     errors = {}
     if form["kind"] not in COMPLAINT_SUBJECTS:
         errors["kind"] = "Please choose what this is about."
-    if not form["body"] or len(form["body"]) > BODY_MAX:
-        errors["body"] = f"Please tell us what happened, in up to {BODY_MAX} characters."
+    words = len(form["body"].split())
+    if not form["body"]:
+        errors["body"] = "Please tell us what happened."
+    elif words > BODY_MAX_WORDS or len(form["body"]) > BODY_MAX:
+        errors["body"] = (f"Please keep it to {BODY_MAX_WORDS} words. "
+                          f"You have written {words}.")
 
     # the case must be one of this patient's own, or nothing at all
     case_id = None

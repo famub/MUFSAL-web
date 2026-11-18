@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MUFSAL — {{ t.c_page_title }}</title>
   {% include "_new-head.html" %}
-  <link rel="stylesheet" href="/static/NewCss/complaints.css?v=6" />
+  <link rel="stylesheet" href="/static/NewCss/complaints.css?v=7" />
 </head>
 
 <body>
@@ -76,10 +76,11 @@
             </div>
 
             <div class="field{{ ' bad' if errors.body }}">
-              <label for="body">{{ t.c_body }}</label>
+              <label for="body">{{ t.c_body }} <span class="req" aria-hidden="true">*</span></label>
               <textarea id="body" name="body" maxlength="{{ body_max }}"
+                        data-max-words="{{ body_max_words }}"
                         placeholder="{{ t.c_body_ph }}" required>{{ form.body }}</textarea>
-              <p class="counter"><span id="count">{{ form.body|length }}</span> / {{ body_max }}</p>
+              <p class="counter"><span id="count">{{ form.body.split()|length }}</span> / {{ body_max_words }} {{ t.c_words }}</p>
               {% if errors.body %}<p class="err" role="alert">{{ errors.body }}</p>{% endif %}
             </div>
 
@@ -166,11 +167,27 @@
   </main>
 
   <script>
-    // Counts what has been typed. Sending is an ordinary form submit, so the
-    // complaint is checked again on the server before it is saved.
+    // Counts the words typed. Sending is an ordinary form submit, so the
+    // complaint is counted again on the server before it is saved.
     const text = document.getElementById('body');
     const count = document.getElementById('count');
-    text.addEventListener('input', function () { count.textContent = text.value.length; });
+    const box = count.parentElement;
+    const max = Number(text.dataset.maxWords);
+
+    function countWords() {
+      const words = text.value.trim() ? text.value.trim().split(/\s+/).length : 0;
+      count.textContent = words;
+      box.classList.toggle('over', words > max);
+      return words;
+    }
+    text.addEventListener('input', countWords);
+    text.form.addEventListener('submit', function (event) {
+      if (countWords() > max) {
+        event.preventDefault();
+        text.focus();
+      }
+    });
+    countWords();
   </script>
 
 </body>

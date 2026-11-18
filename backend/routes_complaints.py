@@ -24,7 +24,8 @@ from texts_dashboard import DASHBOARD_TEXT
 router = APIRouter()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
-BODY_MAX = 2000
+BODY_MAX_WORDS = 120     # the limit the person sees and the page counts
+BODY_MAX = 2000          # a safety net in characters, so nothing huge is posted
 
 # What a complaint can be about. The key is what the form sends; the text
 # that is saved in complaints.subject is the English wording, so the admin
@@ -95,6 +96,7 @@ def render_complaints(request, user_id, form=None, errors=None,
             "errors": errors or {},
             "sent": sent,
             "body_max": BODY_MAX,
+            "body_max_words": BODY_MAX_WORDS,
         },
         status_code=status_code,
     )
@@ -122,8 +124,11 @@ def send_complaint(request: Request, kind: str = Form(""), case_id: str = Form("
     errors = {}
     if form["kind"] not in KINDS:
         errors["kind"] = t["c_err_kind"]
-    if not form["body"] or len(form["body"]) > BODY_MAX:
+    words = len(form["body"].split())
+    if not form["body"]:
         errors["body"] = t["c_err_body"]
+    elif words > BODY_MAX_WORDS or len(form["body"]) > BODY_MAX:
+        errors["body"] = t["c_err_body_long"].format(limit=BODY_MAX_WORDS, count=words)
 
     # the case has to be one this user actually works on, or none at all
     chosen_case = None

@@ -257,8 +257,12 @@ button { font: inherit; cursor: pointer; }
 /* two fields side by side */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-/* character counter under a textarea */
+/* word counter under a textarea; .over turns it red past the limit */
 .counter { text-align: end; font-size: .76rem; color: var(--grey); margin-top: 6px; }
+.counter.over { color: var(--red); font-weight: 600; }
+
+/* the star that marks a question the person has to answer */
+.req { color: var(--red); font-weight: 700; margin-inline-start: 3px; }
 
 /* ---------- radio cards: one choice, each with a line of explanation ---------- */
 
