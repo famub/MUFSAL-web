@@ -323,7 +323,13 @@
     document.querySelectorAll('[data-go]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const target = Number(btn.dataset.go);
-        if (target > current && !stepIsDone(current)) return;
+        // going forward: every step being skipped over has to be finished too
+        for (let n = current; n < target; n++) {
+          if (!stepIsDone(n)) {
+            if (n !== current) { current = n; show(n); }
+            return;
+          }
+        }
         current = target;
         show(target);
       });
