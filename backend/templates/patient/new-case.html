@@ -178,8 +178,8 @@
 
           <div class="q{{ ' bad' if 'medications' in errors }}">
             <label for="meds">Medicines you take for the knee</label>
-            <input class="in" type="text" id="meds" name="medications" maxlength="500" value="{{ a.medications }}"
-              placeholder="For example: paracetamol when needed &mdash; or write None" />
+            <textarea class="in" id="meds" name="medications" maxlength="500"
+              placeholder="For example: paracetamol when needed &mdash; or leave it empty">{{ a.medications }}</textarea>
           </div>
 
           <div class="q{{ ' bad' if 'height_cm' in errors or 'weight_kg' in errors }}">
@@ -323,13 +323,7 @@
     document.querySelectorAll('[data-go]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const target = Number(btn.dataset.go);
-        // going forward: every step being skipped over has to be finished too
-        for (let n = current; n < target; n++) {
-          if (!stepIsDone(n)) {
-            if (n !== current) { current = n; show(n); }
-            return;
-          }
-        }
+        if (target > current && !stepIsDone(current)) return;
         current = target;
         show(target);
       });
