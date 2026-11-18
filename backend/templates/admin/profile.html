@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+{% set ar = lang == "ar" %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ "ملفي الشخصي" if ar else "My profile" }}</title>
+  {% include "_new-head.html" %}
+  <!-- the same stylesheet as the patient's profile -->
+  <link rel="stylesheet" href="/static/NewCss/profile-patient.css?v=6" />
+</head>
+
+<body>
+
+  {% set rail_role = "admin" %}{% set nav_active = "profile" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>{{ 'ملفي الشخصي' if ar else 'My Profile' }}</h1>
+          <p>{{ 'أدِر بيانات حسابك وأمان حساب المشرف.' if ar else 'Manage your account details and the security of this administrator account.' }}</p>
+        </div>
+      </div>
+
+      {% if saved %}
+      <p class="saved show">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        {{ 'تم حفظ بياناتك.' if ar else 'Your details have been saved.' }}
+      </p>
+      {% endif %}
+
+      <!-- ---------- card 1: account information ----------
+           MUFSAL has one kind of administrator, so the role is fixed.
+           Only the name, the email and the phone number can be edited. -->
+      <form method="post" action="/profile-admin" novalidate>
+        <section class="card{{ ' editing' if errors }}" id="contact-card">
+          <div class="card-head">
+            <div>
+              <h2>{{ 'معلومات الحساب' if ar else 'Account Information' }}</h2>
+            </div>
+            <button class="btn-edit" type="button" data-edit="contact-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 112.8 2.8L11.8 15H9v-2.8l8.6-8.6z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              {{ 'تعديل الملف' if ar else 'Edit Profile' }}
+            </button>
+          </div>
+
+          <div class="grid">
+            <div class="field{{ ' bad' if errors.full_name }}">
+              <label for="name">{{ 'الاسم الكامل' if ar else 'Full Name' }}</label>
+              <input type="text" id="name" name="full_name" value="{{ form.full_name }}" maxlength="100" {% if not errors %}disabled{% endif %} />
+              {% if errors.full_name %}<p class="err">{{ errors.full_name }}</p>{% endif %}
+            </div>
+
+            <!-- the role never changes -->
+            <div class="field locked">
+              <label for="role">{{ 'دور الحساب' if ar else 'Account Role' }}</label>
+              <input type="text" id="role" value="{{ 'مشرف' if ar else 'Administrator' }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+
+            <div class="field{{ ' bad' if errors.email }}">
+              <label for="email">{{ 'البريد الإلكتروني' if ar else 'Email Address' }}</label>
+              <input type="text" inputmode="email" id="email" name="email" value="{{ form.email }}" maxlength="255" {% if not errors %}disabled{% endif %} />
+              {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
+            </div>
+
+            <div class="field{{ ' bad' if errors.phone }}">
+              <label for="phone">{{ 'رقم الجوال' if ar else 'Phone Number' }}</label>
+              <input type="tel" id="phone" name="phone" value="{{ form.phone }}" maxlength="12" placeholder="966XXXXXXXXX" {% if not errors %}disabled{% endif %} />
+              {% if errors.phone %}<p class="err">{{ errors.phone }}</p>{% endif %}
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-save" type="submit">{{ 'حفظ التغييرات' if ar else 'Save Changes' }}</button>
+            <a class="btn-cancel" href="/profile-admin">{{ 'إلغاء' if ar else 'Cancel' }}</a>
+          </div>
+        </section>
+      </form>
+
+      <!-- ---------- card 2: security ----------
+           This account can approve professionals and delete any user, so its
+           password matters more than anyone else's. The real password is never
+           shown. "Change password" uses the same reset-link page as everyone. -->
+      <section class="card" id="security-card">
+        <div class="card-head">
+          <div>
+            <h2>{{ 'الأمان' if ar else 'Security' }}</h2>
+            <p>{{ 'هذا الحساب يقبل المهنيين ويحذف المستخدمين، فاجعل كلمة مروره قوية.' if ar else 'This account can approve professionals and remove users, so keep its password strong.' }}</p>
+          </div>
+          <a class="btn-edit" href="/forgot-password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            {{ 'تغيير كلمة المرور' if ar else 'Change Password' }}
+          </a>
+        </div>
+
+        <div class="grid">
+          <div class="field locked">
+            <label for="password">{{ 'كلمة المرور' if ar else 'Password' }}</label>
+            <input type="text" id="password" value="••••••••••••" readonly disabled />
+            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+          </div>
+        </div>
+      </section>
+
+      {% include "admin/_foot.html" %}
+    </div>
+  </main>
+
+  <script>
+    // Edit mode: unlock the boxes that may be changed. Saving is an ordinary form submit, so the server has the last word.
+    const card = document.getElementById('contact-card');
+    const editable = () => [...card.querySelectorAll('.field:not(.locked) input')];
+    document.querySelector('[data-edit]').addEventListener('click', function () {
+      editable().forEach(f => { f.disabled = false; });
+      card.classList.add('editing');
+      editable()[0].focus();
+    });
+  </script>
+
+</body>
+
+</html>

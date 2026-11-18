@@ -4,17 +4,21 @@
     /admin-delayed-requests      delay complaints: reassign, mark as handled
     /admin-license-verification  doctor / radiologist requests, history, active accounts
     /admin-complaints            general complaints: reply and change the status
+    /profile-admin               the administrator's own details (name, email, phone)
 
 The data itself is loaded by static/js/admin-ui.js from /api/admin/... (routes_admin.py).
 A visitor who is not logged in goes to /login; another role goes to its own home page.
 """
 from pathlib import Path
 
+import re
+
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from auth_service import HOME
+from db import get_connection
 from routes_dashboard import get_lang
 
 router = APIRouter()
@@ -45,3 +49,94 @@ def make_page(name, template):
 
 for _name, _template in PAGES.items():
     make_page(_name, _template)
+
+
+# ------------------------------------------------------------------ the administrator's profile
+# Same shape as the patient's profile: name, email and phone can change, the role is locked.
+# (An administrator has no national ID or date of birth, and the phone number is optional.)
+
+EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")   # same rule as the old profile page
+ARABIC = re.compile(r"[\u0600-\u06FF]")
+PHONE_PATTERN = re.compile(r"^966[0-9]{9}$")
+
+ERR = {
+    "en": {"name": "Please write your full name.", "email": "Please enter a valid email address, for example name@example.com",
+           "email_ar": "Please write the email in English letters.",
+           "taken": "Another account already uses this email address.",
+           "phone": "The number starts with 966 and has 12 digits in all."},
+    "ar": {"name": "اكتب اسمك الكامل.", "email": "أدخل بريدًا إلكترونيًا صحيحًا، مثال: name@example.com",
+           "email_ar": "اكتب البريد الإلكتروني بأحرف إنجليزية.",
+           "taken": "يوجد حساب آخر يستخدم هذا البريد الإلكتروني.",
+           "phone": "يبدأ الرقم بـ 966 ويتكوّن من 12 رقمًا."},
+}
+
+
+def admin_or_redirect(request):
+    """(user_id, None) for a signed-in administrator, otherwise (None, a redirect)."""
+    role = request.session.get("role")
+    if request.session.get("user_id") is None or role is None:
+        return None, RedirectResponse("/login", status_code=303)
+    if role != "admin":
+        return None, RedirectResponse(HOME.get(role, "/login"), status_code=303)
+    return request.session["user_id"], None
+
+
+def get_admin_account(user_id):
+    with get_connection() as conn:
+        return conn.execute(
+            "SELECT full_name, email, phone, created_at FROM users WHERE user_id = %s", (user_id,)
+        ).fetchone()
+
+
+def profile_page(request, user_id, form=None, errors=None, saved=False, status_code=200):
+    lang = get_lang(request)
+    row = get_admin_account(user_id)
+    return templates.TemplateResponse(
+        request, "admin/profile.html",
+        {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr",
+         "form": form or {"full_name": row["full_name"], "email": row["email"], "phone": row["phone"] or ""},
+         "errors": errors or {}, "saved": saved,
+         "since": row["created_at"].strftime("%d/%m/%Y")},
+        status_code=status_code, headers={"Cache-Control": "no-store"})
+
+
+@router.get("/profile-admin", include_in_schema=False)
+def profile(request: Request, saved: int = 0):
+    user_id, redirect = admin_or_redirect(request)
+    if redirect:
+        return redirect
+    return profile_page(request, user_id, saved=bool(saved))
+
+
+@router.post("/profile-admin", include_in_schema=False)
+async def save_profile(request: Request):
+    """Save the name, the email and the phone number. Checked again here: the page's own checks are only a convenience."""
+    user_id, redirect = admin_or_redirect(request)
+    if redirect:
+        return redirect
+    msg = ERR[get_lang(request)]
+    data = await request.form()
+    form = {"full_name": (data.get("full_name") or "").strip(),
+            "email": (data.get("email") or "").strip(),
+            "phone": (data.get("phone") or "").strip()}
+    errors = {}
+    if not 2 <= len(form["full_name"]) <= 100:
+        errors["full_name"] = msg["name"]
+    if ARABIC.search(form["email"]):
+        errors["email"] = msg["email_ar"]
+    elif not EMAIL_PATTERN.match(form["email"]) or len(form["email"]) > 255:
+        errors["email"] = msg["email"]
+    else:
+        with get_connection() as conn:
+            taken = conn.execute("SELECT 1 FROM users WHERE lower(email) = lower(%s) AND user_id <> %s",
+                                 (form["email"], user_id)).fetchone()
+        if taken:
+            errors["email"] = msg["taken"]
+    if form["phone"] and not PHONE_PATTERN.match(form["phone"]):
+        errors["phone"] = msg["phone"]
+    if errors:
+        return profile_page(request, user_id, form=form, errors=errors, status_code=400)
+    with get_connection() as conn:
+        conn.execute("UPDATE users SET full_name = %s, email = %s, phone = %s WHERE user_id = %s",
+                     (form["full_name"], form["email"], form["phone"] or None, user_id))
+    return RedirectResponse("/profile-admin?saved=1", status_code=303)
