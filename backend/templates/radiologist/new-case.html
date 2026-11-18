@@ -135,12 +135,16 @@
           </div>
 
           <div class="q{{ ' bad' if 'knee' in errors }}" style="margin-top:28px;margin-bottom:0">
-            <p class="q-title">Which knee is this? <span class="note">One X-ray shows one knee.</span></p>
+            <p class="q-title">Which knee is this? <span class="req" aria-hidden="true">*</span> <span class="note">One X-ray shows one knee.</span></p>
             <div class="opts">
-              <label class="opt"><input type="radio" name="knee" value="right" {{ 'checked' if a.knee != 'left' }} /><span>Right knee</span></label>
+              <!-- neither side is ticked until the radiologist picks one: a knee chosen
+                   for him could send the report for the wrong knee -->
+              <label class="opt"><input type="radio" name="knee" value="right" {{ 'checked' if a.knee == 'right' }} /><span>Right knee</span></label>
               <label class="opt"><input type="radio" name="knee" value="left" {{ 'checked' if a.knee == 'left' }} /><span>Left knee</span></label>
             </div>
           </div>
+
+          <p class="err step-err" role="alert" hidden></p>
 
           <div class="nav-btns">
             <button class="btn-next" type="button" data-go="3">
@@ -156,7 +160,7 @@
           <p class="hint">The doctor reads these next to the X-ray. Answer them about the patient's knee in the image.</p>
 
           <div class="q{{ ' bad' if 'pain_with_use' in errors }}">
-            <p class="q-title">Is the patient's pain worse when they use the knee?</p>
+            <p class="q-title">Is the patient's pain worse when they use the knee? <span class="req" aria-hidden="true">*</span></p>
             <div class="opts">
               {% for value, label in [('yes', 'Yes'), ('no', 'No')] %}
               <label class="opt"><input type="radio" name="pain_with_use" value="{{ value }}" {{ 'checked' if a.pain_with_use == value }} /><span>{{ label }}</span></label>
@@ -165,7 +169,7 @@
           </div>
 
           <div class="q{{ ' bad' if 'stiffness_duration' in errors }}">
-            <p class="q-title">How long is the patient's knee stiff in the morning?</p>
+            <p class="q-title">How long is the patient's knee stiff in the morning? <span class="req" aria-hidden="true">*</span></p>
             <div class="opts">
               {% for value, label in [('none', 'Not stiff'), ('le30', '30 minutes or less'), ('gt30', 'More than 30 minutes')] %}
               <label class="opt"><input type="radio" name="stiffness_duration" value="{{ value }}" {{ 'checked' if a.stiffness_duration == value }} /><span>{{ label }}</span></label>
@@ -174,7 +178,7 @@
           </div>
 
           <div class="q{{ ' bad' if 'stairs_pain' in errors }}">
-            <p class="q-title">Does the patient have pain going up or down stairs?</p>
+            <p class="q-title">Does the patient have pain going up or down stairs? <span class="req" aria-hidden="true">*</span></p>
             <div class="opts">
               {% for value, label in [('none', 'None'), ('mild', 'Mild'), ('moderate', 'Moderate'), ('severe', 'Severe'), ('extreme', 'Extreme')] %}
               <label class="opt"><input type="radio" name="stairs_pain" value="{{ value }}" {{ 'checked' if a.stairs_pain == value }} /><span>{{ label }}</span></label>
@@ -183,7 +187,7 @@
           </div>
 
           <div class="q{{ ' bad' if 'rising_difficulty' in errors }}">
-            <p class="q-title">Does the patient have difficulty getting up from sitting?</p>
+            <p class="q-title">Does the patient have difficulty getting up from sitting? <span class="req" aria-hidden="true">*</span></p>
             <div class="opts">
               {% for value, label in [('none', 'None'), ('mild', 'Mild'), ('moderate', 'Moderate'), ('severe', 'Severe'), ('extreme', 'Extreme')] %}
               <label class="opt"><input type="radio" name="rising_difficulty" value="{{ value }}" {{ 'checked' if a.rising_difficulty == value }} /><span>{{ label }}</span></label>
@@ -193,7 +197,7 @@
 
           <!-- the warning signs and "anything else" are one question -->
           <div class="q{{ ' bad' if 'warnings' in errors or 'other_symptoms' in errors }}">
-            <p class="q-title">Does the patient have any of these? <span class="note">Tick all that apply, or tick the last one.</span></p>
+            <p class="q-title">Does the patient have any of these? <span class="req" aria-hidden="true">*</span> <span class="note">Tick all that apply, or tick the last one.</span></p>
             <div class="checks">
               {% for name, label in [
                    ('warning_injury', 'A recent injury or fall on this knee'),
@@ -216,7 +220,7 @@
           </div>
 
           <div class="q{{ ' bad' if 'height_cm' in errors or 'weight_kg' in errors }}">
-            <p class="q-title">Height and weight <span class="note">Used to work out the patient's BMI.</span></p>
+            <p class="q-title">Height and weight <span class="req" aria-hidden="true">*</span> <span class="note">Used to work out the patient's BMI.</span></p>
             <div class="two">
               <input class="in" type="number" name="height_cm" min="100" max="250" step="1" value="{{ a.height_cm }}" placeholder="Height in cm" aria-label="Height in cm" />
               <input class="in" type="number" name="weight_kg" min="20" max="400" step="0.1" value="{{ a.weight_kg }}" placeholder="Weight in kg" aria-label="Weight in kg" />
@@ -224,13 +228,15 @@
           </div>
 
           <div class="q{{ ' bad' if 'prior_injury' in errors }}" style="margin-bottom:0">
-            <p class="q-title">Has the patient injured this knee before?</p>
+            <p class="q-title">Has the patient injured this knee before? <span class="req" aria-hidden="true">*</span></p>
             <div class="opts">
               {% for value, label in [('yes', 'Yes'), ('no', 'No')] %}
               <label class="opt"><input type="radio" name="prior_injury" value="{{ value }}" {{ 'checked' if a.prior_injury == value }} /><span>{{ label }}</span></label>
               {% endfor %}
             </div>
           </div>
+
+          <p class="err step-err" role="alert" hidden></p>
 
           <div class="nav-btns">
             <button class="btn-back" type="button" data-go="2">Back</button>
@@ -294,8 +300,83 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    /* A step that is not finished does not let him go forward. The server
+       checks everything again when the case is sent; this only saves him from
+       reaching the summary and reading "Not answered" there. Step 1 guards
+       itself: its button stays disabled until a patient is confirmed.
+       Going back is always allowed. */
+
+    const NEEDED = {
+      2: ['knee'],
+      3: ['pain_with_use', 'stiffness_duration', 'stairs_pain',
+          'rising_difficulty', 'height_cm', 'weight_kg', 'prior_injury']
+    };
+
+    let current = Number((steps.find(function (s) { return s.classList.contains('is-on'); })
+                          || steps[0]).dataset.step);
+
+    function whatIsMissing(step) {
+      const data = new FormData(form);
+      const missing = NEEDED[step].filter(function (name) {
+        return !String(data.get(name) || '').trim();
+      });
+      if (step === 2 && !file.files[0]) missing.unshift('xray');
+      if (step === 3 && !none.checked && !signs.some(function (c) { return c.checked; })) {
+        missing.push('warnings');
+      }
+      return missing;
+    }
+
+    function boxFor(name) {
+      if (name === 'xray') return drop;
+      if (name === 'warnings') return none.closest('.q');
+      const field = form.querySelector('[name="' + name + '"]');
+      return field ? field.closest('.q') : null;
+    }
+
+    function stepIsDone(step) {
+      if (!NEEDED[step]) return true;
+      const section = document.querySelector('.step[data-step="' + step + '"]');
+      const note = section.querySelector('.step-err');
+      section.querySelectorAll('.q.bad').forEach(function (q) { q.classList.remove('bad'); });
+
+      const missing = whatIsMissing(step);
+      if (!missing.length) { note.hidden = true; return true; }
+
+      let first = null;
+      missing.forEach(function (name) {
+        const box = boxFor(name);
+        if (!box) return;
+        if (box !== drop) box.classList.add('bad');
+        if (!first) first = box;
+      });
+      note.textContent = (missing.length === 1 && missing[0] === 'xray')
+        ? "Please choose the patient's X-ray before you go on."
+        : 'Please answer the questions marked * before you go on.';
+      note.hidden = false;
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+
     document.querySelectorAll('[data-go]').forEach(function (btn) {
-      btn.addEventListener('click', function () { show(Number(btn.dataset.go)); });
+      btn.addEventListener('click', function () {
+        const target = Number(btn.dataset.go);
+        // going forward: every step being skipped over has to be finished too
+        for (let n = current; n < target; n++) {
+          if (!stepIsDone(n)) {
+            if (n !== current) { current = n; show(n); }
+            return;
+          }
+        }
+        current = target;
+        show(target);
+      });
+    });
+
+    // once a question is answered it stops looking wrong
+    form.addEventListener('change', function (event) {
+      const q = event.target.closest && event.target.closest('.q');
+      if (q) q.classList.remove('bad');
     });
 
 
