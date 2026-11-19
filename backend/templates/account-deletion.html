@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ 'بانتظار حذف الحساب' if lang == 'ar' else 'Account deletion pending' }}</title>
+  {% include "_new-head.html" %}
+</head>
+
+<body>
+  {% set ar = lang == 'ar' %}
+  {# the account asked to be deleted: every other page sends it here (session_guard.py) #}
+  <main class="locked-page">
+    <section class="card wait-card">
+      <img src="/assets/logo-light.png" alt="MUFSAL" class="locked-logo" />
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" /></svg></span>
+      <h2>{{ 'طلب حذف الحساب قيد المراجعة' if ar else 'Your account deletion is pending' }}</h2>
+      <p>{{ 'وصل طلبك إلى المشرف، وحسابك مغلق حتى يؤكد الحذف. لا يمكنك استخدام صفحات الموقع خلال هذه الفترة.' if ar else 'Your request has reached the admin, and your account is locked until the admin confirms the deletion. You cannot use MUFSAL in the meantime.' }}</p>
+      <p>{{ 'إذا أرسلت الطلب بالخطأ، تواصل مع مشرف MUFSAL.' if ar else 'If you sent it by mistake, please contact the MUFSAL admin.' }}</p>
+      <div class="dialog-actions" style="justify-content:center">
+        <form action="/set-lang" method="get">
+          <input type="hidden" name="lang" value="{{ 'en' if ar else 'ar' }}" />
+          <input type="hidden" name="next" value="/account-deletion" />
+          <button type="submit" class="btn btn-ghost">{{ 'English' if ar else 'العربية' }}</button>
+        </form>
+        <a class="btn btn-dark" href="/logout">{{ 'تسجيل الخروج' if ar else 'Log out' }}</a>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>
