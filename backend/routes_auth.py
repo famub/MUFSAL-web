@@ -59,6 +59,8 @@ async def login(request: Request):
         request.session.clear()                       # a new session for every login
         request.session["user_id"] = user["user_id"]
         request.session["role"] = user["role"]
+        if user.get("delete_requested_at"):           # asked to delete the account: locked (routes_account.py)
+            request.session["deleting"] = True
     return JSONResponse(payload, status_code=status)
 
 
