@@ -1,0 +1,26 @@
+{# "Delete account" card for the doctor and radiologist profile pages. Only reads `lang`.
+   {% include "_delete-account.html" %}
+   The button asks first (a small window); "Yes, delete" sends the request to the admin
+   (routes_account.py) and locks the account until the admin decides. #}
+{% set ar = (lang | default('en')) == 'ar' %}
+<section class="card danger-card">
+  <div>
+    <h2>{{ 'حذف الحساب' if ar else 'Delete account' }}</h2>
+    <p>{{ 'يُرسل طلب الحذف إلى المشرف، ويُغلق حسابك حتى يؤكد المشرف الحذف.' if ar else 'Your request goes to the admin, and your account is locked until the admin confirms the deletion.' }}</p>
+  </div>
+  <button type="button" class="btn btn-danger" onclick="document.getElementById('delete-dialog').showModal()">
+    {{ 'حذف الحساب' if ar else 'Delete account' }}
+  </button>
+</section>
+
+<dialog id="delete-dialog" class="confirm-dialog" aria-labelledby="delete-title">
+  <form method="post" action="/account/delete-request">
+    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 21.5 19h-19L12 3Z" stroke-linejoin="round" /><path d="M12 10v4M12 16.6v.1" stroke-linecap="round" /></svg></span>
+    <h3 id="delete-title">{{ 'هل تريد حذف حسابك؟' if ar else 'Delete your account?' }}</h3>
+    <p>{{ 'سيُغلق حسابك فوراً ولن تتمكن من استخدام الموقع. بعد تأكيد المشرف يُحذف الحساب نهائياً ولا يمكن استرجاعه.' if ar else 'Your account is locked straight away and you will not be able to use MUFSAL. Once the admin confirms, the account is deleted for good and cannot be brought back.' }}</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">{{ 'إلغاء' if ar else 'Cancel' }}</button>
+      <button type="submit" class="btn btn-danger">{{ 'نعم، احذف حسابي' if ar else 'Yes, delete my account' }}</button>
+    </div>
+  </form>
+</dialog>
