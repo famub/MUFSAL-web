@@ -28,7 +28,6 @@ CREATE TABLE users (
     national_id   CHAR(10)     UNIQUE,
     status        VARCHAR(20)  NOT NULL DEFAULT 'pending',
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    delete_requested_at TIMESTAMP,          -- a doctor/radiologist asked to delete the account; the admin decides
     CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist','admin')),
     CONSTRAINT users_status_valid CHECK (status IN ('pending','approved','rejected')),
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
@@ -50,6 +49,7 @@ CREATE TABLE professionals (
     scfhs_number           VARCHAR(20) NOT NULL UNIQUE,
     license_expiry         DATE        NOT NULL,
     pending_license_expiry DATE,
+    delete_requested_at    TIMESTAMP,
     deactivated_at         TIMESTAMP
 );
 
@@ -59,8 +59,11 @@ COMMENT ON COLUMN professionals.license_expiry IS
 COMMENT ON COLUMN professionals.pending_license_expiry IS
     'A renewal date waiting for the admin to accept it; empty when no renewal is in hand. The new date waits here instead of overwriting license_expiry, so a licence is never in force before the admin has said so. Accepted, it moves to license_expiry and is emptied; refused, it is emptied and the old date stands.';
 
+COMMENT ON COLUMN professionals.delete_requested_at IS
+    'When the professional asked for the account to be closed, empty while no such request is in hand. It sits here rather than in users because only a doctor or a radiologist can ask: in users it would stay empty for every patient and every admin for good. It is also the first half of one act, whose second half is the column below, so both are read from a single row.';
+
 COMMENT ON COLUMN professionals.deactivated_at IS
-    'When the account was taken out of service, empty while it is in service. This is the admin acting on users.delete_requested_at: the request is recorded there, the decision here. The row is never deleted, because a doctor signs reports and a radiologist uploads X-rays, and removing it would leave medical records with no author.';
+    'When the account was taken out of service, empty while it is in service. This is the admin acting on the request above: the asking is recorded there, the decision here, so a request still waiting is one column filled and the other empty. The row is never deleted, because a doctor signs reports and a radiologist uploads X-rays, and removing it would leave medical records with no author.';
 
 CREATE TABLE registration_decisions (
     decision_id     SERIAL PRIMARY KEY,
