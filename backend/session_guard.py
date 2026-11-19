@@ -35,7 +35,7 @@ def install(app):
                 return RedirectResponse("/login?expired=1", status_code=303)
             session["seen"] = now 
             if session.get("deleting") and path not in WHILE_DELETING:
-              if path.startswith("/api/"):
+                if path.startswith("/api/"):
                     return JSONResponse({"ok": False, "error": "deleting"}, status_code=403)
                 return RedirectResponse("/account-deletion", status_code=303)
         return await call_next(request)
