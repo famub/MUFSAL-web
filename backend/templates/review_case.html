@@ -126,9 +126,9 @@
             </div>
 
             <div class="field{{ ' bad' if errors.notes }}">
-              <label for="notes">{{ t.notes }}</label>
+              <label for="notes">{{ t.notes }} <span class="req" aria-hidden="true">*</span></label>
               <textarea id="notes" name="notes" placeholder="{{ t.notes_ph }}" required>{{ notes }}</textarea>
-              <p class="hint">{{ t.notes_hint }}</p>
+              
               {% if errors.notes %}<p class="err" role="alert">{{ errors.notes }}</p>{% endif %}
             </div>
           </div>
@@ -141,10 +141,7 @@
       </section>
       {% endif %}
 
-      <div class="warn" style="margin-top:20px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5M12 16v.1" stroke-linecap="round" /></svg>
-        <span>{{ t.disclaimer }}</span>
-      </div>
+    
 
       {% include "_page-foot.html" %}
     </div>
