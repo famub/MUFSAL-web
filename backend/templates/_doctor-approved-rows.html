@@ -1,7 +1,7 @@
 {# One card per approved case. Used by dashboard-doctor.html and doctor-cases.html.
    Needs: t, lang, approved. #}
 {% for c in approved %}
-<article class="row case-row is-approved">
+<article class="row case-row is-approved" data-search="{{ c.patient_name | lower }} {{ c.national_id }} {{ c.case_id }}">
   <div class="who">
     <span class="avatar" aria-hidden="true">{{ c.patient_name[:1] }}</span>
     <div>
