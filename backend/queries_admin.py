@@ -158,18 +158,34 @@ def list_complaints():
     return rows
 
 
-def respond_to_complaint(complaint_id, admin_id, status, reply=None):
-    """Set the status and, when there is text, save the admin's reply. Returns False when not found."""
+# A complaint's status is never picked by hand. It moves by itself:
+#   open           - just arrived, nobody has looked at it
+#   investigating  - the admin opened its details (mark_complaint_seen)
+#   resolved       - the admin sent a reply (respond_to_complaint)
+
+def mark_complaint_seen(complaint_id):
+    """The admin opened the complaint: 'open' becomes 'investigating'. Any other status stays as it is.
+    Returns the status after the call, or None when there is no such complaint."""
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE complaints SET status = 'investigating' WHERE complaint_id = %s AND status = 'open'",
+            (complaint_id,),
+        )
+        row = conn.execute("SELECT status FROM complaints WHERE complaint_id = %s", (complaint_id,)).fetchone()
+    return row["status"] if row else None
+
+
+def respond_to_complaint(complaint_id, admin_id, reply):
+    """Save the admin's reply and mark the complaint 'resolved'. Returns False when not found."""
     with get_connection() as conn:
         row = conn.execute(
-            "UPDATE complaints SET status = %s WHERE complaint_id = %s RETURNING complaint_id",
-            (status, complaint_id),
+            "UPDATE complaints SET status = 'resolved' WHERE complaint_id = %s RETURNING complaint_id",
+            (complaint_id,),
         ).fetchone()
         if row is None:
             return False
-        if reply:
-            conn.execute(
-                "INSERT INTO complaint_replies (complaint_id, admin_id, body) VALUES (%s, %s, %s)",
-                (complaint_id, admin_id, reply),
-            )
+        conn.execute(
+            "INSERT INTO complaint_replies (complaint_id, admin_id, body) VALUES (%s, %s, %s)",
+            (complaint_id, admin_id, reply),
+        )
     return True

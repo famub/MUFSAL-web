@@ -34,10 +34,20 @@
       approved_ok: n => `${n} approved. They can now log in.`, rejected_ok: n => `${n} rejected. The reason was saved.`,
       reject_t: n => `Reject ${n}`, reject_s: 'The applicant will see this reason and can submit a new request.', reject_r: 'Rejection reason', required: 'This field is required.',
       delete_t: n => `Delete ${n}?`, delete_s: 'This permanently removes the account and blocks future logins with these credentials.', delete_b: 'Delete account', deleted_ok: 'Account deleted.',
-      your_reply: 'Your reply', send: 'Send reply', write_first: 'Write a reply or change the status first.', sent_ok: 'Reply sent.', status_ok: 'Status updated.',
+      your_reply: 'Your reply', send: 'Send reply', write_first: 'Write your reply first.', sent_ok: 'Reply sent. The complaint is now resolved.', status_ok: 'Status updated.', reply_hint: 'When you send the reply, the complaint becomes Resolved automatically.',
       admin: 'Admin', ev: { assigned: 'Assigned to', reassigned: 'Reassigned to', approved: 'Approved by' },
       reported_ev: (by, src) => `Delay reported by ${by} (${src}).`, handled_ev: 'Marked as handled.',
-      net: 'Could not reach the server.', fail: 'Something went wrong: ', none_dash: '-', review: 'Review', see_all: 'See all', showing: (a, b) => `Showing ${a} of ${b}`
+      net: 'Could not reach the server.', fail: 'Something went wrong: ', none_dash: '-', review: 'Review', see_all: 'See all', showing: (a, b) => `Showing ${a} of ${b}`,
+      k_delayed_sub: n => n ? `${n} overdue (48h+)` : 'None overdue', k_lic_sub: t => t ? `Oldest waiting ${t}` : 'No one is waiting',
+      k_cmp_sub: n => n ? `${n} being investigated` : 'None being investigated', k_acc_sub: (d, r) => `${d} doctors · ${r} radiologists`,
+      attn_t: 'Needs your attention', attn_s: 'Oldest items first', attn_none: 'All clear. Nothing is waiting for you.',
+      t_lic: 'License request', t_cmp: 'Complaint',
+      act_t: 'Weekly activity', act_s: 'Last 8 weeks', leg_d: 'Delayed reports', leg_c: 'Complaints', leg_l: 'License decisions',
+      act_none: 'No activity in the last 8 weeks.', wk: d => `Week of ${d}`,
+      d_sub: 'By status and source', l_sub: 'Waiting and decided', c_sub: 'By status and topic',
+      by_source: 'By source', by_role: 'Waiting, by role', by_topic: 'By topic', total: 'Total', view_all: 'View all',
+      kp_d: 'Delayed requests', kp_l: 'Pending licenses', kp_c: 'Open complaints', h_l: 'License requests', h_c: 'Complaints',
+      kb_report: 'In a report', kb_site: 'The site', kb_other: 'Other', unresolved: 'Unresolved'
     },
     ar: {
       s_delayed: 'الطلبات المتأخرة', s_licenses: 'طلبات التراخيص المعلّقة', s_complaints: 'الشكاوى العامة',
@@ -64,10 +74,20 @@
       approved_ok: n => `تم قبول ${n}. يمكنه الآن تسجيل الدخول.`, rejected_ok: n => `تم رفض ${n}. حُفظ السبب.`,
       reject_t: n => `رفض ${n}`, reject_s: 'سيرى مقدّم الطلب هذا السبب ويمكنه تقديم طلب جديد.', reject_r: 'سبب الرفض', required: 'هذا الحقل مطلوب.',
       delete_t: n => `حذف ${n}؟`, delete_s: 'سيُحذف الحساب نهائيًا ولن يتمكن من تسجيل الدخول بهذه البيانات.', delete_b: 'حذف الحساب', deleted_ok: 'تم حذف الحساب.',
-      your_reply: 'ردّك', send: 'إرسال الرد', write_first: 'اكتب ردًا أو غيّر الحالة أولًا.', sent_ok: 'تم إرسال الرد.', status_ok: 'تم تحديث الحالة.',
+      your_reply: 'ردّك', send: 'إرسال الرد', write_first: 'اكتب ردّك أولًا.', sent_ok: 'تم إرسال الرد. أصبحت الشكوى محلولة.', status_ok: 'تم تحديث الحالة.', reply_hint: 'عند إرسال الرد تتحول الشكوى تلقائيًا إلى «تم الحل».',
       admin: 'المشرف', ev: { assigned: 'أُسندت إلى', reassigned: 'أُعيد إسنادها إلى', approved: 'اعتمدها' },
       reported_ev: (by, src) => `أبلغ عن التأخير ${by} (${src}).`, handled_ev: 'تم تعليمها كمعالَجة.',
-      net: 'تعذّر الوصول إلى الخادم.', fail: 'حدث خطأ: ', none_dash: '-', review: 'مراجعة', see_all: 'عرض الكل', showing: (a, b) => `عرض ${a} من ${b}`
+      net: 'تعذّر الوصول إلى الخادم.', fail: 'حدث خطأ: ', none_dash: '-', review: 'مراجعة', see_all: 'عرض الكل', showing: (a, b) => `عرض ${a} من ${b}`,
+      k_delayed_sub: n => n ? `${n} تجاوزت 48 ساعة` : 'لا توجد طلبات تجاوزت المدة', k_lic_sub: t => t ? `الأقدم ينتظر ${t}` : 'لا أحد في الانتظار',
+      k_cmp_sub: n => n ? `${n} قيد المتابعة` : 'لا توجد شكاوى قيد المتابعة', k_acc_sub: (d, r) => `${d} أطباء · ${r} أخصائيو أشعة`,
+      attn_t: 'يحتاج إلى انتباهك', attn_s: 'الأقدم أولًا', attn_none: 'كل شيء على ما يرام. لا شيء ينتظرك.',
+      t_lic: 'طلب ترخيص', t_cmp: 'شكوى',
+      act_t: 'النشاط الأسبوعي', act_s: 'آخر 8 أسابيع', leg_d: 'بلاغات التأخير', leg_c: 'الشكاوى', leg_l: 'قرارات التراخيص',
+      act_none: 'لا يوجد نشاط في آخر 8 أسابيع.', wk: d => `أسبوع ${d}`,
+      d_sub: 'حسب الحالة والمصدر', l_sub: 'المعلّقة والمقرَّرة', c_sub: 'حسب الحالة والموضوع',
+      by_source: 'حسب المصدر', by_role: 'المعلّقة حسب الدور', by_topic: 'حسب الموضوع', total: 'الإجمالي', view_all: 'عرض الكل',
+      kp_d: 'طلبات متأخرة', kp_l: 'تراخيص معلّقة', kp_c: 'شكاوى مفتوحة', h_l: 'طلبات التراخيص', h_c: 'الشكاوى',
+      kb_report: 'في تقرير', kb_site: 'الموقع', kb_other: 'أخرى', unresolved: 'غير محلولة'
     }
   }[AR ? 'ar' : 'en'];
   const T = TXT;
@@ -106,7 +126,7 @@
         const log = r.log.map(e => ({ t: ts(e.created_at), txt: `${T.ev[e.event_type] || e.event_type} ${e.doctor_name || '-'}.` + (e.note ? ' ' + e.note : '') }));
         log.push({ t: ts(r.reported_at), txt: T.reported_ev(r.raised_by, T[r.source] || r.source) });
         if (r.handled_at) log.push({ t: ts(r.handled_at), txt: T.handled_ev });
-        return { id: String(r.delay_complaint_id), no: '#' + r.case_id, src: r.source, dr: r.doctor_name || '', at: ts(r.submitted_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
+        return { id: String(r.delay_complaint_id), no: '#' + r.case_id, src: r.source, dr: r.doctor_name || '', at: ts(r.submitted_at), rep: ts(r.reported_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
       });
     },
     async pending() { const d = await api('/api/admin/requests'); if (d) DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, phone: r.phone, at: ts(r.created_at) })); },
@@ -118,7 +138,10 @@
 
   // ---------------------------------------------------------------- filters
   const PAGE = document.body.dataset.page || 'home';
-  const S = { sub: PAGE === 'licenses' && location.hash === '#accounts' ? 'accounts' : 'pending', f: {} };
+  const QS = new URLSearchParams(location.search);
+  const KEYS = { delayed: ['q', 'src', 's'], licenses: ['q', 'r', 'd', 'from', 'to'], complaints: ['q', 'w', 'k', 's'] }[PAGE] || [];
+  const TAB = ['pending', 'history', 'accounts'].includes(QS.get('tab')) ? QS.get('tab') : location.hash === '#accounts' ? 'accounts' : 'pending';
+  const S = { sub: PAGE === 'licenses' ? TAB : 'pending', f: Object.fromEntries(KEYS.filter(k => QS.get(k)).map(k => [k, QS.get(k)])) };
   const SVG = {
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round"/></svg>',
@@ -137,7 +160,7 @@
       (S.sub === 'pending' ? sel('r', ROLES2, T.all_roles) : '') +
       (S.sub === 'history' ? search('q', T.search_app) + sel('d', [['approved', T.approved], ['rejected', T.rejected]], T.all_decisions) + date('from', T.from) + date('to', T.to) : '') +
       (S.sub === 'accounts' ? search('q', T.search_name) + sel('r', ROLES2, T.all_roles) : ''),
-    complaints: () => search('q', T.search_cmp) + sel('w', ROLES3, T.all_roles) + sel('k', [['report', T.k_report], ['site', T.k_site], ['other', T.k_other]], T.all_about) + sel('s', Object.entries(CST).map(([k, v]) => [k, T[v[0]]]), T.all_status)
+    complaints: () => search('q', T.search_cmp) + sel('w', ROLES3, T.all_roles) + sel('k', [['report', T.k_report], ['site', T.k_site], ['other', T.k_other]], T.all_about) + sel('s', [['unresolved', T.unresolved], ...Object.entries(CST).map(([k, v]) => [k, T[v[0]]])], T.all_status)
   };
 
   // ---------------------------------------------------------------- rows
@@ -155,7 +178,6 @@
     who(r.name, r.email, initials(r.name)) + cell(T.role, roleTag(r.role), 'hide-sm') + cell(T.scfhs, esc(r.scfhs), 'hide-sm') + cell(T.nid, esc(r.nid), 'hide-sm') + cell(T.submitted, fmt(r.at), 'hide-sm') + `<div class="acts">${acts}</div>`);
   const RC = (c, acts) => row('minmax(0,2fr) minmax(0,1.3fr) minmax(0,1.1fr) 120px minmax(0,1fr) 150px',
     who(c.sub, `${T.ticket} ${c.no}`, '!') + cell(T.complainant, `${esc(c.name)}<br>${roleTag(c.who)}`, 'hide-sm') + cell(T.about, esc(T['k_' + c.kind]), 'hide-sm') + cell(T.status, tag(T[CST[c.st][0]], CST[c.st][1])) + cell(T.submitted, fmt(c.at), 'hide-sm') + `<div class="acts">${acts}</div>`);
-  const go = (href, label) => `<a class="btn btn-sm btn-dark" href="${href}">${esc(label)} <svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`;
 
   const OUT = {
     delayed() {
@@ -178,29 +200,109 @@
     },
     complaints() {
       const f = S.f;
-      return DB.cmp.filter(c => (!f.w || c.who === f.w) && (!f.k || c.kind === f.k) && (!f.s || c.st === f.s) && has(c.sub + c.name, f.q)).sort((a, b) => b.at - a.at)
+      return DB.cmp.filter(c => (!f.w || c.who === f.w) && (!f.k || c.kind === f.k) && (!f.s || (f.s === 'unresolved' ? c.st !== 'resolved' : c.st === f.s)) && has(c.sub + c.name, f.q)).sort((a, b) => b.at - a.at)
         .map(c => RC(c, btn('cview', c.id, T.respond, 'btn-soft'))).join('') || empty(T.none_cmp);
     }
   };
 
+  // ---------------------------------------------------------------- dashboard: numbers, charts, what needs attention
+  // Everything is worked out here from the same /api/admin data the other pages use. Every number, bar and
+  // slice is a link: it opens the page it counts, already filtered (the pages read ?s=, ?k=, ?tab= ... from the address).
+  const WEEK = 7 * 864e5;
+  const PG = { delayed: '/admin-delayed-requests', licenses: '/admin-license-verification', complaints: '/admin-complaints' };
+  const lnk = (base, q) => base + (q ? '?' + new URLSearchParams(q) : '');
+  const sum = a => a.reduce((x, y) => x + y, 0);
+  const ICO = {
+    delayed: ['red', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/>'],
+    licenses: ['ok', '<path d="M12 3 4 6v6c0 4.4 3.4 8.3 8 9 4.6-.7 8-4.6 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m8.8 12.2 2.3 2.3 4.2-4.4" stroke-linecap="round" stroke-linejoin="round"/>'],
+    complaints: ['amber', '<path d="M4 14v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/><rect x="2.5" y="12.5" width="4.5" height="7.5" rx="2.2"/><rect x="17" y="12.5" width="4.5" height="7.5" rx="2.2"/>'],
+    accounts: ['', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" stroke-linecap="round"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.9c1.8.7 3 2.4 3 5.1" stroke-linecap="round"/>']
+  };
+  const svgIco = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${ICO[k][1]}</svg>`;
+
+  function donut(items, label) {
+    const R = 46, C = 2 * Math.PI * R, live = items.filter(i => i.v), total = sum(items.map(i => i.v));
+    let off = 0;
+    const arcs = live.map(i => {
+      const len = i.v / total * C, gap = live.length > 1 ? 3 : 0;
+      const a = `<a href="${i.href}"><title>${esc(i.label)}: ${i.v}</title><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--${i.c})" stroke-width="16" stroke-dasharray="${Math.max(len - gap, 0.01)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"/></a>`;
+      off += len; return a;
+    }).join('');
+    return `<svg class="donut" viewBox="0 0 120 120" role="img" aria-label="${esc(label)}: ${total}"><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--mint)" stroke-width="16"/>${arcs}<text x="60" y="60" text-anchor="middle" class="d-num">${total}</text><text x="60" y="76" text-anchor="middle" class="d-lbl">${esc(label)}</text></svg>`;
+  }
+  const legend = items => `<div class="lg-list">${items.map(i => `<a class="lg" href="${i.href}"><i style="background:var(--${i.c})"></i><span>${esc(i.label)}</span><b>${i.v}</b></a>`).join('')}</div>`;
+  const hbars = items => { const mx = Math.max(1, ...items.map(i => i.v)); return `<div class="hbars">${items.map(i => `<a class="hb" href="${i.href}"><span class="hb-l">${esc(i.label)}</span><span class="hb-t"><span class="hb-f" style="width:${i.v / mx * 100}%;background:var(--${i.c})"></span></span><b>${i.v}</b></a>`).join('')}</div>`; };
+  const dcard = (k, title, sub, body, href) => `<section class="card dash-card"><header class="dc-h"><span class="att-ico ${ICO[k][0]}">${svgIco(k)}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div><a class="dc-go" href="${href}">${T.view_all} ${AR ? '&larr;' : '&rarr;'}</a></header>${body}</section>`;
+
+  function weekly() {
+    const d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - ((d0.getDay() + 6) % 7));      // Monday of this week
+    const s0 = d0.getTime() - 7 * WEEK, cols = Array.from({ length: 8 }, (_, i) => ({ t: s0 + i * WEEK, d: 0, c: 0, l: 0 }));
+    const put = (t, k) => { const i = Math.floor((t - s0) / WEEK); if (t && i >= 0 && i < 8) cols[i][k]++; };
+    DB.delayed.forEach(r => put(r.rep, 'd')); DB.cmp.forEach(c => put(c.at, 'c')); DB.history.forEach(r => put(r.at, 'l'));
+    const mx = Math.max(1, ...cols.map(c => c.d + c.c + c.l));
+    if (!cols.some(c => c.d + c.c + c.l)) return `<div class="empty small"><h3>${T.act_none}</h3></div>`;
+    const short = t => new Date(t).toLocaleDateString(AR ? 'ar-SA-u-ca-gregory' : 'en-GB', { day: 'numeric', month: 'short' });
+    const seg = (n, c, k, href) => n ? `<a href="${href}" style="flex:${n};background:var(--${c})"></a>` : '';
+    const tt = k => sum(cols.map(c => c[k]));
+    const head = `<div class="wk-sum"><a href="${PG.delayed}"><i style="background:var(--brand)"></i><span>${T.leg_d}</span><b>${tt('d')}</b></a><a href="${PG.complaints}"><i style="background:var(--amber)"></i><span>${T.leg_c}</span><b>${tt('c')}</b></a><a href="${lnk(PG.licenses, { tab: 'history' })}"><i style="background:var(--ink)"></i><span>${T.leg_l}</span><b>${tt('l')}</b></a></div>`;
+    return head + `<div class="wk">${cols.map(c => {
+      const tot = c.d + c.c + c.l;
+      return `<div class="wk-col" title="${esc(`${T.wk(short(c.t))}: ${T.leg_d} ${c.d} · ${T.leg_c} ${c.c} · ${T.leg_l} ${c.l}`)}"><div class="wk-bar"><span class="wk-n">${tot || ''}</span><div class="wk-stack" style="height:${tot ? Math.max(6, tot / mx * 190) : 3}px">${seg(c.l, 'ink', 'l', PG.licenses + '?tab=history')}${seg(c.c, 'amber', 'c', PG.complaints)}${seg(c.d, 'brand', 'd', PG.delayed)}</div></div><span class="wk-x">${short(c.t)}</span></div>`;
+    }).join('')}</div>`;
+  }
+
+  function attention() {
+    const top = (arr, n) => arr.sort((a, b) => a.at - b.at).slice(0, n);
+    const items = [
+      ...top(DB.delayed.filter(r => r.st === 'pending').map(r => ({ k: 'delayed', id: r.id, at: r.at, title: `${T.case} ${r.no}`, sub: `${T.delayed_req} · ${r.dr || T.not_assigned}`, bad: hrs(r.at) > 48 })), 3),
+      ...top(DB.pending.map(r => ({ k: 'licenses', id: r.id, at: r.at, title: r.name, sub: `${T.t_lic} · ${T[r.role] || r.role}` })), 3),
+      ...top(DB.cmp.filter(c => c.st !== 'resolved').map(c => ({ k: 'complaints', id: c.id, at: c.at, title: c.sub, sub: `${T.t_cmp} · ${c.name}` })), 3)
+    ].sort((a, b) => (b.bad || 0) - (a.bad || 0) || a.at - b.at).slice(0, 5);
+    if (!items.length) return `<div class="empty small"><h3>${T.attn_none}</h3></div>`;
+    return `<div class="att-list">${items.map(i => `<a class="att" href="${lnk(PG[i.k], { open: i.id })}"><span class="att-ico ${ICO[i.k][0]}">${svgIco(i.k)}</span><div><strong>${esc(i.title)}</strong><p>${esc(i.sub)}</p></div>${tag(dur(i.at), i.bad ? 'tag-bad' : 'tag-wait')}${SVG.go}</a>`).join('')}</div>`;
+  }
+
+  function drawHome() {
+    const n = DB.summary, over = DB.delayed.filter(r => r.st === 'pending' && hrs(r.at) > 48).length;
+    const oldest = DB.pending.length ? dur(Math.min(...DB.pending.map(r => r.at))) : '';
+    const inv = DB.cmp.filter(c => c.st === 'investigating').length;
+    const docs = DB.accounts.filter(a => a.role === 'doctor').length, rads = DB.accounts.length - docs;
+    const kpi = [
+      ['delayed', n.delayed, T.kp_d, T.k_delayed_sub(over), over ? 'bad' : '', lnk(PG.delayed, { s: 'pending' })],
+      ['licenses', n.licenses, T.kp_l, T.k_lic_sub(oldest), '', PG.licenses],
+      ['complaints', n.complaints, T.kp_c, T.k_cmp_sub(inv), '', lnk(PG.complaints, { s: 'unresolved' })],
+      ['accounts', DB.accounts.length, T.c_accounts, T.k_acc_sub(docs, rads), '', lnk(PG.licenses, { tab: 'accounts' })]
+    ];
+    $('#stats').innerHTML = kpi.map(([k, v, l, sub, cls, href]) => `<a class="card stat" href="${href}"><span class="ico ${ICO[k][0]}">${svgIco(k)}</span><div><strong>${v}</strong><span>${esc(l)}</span><em class="${cls}">${esc(sub)}</em></div></a>`).join('');
+
+    // delayed requests
+    const dp = DB.delayed.filter(r => r.st === 'pending').length, dh = DB.delayed.length - dp;
+    const bySrc = s => DB.delayed.filter(r => r.src === s).length;
+    const dItems = [{ label: T.pending, v: dp, c: 'amber', href: lnk(PG.delayed, { s: 'pending' }) }, { label: T.handled, v: dh, c: 'ok', href: lnk(PG.delayed, { s: 'handled' }) }];
+    // license requests
+    const ap = DB.history.filter(r => r.d === 'approved').length, rj = DB.history.length - ap;
+    const lItems = [{ label: T.pending, v: DB.pending.length, c: 'amber', href: PG.licenses }, { label: T.approved, v: ap, c: 'ok', href: lnk(PG.licenses, { tab: 'history', d: 'approved' }) }, { label: T.rejected, v: rj, c: 'red', href: lnk(PG.licenses, { tab: 'history', d: 'rejected' }) }];
+    const pr = r => DB.pending.filter(x => x.role === r).length;
+    // complaints
+    const cs = s => DB.cmp.filter(c => c.st === s).length, ck = k => DB.cmp.filter(c => c.kind === k).length;
+    const cItems = [{ label: T.openst, v: cs('open'), c: 'amber', href: lnk(PG.complaints, { s: 'open' }) }, { label: T.investigating, v: cs('investigating'), c: 'brand', href: lnk(PG.complaints, { s: 'investigating' }) }, { label: T.resolved, v: cs('resolved'), c: 'ok', href: lnk(PG.complaints, { s: 'resolved' }) }];
+
+    const two = (items, label) => `<div class="dn">${donut(items, label)}${legend(items)}</div>`;
+    $('#home').innerHTML =
+      `<div class="dash-row two"><section class="card dash-card"><header class="dc-h"><div><h2>${T.attn_t}</h2><p>${T.attn_s}</p></div></header>${attention()}</section>
+       <section class="card dash-card"><header class="dc-h"><div><h2>${T.act_t}</h2><p>${T.act_s}</p></div></header>${weekly()}</section></div>
+       <div class="dash-row three">` +
+      dcard('delayed', T.s_delayed, T.d_sub, two(dItems, T.total) + `<h3 class="dc-sub">${T.by_source}</h3>` + hbars([
+        { label: T.patient, v: bySrc('patient'), c: 'brand', href: lnk(PG.delayed, { src: 'patient' }) }, { label: T.radiologist, v: bySrc('radiologist'), c: 'brand', href: lnk(PG.delayed, { src: 'radiologist' }) }]), PG.delayed) +
+      dcard('licenses', T.h_l, T.l_sub, two(lItems, T.total) + `<h3 class="dc-sub">${T.by_role}</h3>` + hbars([
+        { label: T.doctor, v: pr('doctor'), c: 'brand', href: lnk(PG.licenses, { r: 'doctor' }) }, { label: T.radiologist, v: pr('radiologist'), c: 'brand', href: lnk(PG.licenses, { r: 'radiologist' }) }]), PG.licenses) +
+      dcard('complaints', T.h_c, T.c_sub, two(cItems, T.total) + `<h3 class="dc-sub">${T.by_topic}</h3>` + hbars([
+        { label: T.kb_report, v: ck('report'), c: 'brand', href: lnk(PG.complaints, { k: 'report' }) }, { label: T.kb_site, v: ck('site'), c: 'brand', href: lnk(PG.complaints, { k: 'site' }) }, { label: T.kb_other, v: ck('other'), c: 'brand', href: lnk(PG.complaints, { k: 'other' }) }]), PG.complaints) +
+      `</div>`;
+  }
+
   function draw(full = true) {
-    if (PAGE === 'home') {
-      const n = DB.summary;
-      const ico = {
-        delayed: ['', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/>'],
-        licenses: ['ok', '<path d="M12 3 4 6v6c0 4.4 3.4 8.3 8 9 4.6-.7 8-4.6 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m8.8 12.2 2.3 2.3 4.2-4.4" stroke-linecap="round" stroke-linejoin="round"/>'],
-        complaints: ['amber', '<path d="M4 14v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/><rect x="2.5" y="12.5" width="4.5" height="7.5" rx="2.2"/><rect x="17" y="12.5" width="4.5" height="7.5" rx="2.2"/>']
-      };
-      $('#stats').innerHTML = [['delayed', T.s_delayed, '/admin-delayed-requests'], ['licenses', T.s_licenses, '/admin-license-verification'], ['complaints', T.s_complaints, '/admin-complaints']]
-        .map(([k, l, href]) => `<a class="card stat" href="${href}"><span class="ico ${ico[k][0]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${ico[k][1]}</svg></span><div><strong>${n[k]}</strong><span>${l}</span></div>${SVG.go}</a>`).join('');
-      const sec = (title, total, shown, href, rows, none) => `<div class="sec-head"><h2>${title}</h2><span>${T.showing(shown, total)}</span>${total > shown ? `<a href="${href}">${T.see_all} ${AR ? '&larr;' : '&rarr;'}</a>` : ''}</div>` + (rows || empty(none));
-      const dl = DB.delayed.filter(r => r.st === 'pending').sort((a, b) => a.at - b.at), pl = [...DB.pending].sort((a, b) => a.at - b.at), cl = DB.cmp.filter(c => c.st !== 'resolved').sort((a, b) => a.at - b.at);
-      $('#home').innerHTML =
-        sec(T.s_delayed, dl.length, Math.min(3, dl.length), '/admin-delayed-requests', dl.slice(0, 3).map(r => RD(r, go('/admin-delayed-requests', T.review))).join(''), T.none_delayed) +
-        sec(T.s_licenses, pl.length, Math.min(3, pl.length), '/admin-license-verification', pl.slice(0, 3).map(r => RL(r, go('/admin-license-verification', T.review))).join(''), T.none_pending) +
-        sec(T.s_complaints, cl.length, Math.min(3, cl.length), '/admin-complaints', cl.slice(0, 3).map(c => RC(c, go('/admin-complaints', T.review))).join(''), T.none_cmp);
-      return;
-    }
+    if (PAGE === 'home') { drawHome(); return; }
     if (full) $('#bar').innerHTML = BAR[PAGE]();
     $('#list').innerHTML = OUT[PAGE]();
   }
@@ -233,12 +335,15 @@
       `<h3 class="sub-h">${T.what}</h3>${[...r.log].reverse().map(m => `<div class="msg"><small>${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}` +
       (r.st === 'pending' ? `<div class="panel-actions">${btn('dhandled', r.id, T.mark, 'btn-primary')}</div>` : ''));
   }
-  function openComplaint(id) {
+  async function openComplaint(id) {
     const c = by(DB.cmp, id);
+    if (c.st === 'open') {                 // opening the details is what moves a new complaint to "investigating"
+      const r = await api(`/api/admin/complaints/${id}/seen`, 'POST', {});
+      if (r) { c.st = r.status; draw(false); }
+    }
     openPanel(`${T.ticket} ${c.no}`, kv({ [T.subject]: c.sub, [T.complainant]: `${c.name} (${T[c.who] || c.who})`, [T.status]: T[CST[c.st][0]], [T.submitted]: fmt(c.at) }) +
       `<div class="msg">${esc(c.body)}</div>${c.th.map(m => `<div class="msg admin"><small>${T.admin} · ${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}
-      <div class="field"><label>${T.status}</label><select id="c-st">${Object.entries(CST).map(([k, v]) => `<option value="${k}"${k === c.st ? ' selected' : ''}>${T[v[0]]}</option>`).join('')}</select></div>
-      <div class="field"><label>${T.your_reply}</label><textarea id="c-txt" rows="4"></textarea><p class="err" hidden>${T.write_first}</p></div>
+      <div class="field"><label>${T.your_reply}</label><textarea id="c-txt" rows="4"></textarea><p class="err" hidden>${T.write_first}</p>${c.st === 'resolved' ? '' : `<p class="hint">${T.reply_hint}</p>`}</div>
       <div class="panel-actions">${btn('reply', c.id, T.send, 'btn-primary')}</div>`);
   }
 
@@ -265,14 +370,18 @@
     del: id => { const r = by(DB.accounts, id); ask({ title: T.delete_t(r.name), text: T.delete_s, ok: T.delete_b, danger: true }, async () => { if (await api(`/api/admin/accounts/${id}`, 'DELETE')) { toast(T.deleted_ok); reload('accounts'); } }); },
     cview: openComplaint,
     reply: async id => {
-      const c = by(DB.cmp, id), txt = $('#c-txt', panel).value.trim(), st = $('#c-st', panel).value;
-      if (!txt && st === c.st) { $('.err', panel).hidden = false; return; }
-      if (await api(`/api/admin/complaints/${id}/respond`, 'POST', { status: st, reply: txt })) { toast(txt ? T.sent_ok : T.status_ok); await LOAD.complaints(); openComplaint(id); draw(false); }
+      const txt = $('#c-txt', panel).value.trim();
+      if (!txt) { $('.err', panel).hidden = false; return; }
+      if (await api(`/api/admin/complaints/${id}/respond`, 'POST', { reply: txt })) { toast(T.sent_ok); await LOAD.complaints(); openComplaint(id); draw(false); }
     }
   };
 
   document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && A[b.dataset.act]) A[b.dataset.act](b.dataset.id); });
   document.addEventListener('input', e => { const f = e.target.dataset.f; if (f) { S.f[f] = e.target.value; draw(false); } });
   draw();
-  reload(...({ home: ['summary', 'delayed', 'pending', 'complaints'], delayed: ['delayed'], licenses: ['pending', 'history', 'accounts'], complaints: ['complaints'] }[PAGE]));
+  reload(...({ home: ['summary', 'delayed', 'pending', 'complaints', 'history', 'accounts'], delayed: ['delayed'], licenses: ['pending', 'history', 'accounts'], complaints: ['complaints'] }[PAGE])).then(() => {
+    // a dashboard link can point straight at one item: ?open=ID opens its panel
+    const o = QS.get('open'), f = { delayed: 'dview', licenses: 'lview', complaints: 'cview' }[PAGE], list = { delayed: DB.delayed, licenses: DB.pending, complaints: DB.cmp }[PAGE];
+    if (o && f && list.some(x => x.id === o)) { A[f](o); history.replaceState(null, '', location.pathname + location.hash); }
+  });
 })();

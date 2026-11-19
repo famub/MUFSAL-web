@@ -12,7 +12,8 @@ Registration requests (list / approve / reject) are in routes_auth.py: GET /api/
     GET    /api/admin/accounts                   active doctor / radiologist accounts
     DELETE /api/admin/accounts/{id}              delete an account
     GET    /api/admin/complaints                 general complaints
-    POST   /api/admin/complaints/{id}/respond    {"status": "investigating", "reply": "..."}
+    POST   /api/admin/complaints/{id}/seen       the admin opened it: open -> investigating (automatic)
+    POST   /api/admin/complaints/{id}/respond    {"reply": "..."}  saves the reply: -> resolved (automatic)
 """
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -141,12 +142,23 @@ async def respond(request: Request):
         return FORBIDDEN
     complaint_id = _int(request, "complaint_id")
     data = await read_json(request)
-    status = data.get("status")
     reply = (data.get("reply") or "").strip()
-    if status not in db.COMPLAINT_STATUSES:
-        return JSONResponse({"ok": False, "error": "bad_status"}, status_code=400)
+    if not reply:                        # the reply is what resolves the complaint, so it cannot be empty
+        return JSONResponse({"ok": False, "error": "reply_required"}, status_code=400)
     if len(reply) > 2000:
         return JSONResponse({"ok": False, "error": "reply_too_long"}, status_code=400)
-    if not complaint_id or not await run_in_threadpool(db.respond_to_complaint, complaint_id, admin, status, reply or None):
+    if not complaint_id or not await run_in_threadpool(db.respond_to_complaint, complaint_id, admin, reply):
         return _not_found()
-    return {"ok": True}
+    return {"ok": True, "status": "resolved"}
+
+
+@router.post("/api/admin/complaints/{complaint_id}/seen")
+async def seen(request: Request):
+    """The admin opened the details of a complaint: a new one ('open') becomes 'investigating'."""
+    if admin_id(request) is None:
+        return FORBIDDEN
+    complaint_id = _int(request, "complaint_id")
+    status = await run_in_threadpool(db.mark_complaint_seen, complaint_id) if complaint_id else None
+    if status is None:
+        return _not_found()
+    return {"ok": True, "status": status}
