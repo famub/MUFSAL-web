@@ -60,7 +60,7 @@
     </div>
   </main>
 
-  <!-- Search: hides the cases that do not contain the typed text (name, Health ID, case number, date) -->
+   <!-- Search by the patient's name or an ID (Health ID or case number) - not by date -->
   <script>
     const search = document.getElementById('search');
     if (search) {
@@ -69,7 +69,7 @@
         const q = search.value.trim().toLowerCase().replace('#', '');
         let shown = 0;
         rows.forEach(function (row) {
-          const match = row.textContent.toLowerCase().includes(q);
+          const match = row.dataset.search.includes(q);
           row.classList.toggle('is-hidden', !match);
           if (match) shown++;
         });
