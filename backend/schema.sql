@@ -13,6 +13,7 @@ CREATE TABLE users (
     national_id   CHAR(10)     UNIQUE,
     status        VARCHAR(20)  NOT NULL DEFAULT 'pending',
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    delete_requested_at TIMESTAMP,          -- a doctor/radiologist asked to delete the account; the admin decides
     CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist','admin')),
     CONSTRAINT users_status_valid CHECK (status IN ('pending','approved','rejected')),
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
