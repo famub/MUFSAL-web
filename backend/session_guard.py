@@ -17,6 +17,9 @@ IDLE_LIMIT_SECONDS = 15 * 60
 SESSION_MAX_AGE = 60 * 60 * 8          # the cookie itself lives 8 hours (patients and admins)
 NOT_COUNTED = ("/static/", "/assets/")  # css/js/images are not "activity"
 
+# An account that asked to be deleted (routes_account.py) can only see these until the admin decides
+WHILE_DELETING = ("/account-deletion", "/logout", "/logout.html", "/api/logout", "/set-lang", "/login")
+
 
 def install(app):
     async def idle_timeout(request, call_next):
@@ -30,7 +33,11 @@ def install(app):
                 if path.startswith("/api/"):
                     return JSONResponse({"ok": False, "error": "expired"}, status_code=401)
                 return RedirectResponse("/login?expired=1", status_code=303)
-            session["seen"] = now
+            session["seen"] = now 
+                        if session.get("deleting") and path not in WHILE_DELETING:
+                if path.startswith("/api/"):
+                    return JSONResponse({"ok": False, "error": "deleting"}, status_code=403)
+                return RedirectResponse("/account-deletion", status_code=303)
         return await call_next(request)
 
     app.add_middleware(BaseHTTPMiddleware, dispatch=idle_timeout)
