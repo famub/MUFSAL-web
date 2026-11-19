@@ -38,7 +38,7 @@ DOCTOR_TEXT = {
         "all_pending_sub": "Every case waiting for your review, most urgent first.",
         "all_approved_title": "All approved cases",
         "all_approved_sub": "Every case you have confirmed, newest first.",
-        "search_ph": "Search by patient, Health ID or date",
+        "search_ph": "Search by patient name or ID",
         "no_match": "No cases match your search.",
         "all_pending": "View all pending cases",
         "all_approved": "View all approved cases",
