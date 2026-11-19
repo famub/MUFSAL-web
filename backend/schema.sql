@@ -1,6 +1,21 @@
 -- =====================================================================
 -- MUFSAL - database schema (PostgreSQL)
 -- Run this file once on an empty "mufsal" database.
+--
+-- ON ACCOUNTS NEVER BEING DELETED
+-- An account is taken out of service, never removed. A doctor signs
+-- reports, a radiologist uploads X-rays and a patient owns the case
+-- itself, so deleting the row would leave a medical record with no
+-- author or no owner. A professional who wants to leave is marked in
+-- professionals.deactivated_at and keeps everything already written.
+--
+-- That rule is not left to us to remember: every foreign key pointing
+-- at users is ON DELETE RESTRICT, so the database refuses the deletion.
+-- Two are not, on purpose:
+--   patients.user_id and professionals.user_id are CASCADE, because
+--     those rows are parts of the same person, not references to one;
+--   password_resets.user_id is CASCADE, because a one-hour token is
+--     worth nothing once its account is gone.
 -- =====================================================================
 
 CREATE TABLE users (
@@ -31,30 +46,47 @@ CREATE TABLE patients (
 );
 
 CREATE TABLE professionals (
-    user_id      INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    scfhs_number VARCHAR(20) NOT NULL UNIQUE
+    user_id                INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    scfhs_number           VARCHAR(20) NOT NULL UNIQUE,
+    license_expiry         DATE        NOT NULL,
+    pending_license_expiry DATE,
+    deactivated_at         TIMESTAMP
 );
+
+COMMENT ON COLUMN professionals.license_expiry IS
+    'The day the practising licence runs out, given by the professional when registering. There is no "suspended" column: whether an account is suspended is read from this date (license_expiry < CURRENT_DATE), so the answer is right at every moment and no nightly job has to keep it so. What time alone decides is not stored.';
+
+COMMENT ON COLUMN professionals.pending_license_expiry IS
+    'A renewal date waiting for the admin to accept it; empty when no renewal is in hand. The new date waits here instead of overwriting license_expiry, so a licence is never in force before the admin has said so. Accepted, it moves to license_expiry and is emptied; refused, it is emptied and the old date stands.';
+
+COMMENT ON COLUMN professionals.deactivated_at IS
+    'When the account was taken out of service, empty while it is in service. This is the admin acting on users.delete_requested_at: the request is recorded there, the decision here. The row is never deleted, because a doctor signs reports and a radiologist uploads X-rays, and removing it would leave medical records with no author.';
 
 CREATE TABLE registration_decisions (
     decision_id     SERIAL PRIMARY KEY,
-    professional_id INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
-    admin_id        INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
+    professional_id INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
+    admin_id        INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
     applicant_name  VARCHAR(100) NOT NULL,
     applicant_role  VARCHAR(20)  NOT NULL,
+    kind            VARCHAR(15)  NOT NULL DEFAULT 'registration',
     decision        VARCHAR(10)  NOT NULL,
     reason          TEXT,
     decided_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT reg_applicant_role_valid CHECK (applicant_role IN ('doctor','radiologist')),
+    CONSTRAINT reg_kind_valid CHECK (kind IN ('registration','renewal')),
     CONSTRAINT reg_decision_valid CHECK (decision IN ('approved','rejected')),
     CONSTRAINT reg_reason_required CHECK (decision = 'approved' OR reason IS NOT NULL)
 );
 
+COMMENT ON COLUMN registration_decisions.kind IS
+    'What was being decided: a first application or a licence renewal. A professional is barred for good after two refused applications, while a refused renewal does not count against that, so the two cannot share one row type. With this column the number of tries left is counted from this table and needs no column of its own: count the rejected rows whose kind is registration.';
+
 CREATE TABLE cases (
     case_id            SERIAL PRIMARY KEY,
-    patient_id         INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    uploaded_by        INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
+    patient_id         INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    uploaded_by        INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
     source             VARCHAR(15)  NOT NULL,
-    assigned_doctor_id INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
+    assigned_doctor_id INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
     xray_image_path    VARCHAR(255) NOT NULL UNIQUE,
     status             VARCHAR(20)  NOT NULL DEFAULT 'under_review',
     submitted_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -126,7 +158,7 @@ COMMENT ON COLUMN ai_results.priority IS
 
 CREATE TABLE reports (
     case_id      INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
-    doctor_id    INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
+    doctor_id    INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
     doctor_name  VARCHAR(100) NOT NULL,
     final_grade  SMALLINT     NOT NULL,
     doctor_notes TEXT         NOT NULL,
@@ -148,7 +180,7 @@ CREATE TABLE case_activity (
 
 CREATE TABLE complaints (
     complaint_id SERIAL       PRIMARY KEY,
-    user_id      INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id      INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     -- which case the complaint is about, when it is about one at all.
     -- The complaint survives the case, so the admin can still read it.
     case_id      INTEGER      REFERENCES cases(case_id) ON DELETE SET NULL,
@@ -162,7 +194,7 @@ CREATE TABLE complaints (
 CREATE TABLE complaint_replies (
     reply_id     SERIAL    PRIMARY KEY,
     complaint_id INTEGER   NOT NULL REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-    admin_id     INTEGER   REFERENCES users(user_id) ON DELETE SET NULL,
+    admin_id     INTEGER   REFERENCES users(user_id) ON DELETE RESTRICT,
     body         TEXT      NOT NULL,
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -179,11 +211,11 @@ CREATE TABLE password_resets (
 CREATE TABLE delay_complaints (
     delay_complaint_id SERIAL      PRIMARY KEY,
     case_id            INTEGER     NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
-    user_id            INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id            INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     status             VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     handled_at         TIMESTAMP,
-    handled_by         INTEGER     REFERENCES users(user_id) ON DELETE SET NULL,
+    handled_by         INTEGER     REFERENCES users(user_id) ON DELETE RESTRICT,
     CONSTRAINT delay_status_valid CHECK (status IN ('pending','handled'))
 );
 

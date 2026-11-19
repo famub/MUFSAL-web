@@ -25,7 +25,11 @@ INSERT INTO users (user_id, role, full_name, email, password_hash, phone, nation
 (10, 'patient',     'Aisha Almutairi',   'aisha@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966509999999', '1099999999', 'approved'),
 (11, 'patient',     'Fatimah Alshehri',  'fatimah@mufsal.test',  '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966501212121', '1012121212', 'approved'),
 (12, 'patient',     'Abdullah Alharbi',  'abdullah@mufsal.test', '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966501313131', '1013131313', 'approved'),
-(13, 'radiologist', 'Yazeed Alomar',     'yazeed@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966501414141', '1014141414', 'pending');
+(13, 'radiologist', 'Yazeed Alomar',     'yazeed@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966501414141', '1014141414', 'pending'),
+-- 14 and 15 carry the two licence states. They are extra accounts so that the
+-- six above keep working as the demo logins everybody already uses.
+(14, 'doctor',      'Sultan Alghamdi',   'sultan@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966501515151', '1015151515', 'pending'),
+(15, 'radiologist', 'Amal Alqahtani',    'amal@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '966501616161', '1016161616', 'approved');
 
 SELECT setval('users_user_id_seq', (SELECT MAX(user_id) FROM users));
 
@@ -39,21 +43,45 @@ INSERT INTO patients (user_id, date_of_birth, gender) VALUES
 (12, '1959-03-17', 'male');
 
 -- ---------- professional details ----------
-INSERT INTO professionals (user_id, scfhs_number) VALUES
-(4,  '12-H-48213'),
-(5,  '15-H-52090'),
-(6,  '09-R-30177'),
-(7,  '18-H-61004'),
-(8,  '07-R-21550'),
-(13, '21-R-70332');
+-- The licence dates are written against today, so every state is there
+-- whenever this file is run:
+--   4 5 6 7 8 13  licence in force        -> nothing in the way
+--   14            licence ran out, a renewal is waiting for the admin
+--                 (users.status is 'pending', so he cannot log in meanwhile)
+--   15            licence in force, but the account was taken out of service
+INSERT INTO professionals (user_id, scfhs_number, license_expiry,
+                           pending_license_expiry, deactivated_at) VALUES
+(4,  '12-H-48213', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
+(5,  '15-H-52090', CURRENT_DATE + INTERVAL '18 months', NULL, NULL),
+(6,  '09-R-30177', CURRENT_DATE + INTERVAL '3 years',   NULL, NULL),
+(7,  '18-H-61004', CURRENT_DATE + INTERVAL '1 year',    NULL, NULL),
+(8,  '07-R-21550', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
+(13, '21-R-70332', CURRENT_DATE + INTERVAL '4 years',   NULL, NULL),
+(14, '11-H-40988', CURRENT_DATE - INTERVAL '9 days',
+                   CURRENT_DATE + INTERVAL '2 years', NULL),
+(15, '16-R-55471', CURRENT_DATE + INTERVAL '2 years',
+                   NULL, CURRENT_TIMESTAMP - INTERVAL '10 days');
 
 -- ---------- admin decisions ----------
--- 7 and 13 are left out on purpose: they are the two licences still waiting
-INSERT INTO registration_decisions (professional_id, admin_id, applicant_name, applicant_role, decision, reason) VALUES
-(4, 1, 'Reem Alqahtani',   'doctor',      'approved', NULL),
-(5, 1, 'Khalid Alzahrani', 'doctor',      'approved', NULL),
-(6, 1, 'Huda Alotaibi',    'radiologist', 'approved', NULL),
-(8, 1, 'Lama Alsalem',     'radiologist', 'rejected', 'The SCFHS registration number could not be verified.');
+-- 7 and 13 are left out on purpose: they are the two licences still waiting.
+--
+-- The 'kind' column is what makes the two-tries rule countable. Lama was
+-- turned down twice on her application, so she is barred for good. Sultan
+-- was turned down once when he applied, got in on his second try, and has
+-- since had a renewal turned down as well - three refusals in all, yet he
+-- may still renew, because a refused renewal is not a refused application.
+INSERT INTO registration_decisions (professional_id, admin_id, applicant_name, applicant_role, kind, decision, reason, decided_at) VALUES
+(4,  1, 'Reem Alqahtani',   'doctor',      'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '200 days'),
+(5,  1, 'Khalid Alzahrani', 'doctor',      'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '180 days'),
+(6,  1, 'Huda Alotaibi',    'radiologist', 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '150 days'),
+(15, 1, 'Amal Alqahtani',   'radiologist', 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '140 days'),
+-- Lama: two refused applications -> may never apply again
+(8,  1, 'Lama Alsalem',     'radiologist', 'registration', 'rejected', 'The SCFHS registration number could not be verified.', CURRENT_TIMESTAMP - INTERVAL '60 days'),
+(8,  1, 'Lama Alsalem',     'radiologist', 'registration', 'rejected', 'The number still does not match the SCFHS register.',   CURRENT_TIMESTAMP - INTERVAL '20 days'),
+-- Sultan: refused once, then let in, and a renewal refused after that
+(14, 1, 'Sultan Alghamdi',  'doctor',      'registration', 'rejected', 'The licence photograph was unreadable.',  CURRENT_TIMESTAMP - INTERVAL '400 days'),
+(14, 1, 'Sultan Alghamdi',  'doctor',      'registration', 'approved', NULL,                                      CURRENT_TIMESTAMP - INTERVAL '390 days'),
+(14, 1, 'Sultan Alghamdi',  'doctor',      'renewal',      'rejected', 'The renewal certificate had no stamp.',   CURRENT_TIMESTAMP - INTERVAL '5 days');
 
 -- =====================================================================
 -- CASES
