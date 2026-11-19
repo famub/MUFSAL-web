@@ -13,7 +13,7 @@ PROFILE_TEXT = {
                          "Contact the administrator to request a change.",
         "verified": "Verified by the administrator",
         "role_label": "Professional Role",
-        "role_doctor": "Doctor",
+        "role_doctor": "Orthopedic Doctor",
         "role_radiologist": "Radiology Specialist",
         "scfhs_label": "SCFHS Registration Number",
 
@@ -45,7 +45,7 @@ PROFILE_TEXT = {
         "prof_subtitle": "تحقّق منها المسؤول عند التسجيل. لتعديلها تواصل مع المسؤول.",
         "verified": "تحقّق منها المسؤول",
         "role_label": "الدور المهني",
-        "role_doctor": "طبيب",
+        "role_doctor": "طبيب عظام",
         "role_radiologist": "أخصائي أشعة",
         "scfhs_label": "رقم التسجيل المهني",
 
