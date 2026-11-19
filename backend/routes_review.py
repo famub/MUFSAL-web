@@ -189,7 +189,7 @@ def render_review(request, case, final_grade=None, notes="", errors_=None, statu
             "notes": notes,
             "errors": errors_ or {},
             "back": back_link(request, "doctor", lang),
-            "back": back_link(request, user["role"], lang),
+            
         },
         status_code=status_code,
     )
@@ -322,6 +322,7 @@ def view_report(request: Request, case_id: int, confirmed: int = 0):
             "t": REPORT_TEXT[lang],
             "role": user["role"],
             "home": HOME.get(user["role"], "/"),
+            "back": back_link(request, user["role"], lang),
             "case": case,
             "approved": approved,
             "report": report,
