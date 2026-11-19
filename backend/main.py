@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 load_dotenv()   # reads .env BEFORE the modules below read their settings
 
+import routes_account 
 import routes_admin
 import routes_admin_pages
 import routes_auth
@@ -59,5 +60,6 @@ app.include_router(routes_doctor.router)      # /dashboard-doctor (built by the 
 app.include_router(routes_complaints.router)  # /complaints (built by the server)
 app.include_router(routes_new_case.router)    # /new-case (built by the server)
 app.include_router(routes_review.router)      # /cases/{id}/review, /cases/{id}/report, /set-lang ...
-app.include_router(routes_profile.router)    # /profile-doctor (built by the server)
+app.include_router(routes_profile.router)    # /profile-doctor (built by the server) 
+app.include_router(routes_account.router)    # /account/delete-request, /account-deletion
 app.include_router(routes_pages.router)       # /login, /register ... and every other .html page
