@@ -84,11 +84,8 @@
               <label for="email">{{ t.email_label }}</label>
               <input type="text" inputmode="email" id="email" name="email" value="{{ profile.email }}" maxlength="255" required disabled />
             </div>
-            <div class="field">
-              <label for="phone">{{ t.phone_label }}</label>
-              <input type="tel" id="phone" name="phone" value="{{ profile.phone }}" maxlength="12" required disabled />
-              <p class="hint">{{ t.phone_hint }}</p>
-            </div>
+                        <!-- the phone is not shown on the doctor's profile; it is sent back unchanged -->
+            <input type="hidden" name="phone" value="{{ profile.phone }}" />
           </div>
 
           <div class="decision-foot" id="actions" hidden>
