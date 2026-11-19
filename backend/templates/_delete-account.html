@@ -15,7 +15,7 @@
 
 <dialog id="delete-dialog" class="confirm-dialog" aria-labelledby="delete-title">
   <form method="post" action="/account/delete-request">
-    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 21.5 19h-19L12 3Z" stroke-linejoin="round" /><path d="M12 10v4M12 16.6v.1" stroke-linecap="round" /></svg></span>
+    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 21.5 19h-19L12 3Z" stroke-linejoin="round" /><path d="M12 10v4M12 16.6v.1" stroke-linecap="round" /></svg></span>
     <h3 id="delete-title">{{ 'هل تريد حذف حسابك؟' if ar else 'Delete your account?' }}</h3>
     <p>{{ 'سيُغلق حسابك فوراً ولن تتمكن من استخدام الموقع. بعد تأكيد المشرف يُحذف الحساب نهائياً ولا يمكن استرجاعه.' if ar else 'Your account is locked straight away and you will not be able to use MUFSAL. Once the admin confirms, the account is deleted for good and cannot be brought back.' }}</p>
     <div class="dialog-actions">
