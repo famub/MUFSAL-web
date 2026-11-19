@@ -60,7 +60,7 @@ COMMENT ON COLUMN professionals.pending_license_expiry IS
     'A renewal date waiting for the admin to accept it; empty when no renewal is in hand. The new date waits here instead of overwriting license_expiry, so a licence is never in force before the admin has said so. Accepted, it moves to license_expiry and is emptied; refused, it is emptied and the old date stands.';
 
 COMMENT ON COLUMN professionals.delete_requested_at IS
-    'When the professional asked for the account to be closed, empty while no such request is in hand. It sits here rather than in users because only a doctor or a radiologist can ask: in users it would stay empty for every patient and every admin for good. It is also the first half of one act, whose second half is the column below, so both are read from a single row.';
+    'When the professional asked for the account to be closed, empty while no such request is in hand. It is here and not in users because only a doctor or a radiologist can ask, so in users it would stay empty for every patient and every admin for good. It is also the first half of one act whose second half is the column below, and keeping them together lets one row answer where a request has got to.';
 
 COMMENT ON COLUMN professionals.deactivated_at IS
     'When the account was taken out of service, empty while it is in service. This is the admin acting on the request above: the asking is recorded there, the decision here, so a request still waiting is one column filled and the other empty. The row is never deleted, because a doctor signs reports and a radiologist uploads X-rays, and removing it would leave medical records with no author.';
@@ -87,19 +87,23 @@ COMMENT ON COLUMN registration_decisions.kind IS
 CREATE TABLE cases (
     case_id            SERIAL PRIMARY KEY,
     patient_id         INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
-    uploaded_by        INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
-    source             VARCHAR(15)  NOT NULL,
+    -- There is no "source" column saying whether the patient or a radiologist
+    -- sent the X-ray in. It is these two columns compared: the same person on
+    -- both sides means the patient sent her own, a different one means a
+    -- radiologist sent it for her. Keeping a column as well would be the same
+    -- fact written twice, and two copies can come to disagree. No account is
+    -- ever deleted (see the note at the top of this file), so uploaded_by is
+    -- always there to answer with.
+    uploaded_by        INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     assigned_doctor_id INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
     xray_image_path    VARCHAR(255) NOT NULL UNIQUE,
     status             VARCHAR(20)  NOT NULL DEFAULT 'under_review',
     submitted_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT cases_source_valid CHECK (source IN ('patient','radiologist')),
     CONSTRAINT cases_status_valid CHECK (status IN ('under_review','approved'))
 );
 
--- Why `source` is stored and not worked out from `uploaded_by`:
-COMMENT ON COLUMN cases.source IS
-    'Kept on purpose, not worked out from uploaded_by. That column is ON DELETE SET NULL, so once the account that uploaded the X-ray is removed the source could no longer be told. Same reasoning as reports.doctor_name and registration_decisions.applicant_name.';
+COMMENT ON COLUMN cases.uploaded_by IS
+    'Who sent the X-ray in: the patient herself, or the radiologist who did it for her. Comparing it with patient_id is what answers that question, which is why there is no column of its own repeating the answer.';
 
 COMMENT ON COLUMN cases.xray_image_path IS
     'Where the file sits under backend/uploads. The file name is a random id, never the case number, so one patient cannot reach another patient''s X-ray by changing a number in the address.';

@@ -79,11 +79,21 @@ def get_user_by_email(email):
         ).fetchone()
 
 
+def is_deactivated(user_id):
+    """True when an admin has taken this professional's account out of service."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM professionals WHERE user_id = %s AND deactivated_at IS NOT NULL",
+            (user_id,),
+        ).fetchone()
+    return row is not None
+
+
 def login(email, password):
     """Check an email and password.
 
     Returns the account when the login is valid, otherwise a dict with 'error':
-    'not_found', 'wrong_password', 'pending' or 'rejected'.
+    'not_found', 'wrong_password', 'pending', 'rejected' or 'deactivated'.
     """
     user = get_user_by_email(email)
     if user is None:
@@ -93,6 +103,10 @@ def login(email, password):
         return {"error": "wrong_password"}
     if user["status"] != "approved":
         return {"error": user["status"]}
+    # A closed account keeps the status it was approved with, because that part
+    # of its history did happen. What stops it logging in is the closing itself.
+    if user["role"] in ("doctor", "radiologist") and is_deactivated(user["user_id"]):
+        return {"error": "deactivated"}
 
     del user["password_hash"]  # never send the hash to the pages
     return user

@@ -181,8 +181,7 @@ async def submit_new_case(request: Request):
     try:
         case_id = create_case(
             patient_id=user_id,
-            uploaded_by=user_id,
-            source="patient",
+            uploaded_by=user_id,      # the patient herself, so the case counts as hers
             xray_image_path=f"uploads/xrays/{file.name}",     # same style as seed.sql
             history=history,
         )

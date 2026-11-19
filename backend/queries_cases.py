@@ -33,22 +33,26 @@ def _pick_doctor(conn):
     return row["user_id"] if row else None
 
 
-def create_case(patient_id, uploaded_by, source, xray_image_path, history):
+def create_case(patient_id, uploaded_by, xray_image_path, history):
     """Save a new X-ray with its medical history and assign it to a doctor.
 
     'history' is a dict with the answers of the upload form.
     Returns the new case_id.
+
+    Who sent the X-ray in is not saved on its own. Pass the patient's own id
+    as uploaded_by when she sends it herself, and the radiologist's id when he
+    sends it for her; every query works the answer out by comparing the two.
     """
     with get_connection() as conn:
         doctor_id = _pick_doctor(conn)
 
         case = conn.execute(
             """
-            INSERT INTO cases (patient_id, uploaded_by, source, assigned_doctor_id, xray_image_path)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO cases (patient_id, uploaded_by, assigned_doctor_id, xray_image_path)
+            VALUES (%s, %s, %s, %s)
             RETURNING case_id
             """,
-            (patient_id, uploaded_by, source, doctor_id, xray_image_path),
+            (patient_id, uploaded_by, doctor_id, xray_image_path),
         ).fetchone()
 
         conn.execute(
@@ -119,7 +123,8 @@ def get_doctor_cases(doctor_id, status="under_review"):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT c.case_id, c.status, c.source, c.submitted_at,
+            SELECT c.case_id, c.status, c.submitted_at,
+                   CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
                    p.full_name AS patient_name, p.national_id,
                    a.predicted_grade, a.confidence, a.priority
             FROM cases c
@@ -142,7 +147,12 @@ def get_case(case_id):
     with get_connection() as conn:
         case = conn.execute(
             """
-            SELECT c.*, p.full_name AS patient_name, p.national_id, p.phone,
+            SELECT c.*,
+                   -- who sent the X-ray in, worked out from the two ids rather
+                   -- than read from a column of its own
+                   CASE WHEN c.uploaded_by = c.patient_id
+                        THEN 'patient' ELSE 'radiologist' END AS source,
+                   p.full_name AS patient_name, p.national_id, p.phone,
                    pt.date_of_birth, pt.gender
             FROM cases c
             JOIN users p ON p.user_id = c.patient_id
@@ -201,7 +211,8 @@ def get_patient_cases(patient_id):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT c.case_id, c.status, c.submitted_at, c.source,
+            SELECT c.case_id, c.status, c.submitted_at,
+                   CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
                    r.final_grade, r.report_ar, r.report_en, r.approved_at, r.doctor_name
             FROM cases c
             LEFT JOIN reports r ON r.case_id = c.case_id

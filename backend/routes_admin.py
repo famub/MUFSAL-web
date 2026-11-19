@@ -120,10 +120,12 @@ async def accounts(request: Request):
 
 @router.delete("/api/admin/accounts/{user_id}")
 async def delete_account(request: Request):
+    """Close an account. The address still reads DELETE so the admin page needs
+    no change, but nothing is removed - see deactivate_professional_account."""
     if admin_id(request) is None:
         return FORBIDDEN
     user_id = _int(request, "user_id")
-    if not user_id or not await run_in_threadpool(db.delete_professional_account, user_id):
+    if not user_id or not await run_in_threadpool(db.deactivate_professional_account, user_id):
         return _not_found()
     return {"ok": True}
 

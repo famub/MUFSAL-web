@@ -90,25 +90,25 @@ INSERT INTO registration_decisions (professional_id, admin_id, applicant_name, a
 -- the site enforces.
 -- =====================================================================
 
-INSERT INTO cases (case_id, patient_id, uploaded_by, source, assigned_doctor_id, xray_image_path, status, submitted_at) VALUES
+INSERT INTO cases (case_id, patient_id, uploaded_by, assigned_doctor_id, xray_image_path, status, submitted_at) VALUES
 -- 1  Sarah, 2 days ago       -> in progress, the delay button is still off
-(1,  2,  2,  'patient',     4, 'uploads/xrays/1.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '2 days'),
+(1,  2,  2,  4, 'uploads/xrays/1.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '2 days'),
 -- 2  Noura, by a radiologist -> finished, grade 1 (green)
-(2,  3,  6,  'radiologist', 5, 'uploads/xrays/2.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '20 days'),
+(2,  3,  6,  5, 'uploads/xrays/2.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '20 days'),
 -- 3  Dana, 12 days ago       -> in progress, the delay button is ON
-(3,  9,  9,  'patient',     4, 'uploads/xrays/3.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '12 days'),
+(3,  9,  9,  4, 'uploads/xrays/3.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '12 days'),
 -- 4  Aisha, 15 days ago      -> in progress with a delay already reported
-(4,  10, 10, 'patient',     5, 'uploads/xrays/4.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '15 days'),
+(4,  10, 10, 5, 'uploads/xrays/4.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '15 days'),
 -- 5  Abdullah, radiologist   -> finished, grade 3 (red)
-(5,  12, 6,  'radiologist', 4, 'uploads/xrays/5.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '30 days'),
+(5,  12, 6,  4, 'uploads/xrays/5.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '30 days'),
 -- 6  Sarah, older case       -> finished, grade 0 (green)
-(6,  2,  2,  'patient',     5, 'uploads/xrays/6.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '60 days'),
+(6,  2,  2,  5, 'uploads/xrays/6.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '60 days'),
 -- 7  Noura, older case       -> finished, grade 2 (amber), had a delay that was handled
-(7,  3,  3,  'patient',     4, 'uploads/xrays/7.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '45 days'),
+(7,  3,  3,  4, 'uploads/xrays/7.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '45 days'),
 -- 8  Abdullah, 5 days ago    -> in progress with NO AI result, the way a real upload arrives today
-(8,  12, 12, 'patient',     5, 'uploads/xrays/8.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '5 days'),
+(8,  12, 12, 5, 'uploads/xrays/8.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '5 days'),
 -- 9  Aisha, older case       -> finished, grade 4 (red)
-(9,  10, 10, 'patient',     4, 'uploads/xrays/9.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '40 days');
+(9,  10, 10, 4, 'uploads/xrays/9.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '40 days');
 
 SELECT setval('cases_case_id_seq', (SELECT MAX(case_id) FROM cases));
 

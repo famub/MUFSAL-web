@@ -11,7 +11,9 @@ def get_radiologist_stats(radiologist_id):
                    COUNT(*) FILTER (WHERE status = 'under_review') AS waiting,
                    COUNT(*) FILTER (WHERE status = 'approved')     AS approved
             FROM cases
-            WHERE uploaded_by = %s AND source = 'radiologist'
+            -- sent in by him, not by the patient herself: comparing the two
+            -- columns is what the old "source" column used to say
+            WHERE uploaded_by = %s AND uploaded_by <> patient_id
             """,
             (radiologist_id,),
         ).fetchone()
@@ -29,7 +31,7 @@ def get_radiologist_cases(radiologist_id, limit=None):
             JOIN users p            ON p.user_id = c.patient_id
             LEFT JOIN case_history h ON h.case_id = c.case_id
             LEFT JOIN reports r      ON r.case_id = c.case_id
-            WHERE c.uploaded_by = %s AND c.source = 'radiologist'
+            WHERE c.uploaded_by = %s AND c.uploaded_by <> c.patient_id
             ORDER BY c.submitted_at DESC
             LIMIT %s
             """,

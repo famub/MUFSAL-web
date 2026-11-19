@@ -2,7 +2,7 @@
 
     GET  /new-case-radiologist         the page: find the patient, upload the X-ray, answer, send
     GET  /new-case-radiologist/find    the search box: ?nationalId=...  -> the patient's name (JSON)
-    POST /new-case-radiologist         saves the case for THAT patient (source = 'radiologist')
+    POST /new-case-radiologist         saves the case for THAT patient (uploaded_by = the radiologist)
 
 The patient must already have an account. The radiologist types the patient's National ID,
 sees the name, confirms, and the case is linked to that patient. It then shows on the
@@ -128,8 +128,7 @@ async def submit(request: Request):
     try:
         case_id = create_case(
             patient_id=patient["patientId"],
-            uploaded_by=user_id,
-            source="radiologist",
+            uploaded_by=user_id,      # the radiologist, not the patient: that is what marks it as his upload
             xray_image_path=f"uploads/xrays/{stored.name}",
             history=history,
         )

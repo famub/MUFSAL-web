@@ -23,7 +23,8 @@ def get_doctor_approved(doctor_id, limit=None):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT c.case_id, c.source, p.full_name AS patient_name, p.national_id,
+            SELECT c.case_id, CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
+                   p.full_name AS patient_name, p.national_id,
             r.final_grade, r.approved_at
             FROM cases c
             JOIN users p   ON p.user_id = c.patient_id

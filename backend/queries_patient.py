@@ -83,7 +83,7 @@ def get_latest_case(patient_id):
                    c.status,
                    c.submitted_at,
                    h.knee,
-                   c.source,
+                   CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
                    up.full_name                                                 AS uploaded_by_name,
                    r.final_grade,
                    r.approved_at,
@@ -120,7 +120,7 @@ def get_all_cases(patient_id):
                    c.status,
                    c.submitted_at,
                    h.knee,
-                   c.source,
+                   CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
                    up.full_name AS uploaded_by_name,
                    r.final_grade,
                    r.approved_at

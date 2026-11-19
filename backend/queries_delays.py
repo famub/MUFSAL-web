@@ -8,14 +8,17 @@ DELAY_DAYS = 10
 def _delay_check(conn, case_id, user_id):
     """Return (allowed, reason). Shared by the button and the submit function."""
     case = conn.execute(
-        "SELECT patient_id, uploaded_by, source, status, submitted_at FROM cases WHERE case_id = %s",
+        "SELECT patient_id, uploaded_by, status, submitted_at FROM cases WHERE case_id = %s",
         (case_id,),
     ).fetchone()
     if case is None:
         return False, "case_not_found"
 
     is_patient = case["patient_id"] == user_id
-    is_radiologist = case["source"] == "radiologist" and case["uploaded_by"] == user_id
+    # the radiologist who sent this X-ray in: someone other than the patient,
+    # which is the same thing the old "source" column used to say
+    is_radiologist = (case["uploaded_by"] != case["patient_id"]
+                      and case["uploaded_by"] == user_id)
     if not (is_patient or is_radiologist):
         return False, "not_allowed"
 

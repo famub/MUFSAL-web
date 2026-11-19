@@ -107,31 +107,41 @@ def list_decisions():
 
 
 def list_active_accounts():
-    """Approved doctors and radiologists."""
+    """Approved doctors and radiologists whose accounts are still open."""
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT u.user_id, u.full_name, u.role, p.scfhs_number, u.delete_requested_at,
+            SELECT u.user_id, u.full_name, u.role, p.scfhs_number, p.delete_requested_at,
                    COALESCE(
                        (SELECT MAX(decided_at) FROM registration_decisions r
                         WHERE r.professional_id = u.user_id AND r.decision = 'approved'),
                        u.created_at) AS approved_at
             FROM users u JOIN professionals p ON p.user_id = u.user_id
             WHERE u.status = 'approved' AND u.role IN ('doctor','radiologist')
+              AND p.deactivated_at IS NULL
             ORDER BY u.full_name
             """
         ).fetchall()
 
 
-def delete_professional_account(user_id):
-    """Delete an approved doctor or radiologist. Returns False when there is no such account.
+def deactivate_professional_account(user_id):
+    """Close a doctor's or radiologist's account. False when there is none open.
 
-    The database does the rest (README-database.md, section 6): reports the doctor approved stay with the
-    patient, open cases lose the assignment. Doctors and radiologists have no files in uploads/ to delete.
+    Nothing is deleted. The account signed reports or sent X-rays in, and every
+    foreign key to users is ON DELETE RESTRICT, so removing the row would leave
+    medical records with no author and the database would refuse it. Filling
+    deactivated_at stops the login (queries_accounts.login) and takes the
+    account off this list, which is what closing it means here.
+
+    Asking twice keeps the first time, so the date stays the day it closed.
     """
     with get_connection() as conn:
         row = conn.execute(
-            "DELETE FROM users WHERE user_id = %s AND role IN ('doctor','radiologist') RETURNING user_id",
+            """
+            UPDATE professionals SET deactivated_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s AND deactivated_at IS NULL
+            RETURNING user_id
+            """,
             (user_id,),
         ).fetchone()
     return row is not None

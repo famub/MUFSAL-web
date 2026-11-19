@@ -40,6 +40,7 @@
       errBadLogin: "Incorrect email or password. Please try again.",
       pendingMsg: "Your account is still awaiting admin approval. You will be able to log in once it is approved.",
       rejectedMsg: "Your registration request was rejected. Please correct your information and submit a new registration request.",
+      deactivatedMsg: "This account has been closed by the admin and can no longer be used. Please contact the admin if you think this is a mistake.",
       rejectedReason: "Reason:", resubmit: "Submit a new request", loggedOut: "You have been logged out.",
       sessionExpired: "Your session ended after 15 minutes without activity. Please log in again.",
       // register choice
@@ -101,6 +102,7 @@
       errBadLogin: "البريد الإلكتروني أو كلمة المرور غير صحيحة. حاول مرة أخرى.",
       pendingMsg: "حسابك ما زال بانتظار موافقة المشرف. ستتمكن من تسجيل الدخول بعد الموافقة عليه.",
       rejectedMsg: "تم رفض طلب تسجيلك. يرجى تصحيح معلوماتك وتقديم طلب تسجيل جديد.",
+      deactivatedMsg: "تم إغلاق هذا الحساب من قبل المشرف ولم يعد قابلًا للاستخدام. يرجى التواصل مع المشرف إذا كنت ترى أن هذا خطأ.",
       rejectedReason: "السبب:", resubmit: "تقديم طلب جديد", loggedOut: "تم تسجيل خروجك.",
       sessionExpired: "انتهت جلستك بعد 15 دقيقة من عدم النشاط. يرجى تسجيل الدخول مرة أخرى.",
       patientCardTitle: "أنا مريض", patientCardDesc: "ارفع أشعة ركبتك واحصل على تقرير راجعه الطبيب بلغة بسيطة.",
@@ -354,6 +356,7 @@
         case "bad_login": showAlert("error", "errBadLogin"); break;       // same message for a wrong email and a wrong password
         case "locked":    showAlert("error", "errLocked"); break;
         case "pending":   showAlert("warn", "pendingMsg"); break;
+        case "deactivated": showAlert("error", "deactivatedMsg"); break;
         case "rejected":
           showAlert("error", "rejectedMsg", () => {
             const reason = r.data.reason ? ` <strong>${esc(t("rejectedReason"))}</strong> ${esc(r.data.reason)}` : "";

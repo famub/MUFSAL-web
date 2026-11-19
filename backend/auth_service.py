@@ -140,6 +140,8 @@ def login(data):
         return (*_err("bad_login", 401), None)      # the same answer for a wrong email and a wrong password
     if error == "pending":
         return (*_err("pending", 403), None)
+    if error == "deactivated":
+        return (*_err("deactivated", 403), None)
     if error == "rejected":
         user = db.get_user_by_email(email)
         return (*_err("rejected", 403, reason=db.get_rejection_reason(user["user_id"])), None)
