@@ -26,7 +26,40 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 UPLOADS_DIR = (Path(__file__).parent / "uploads").resolve()
 
 
-# ---------------------------------------------------------------- helpers
+# ---------------------------------------------------------------- helpers 
+
+# The "back" arrow on the review and report pages returns to the list the user came from.
+# Only these pages count (each role its own); anything else -> the user's home page.
+BACK_PAGES = {
+    "/dashboard-doctor": ("Back to home", "العودة إلى الرئيسية"),
+    "/pending-cases": ("Back to pending cases", "العودة إلى الحالات المعلّقة"),
+    "/approved-cases": ("Back to approved cases", "العودة إلى الحالات المعتمدة"),
+    "/dashboard-patient": ("Back to home", "العودة إلى الرئيسية"),
+    "/patient-cases": ("Back to my cases", "العودة إلى حالاتي"),
+    "/dashboard-radiologist": ("Back to dashboard", "العودة إلى لوحة التحكم"),
+    "/radiologist-cases": ("Back to cases", "العودة إلى الحالات"),
+}
+BACK_FOR_ROLE = {
+    "doctor": ("/dashboard-doctor", "/pending-cases", "/approved-cases"),
+    "patient": ("/dashboard-patient", "/patient-cases"),
+    "radiologist": ("/dashboard-radiologist", "/radiologist-cases"),
+}
+
+
+def back_link(request, role, lang):
+    """(url, label) of the page this user came from.
+    Read from the Referer header, so a filtered list (?priority=high) comes back filtered too.
+    Kept in the session, so it survives a refresh or a form error on the same page."""
+    from urllib.parse import urlsplit
+    allowed = BACK_FOR_ROLE.get(role, ())
+    ref = urlsplit(request.headers.get("referer", ""))
+    if ref.path in allowed and ref.netloc in ("", request.url.netloc):
+        request.session["back"] = ref.path + ("?" + ref.query if ref.query else "")
+    url = request.session.get("back", "")
+    if urlsplit(url).path not in allowed:
+        url = allowed[0] if allowed else "/"
+    label = BACK_PAGES.get(urlsplit(url).path, ("Back", "رجوع"))
+    return url, label[1] if lang == "ar" else label[0]
 
 def get_lang(request):
     """Page language from the 'lang' cookie (English by default)."""
@@ -155,6 +188,8 @@ def render_review(request, case, final_grade=None, notes="", errors_=None, statu
             "final_grade": final_grade,
             "notes": notes,
             "errors": errors_ or {},
+            "back": back_link(request, "doctor", lang),
+            "back": back_link(request, user["role"], lang),
         },
         status_code=status_code,
     )
