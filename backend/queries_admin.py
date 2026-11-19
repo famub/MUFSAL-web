@@ -111,7 +111,7 @@ def list_active_accounts():
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT u.user_id, u.full_name, u.role, p.scfhs_number,
+            SELECT u.user_id, u.full_name, u.role, p.scfhs_number, u.delete_requested_at,
                    COALESCE(
                        (SELECT MAX(decided_at) FROM registration_decisions r
                         WHERE r.professional_id = u.user_id AND r.decision = 'approved'),
