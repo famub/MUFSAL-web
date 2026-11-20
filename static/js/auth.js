@@ -41,6 +41,8 @@
       pendingMsg: "Your account is still awaiting admin approval. You will be able to log in once it is approved.",
       rejectedMsg: "Your registration request was rejected. Please correct your information and submit a new registration request.",
       deactivatedMsg: "This account has been closed by the admin and can no longer be used. Please contact the admin if you think this is a mistake.",
+      rejectedFinalMsg: "Your registration request was rejected again. You cannot submit another request. Please contact the admin if you think this is a mistake.",
+      errResubmitBlocked: "This account was rejected twice, so a new request cannot be submitted. Please contact the admin.",
       rejectedReason: "Reason:", resubmit: "Submit a new request", loggedOut: "You have been logged out.",
       sessionExpired: "Your session ended after 15 minutes without activity. Please log in again.",
       // register choice
@@ -56,7 +58,7 @@
       role: "Role", roleSelect: "Select your role", radiologist: "Radiologist", doctor: "Doctor",
       nationalId: "National ID / Iqama number", nationalIdHint: "10 digits.", scfhs: "SCFHS licence number", licenseExpiry: "Licence expiry date",
       submitRequest: "Submit account request",
-      pendingTitle: "Request submitted", pendingBody: "Your registration request is pending admin approval. You will be able to log in once it is approved.",
+      pendingTitle: "Request submitted", pendingBody: "Your registration request is pending admin approval. You can log in now, but your account stays locked until the admin approves it.",
       // forgot / reset
       sendLink: "Send reset link", forgotDone: "If this email is registered, a password reset link has been sent to it.",
       demoOpenReset: "Demo only: open the reset page", backToLogin: "Back to log in",
@@ -105,6 +107,8 @@
       pendingMsg: "حسابك ما زال بانتظار موافقة المشرف. ستتمكن من تسجيل الدخول بعد الموافقة عليه.",
       rejectedMsg: "تم رفض طلب تسجيلك. يرجى تصحيح معلوماتك وتقديم طلب تسجيل جديد.",
       deactivatedMsg: "تم إغلاق هذا الحساب من قبل المشرف ولم يعد قابلًا للاستخدام. يرجى التواصل مع المشرف إذا كنت ترى أن هذا خطأ.",
+      rejectedFinalMsg: "تم رفض طلب تسجيلك مرة أخرى، ولا يمكنك تقديم طلب جديد. يرجى التواصل مع المشرف إذا كنت ترى أن هذا خطأ.",
+      errResubmitBlocked: "تم رفض هذا الحساب مرتين، لذلك لا يمكن تقديم طلب جديد. يرجى التواصل مع المشرف.",
       rejectedReason: "السبب:", resubmit: "تقديم طلب جديد", loggedOut: "تم تسجيل خروجك.",
       sessionExpired: "انتهت جلستك بعد 15 دقيقة من عدم النشاط. يرجى تسجيل الدخول مرة أخرى.",
       patientCardTitle: "أنا مريض", patientCardDesc: "ارفع أشعة ركبتك واحصل على تقرير راجعه الطبيب بلغة بسيطة.",
@@ -117,7 +121,7 @@
       role: "الدور", roleSelect: "اختر دورك", radiologist: "أخصائي أشعة", doctor: "طبيب",
       nationalId: "رقم الهوية الوطنية / الإقامة", nationalIdHint: "10 أرقام.", scfhs: "رقم ترخيص هيئة التخصصات الصحية", licenseExpiry: "تاريخ انتهاء الرخصة",
       submitRequest: "إرسال طلب إنشاء الحساب",
-      pendingTitle: "تم إرسال الطلب", pendingBody: "طلب تسجيلك بانتظار موافقة المشرف. ستتمكن من تسجيل الدخول بعد الموافقة عليه.",
+      pendingTitle: "تم إرسال الطلب", pendingBody: "طلب تسجيلك بانتظار موافقة المشرف. يمكنك تسجيل الدخول الآن، لكن حسابك يبقى مقفلاً حتى يوافق المشرف.",
       sendLink: "إرسال رابط إعادة التعيين", forgotDone: "إذا كان هذا البريد مسجلًا، فقد أُرسل إليه رابط لإعادة تعيين كلمة المرور.",
       demoOpenReset: "للتجربة فقط: افتح صفحة إعادة التعيين", backToLogin: "العودة إلى تسجيل الدخول",
       newPassword: "كلمة المرور الجديدة", resetBtn: "حفظ كلمة المرور الجديدة",
@@ -188,6 +192,7 @@
   function showServerError(form, data) {
     const hit = FIELD_ERRORS[data && data.error];
     if (hit && $(hit[0])) { setError($(hit[0]).closest(".field"), hit[1]); scrollToFirstError(form); }
+    else if (data && data.error === "resubmit_blocked") showAlert("error", "errResubmitBlocked");
     else showAlert("error", data && data.error === "invalid_data" ? "errInvalidData" : "errServer");
   }
 
@@ -365,12 +370,14 @@
         case "locked":    showAlert("error", "errLocked"); break;
         case "pending":   showAlert("warn", "pendingMsg"); break;
         case "deactivated": showAlert("error", "deactivatedMsg"); break;
-        case "rejected":
-          showAlert("error", "rejectedMsg", () => {
+        case "rejected": {
+          const retry = r.data.canResubmit !== false;      // the server allows ONE new request, not more
+          showAlert("error", retry ? "rejectedMsg" : "rejectedFinalMsg", () => {
             const reason = r.data.reason ? ` <strong>${esc(t("rejectedReason"))}</strong> ${esc(r.data.reason)}` : "";
-            return reason + ` <a class="link" href="register-professional.html">${esc(t("resubmit"))}</a>`;
+            return reason + (retry ? ` <a class="link" href="register-professional.html">${esc(t("resubmit"))}</a>` : "");
           });
           break;
+        }
         default: showAlert("error", "errServer");
       }
     });
