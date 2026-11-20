@@ -206,10 +206,10 @@ def decide_professional(user_id, admin_id, decision, reason=None):
         conn.execute(
             """
             INSERT INTO registration_decisions
-                (professional_id, admin_id, applicant_name, applicant_role, decision, reason)
-            VALUES (%s, %s, %s, %s, %s, %s)
+                (professional_id, admin_id, decision, reason)
+            VALUES (%s, %s, %s, %s)
             """,
-            (user_id, admin_id, row["full_name"], row["role"], decision, reason),
+            (user_id, admin_id, decision, reason),
         )
     return True
 

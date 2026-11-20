@@ -33,24 +33,46 @@ CREATE TABLE users (
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
     CONSTRAINT users_phone_format CHECK (phone ~ '^966[0-9]{9}$'),
     CONSTRAINT users_national_id_format CHECK (national_id ~ '^[0-9]{10}$'),
-    CONSTRAINT users_identity_required CHECK (role = 'admin' OR (national_id IS NOT NULL AND phone IS NOT NULL))
+    CONSTRAINT users_identity_required CHECK (role = 'admin' OR (national_id IS NOT NULL AND phone IS NOT NULL)),
+    -- lets the two tables below point at (user_id, role) together, so the
+    -- database itself refuses a doctor written into patients
+    CONSTRAINT users_id_role_unique UNIQUE (user_id, role)
 );
+
+-- The same address written two ways is one address, but UNIQUE on email reads
+-- 'Sara@..' and 'sara@..' as two. Enforcing it on the lowered text instead
+-- stops one person holding two accounts without meaning to.
+CREATE UNIQUE INDEX users_email_lower_unique ON users (lower(email));
 
 CREATE TABLE patients (
     user_id       INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    -- Carried only so the key below can check it. Without it the row says it
+    -- belongs to a user, not that the user is a patient, and a doctor could be
+    -- written in here. The DEFAULT and the CHECK keep it from ever being
+    -- anything else, so no code has to pass it.
+    role          VARCHAR(20) NOT NULL DEFAULT 'patient'
+                  CONSTRAINT patients_role_fixed CHECK (role = 'patient'),
     date_of_birth DATE        NOT NULL,
     gender        VARCHAR(10) NOT NULL,
+    CONSTRAINT patients_is_a_patient FOREIGN KEY (user_id, role)
+        REFERENCES users(user_id, role) ON DELETE CASCADE,
     CONSTRAINT patients_gender_valid CHECK (gender IN ('female','male')),
     CONSTRAINT patients_age_18_plus CHECK (date_of_birth <= CURRENT_DATE - INTERVAL '18 years')
 );
 
 CREATE TABLE professionals (
     user_id                INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    -- as in patients above, but here two roles are allowed
+    role                   VARCHAR(20) NOT NULL
+                           CONSTRAINT professionals_role_valid
+                           CHECK (role IN ('doctor','radiologist')),
     scfhs_number           VARCHAR(20) NOT NULL UNIQUE,
     license_expiry         DATE        NOT NULL,
     pending_license_expiry DATE,
     delete_requested_at    TIMESTAMP,
-    deactivated_at         TIMESTAMP
+    deactivated_at         TIMESTAMP,
+    CONSTRAINT professionals_is_a_professional FOREIGN KEY (user_id, role)
+        REFERENCES users(user_id, role) ON DELETE CASCADE
 );
 
 COMMENT ON COLUMN professionals.license_expiry IS
@@ -67,15 +89,14 @@ COMMENT ON COLUMN professionals.deactivated_at IS
 
 CREATE TABLE registration_decisions (
     decision_id     SERIAL PRIMARY KEY,
-    professional_id INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
-    admin_id        INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
-    applicant_name  VARCHAR(100) NOT NULL,
-    applicant_role  VARCHAR(20)  NOT NULL,
+    -- the applicant's name and role are not copied here either: both are read
+    -- through professional_id, for the same reason as reports.doctor_id above.
+    professional_id INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    admin_id        INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     kind            VARCHAR(15)  NOT NULL DEFAULT 'registration',
     decision        VARCHAR(10)  NOT NULL,
     reason          TEXT,
     decided_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT reg_applicant_role_valid CHECK (applicant_role IN ('doctor','radiologist')),
     CONSTRAINT reg_kind_valid CHECK (kind IN ('registration','renewal')),
     CONSTRAINT reg_decision_valid CHECK (decision IN ('approved','rejected')),
     CONSTRAINT reg_reason_required CHECK (decision = 'approved' OR reason IS NOT NULL)
@@ -165,8 +186,10 @@ COMMENT ON COLUMN ai_results.priority IS
 
 CREATE TABLE reports (
     case_id      INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
-    doctor_id    INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
-    doctor_name  VARCHAR(100) NOT NULL,
+    -- the doctor's name is not copied here: it is read through this id. No
+    -- account is ever deleted, so the name is always reachable, and one copy
+    -- cannot drift from the other.
+    doctor_id    INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     final_grade  SMALLINT     NOT NULL,
     doctor_notes TEXT         NOT NULL,
     report_ar    TEXT         NOT NULL,
@@ -179,7 +202,9 @@ CREATE TABLE case_activity (
     activity_id SERIAL      PRIMARY KEY,
     case_id     INTEGER     NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
     event_type  VARCHAR(20) NOT NULL,
-    doctor_name VARCHAR(100),
+    -- the doctor the event is about, by id and not by name. Two doctors can
+    -- share a name, and then a name alone cannot say which one acted.
+    doctor_id   INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     note        TEXT,
     created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT activity_event_valid CHECK (event_type IN ('assigned','reassigned','approved'))
@@ -201,7 +226,7 @@ CREATE TABLE complaints (
 CREATE TABLE complaint_replies (
     reply_id     SERIAL    PRIMARY KEY,
     complaint_id INTEGER   NOT NULL REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-    admin_id     INTEGER   REFERENCES users(user_id) ON DELETE RESTRICT,
+    admin_id     INTEGER   NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     body         TEXT      NOT NULL,
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

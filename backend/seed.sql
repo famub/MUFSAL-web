@@ -49,18 +49,18 @@ INSERT INTO patients (user_id, date_of_birth, gender) VALUES
 --   14            licence ran out, a renewal is waiting for the admin
 --                 (users.status is 'pending', so he cannot log in meanwhile)
 --   15            licence in force, but the account was taken out of service
-INSERT INTO professionals (user_id, scfhs_number, license_expiry,
+INSERT INTO professionals (user_id, role, scfhs_number, license_expiry,
                            pending_license_expiry, deactivated_at) VALUES
-(4,  '12-H-48213', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
-(5,  '15-H-52090', CURRENT_DATE + INTERVAL '18 months', NULL, NULL),
-(6,  '09-R-30177', CURRENT_DATE + INTERVAL '3 years',   NULL, NULL),
-(7,  '18-H-61004', CURRENT_DATE + INTERVAL '1 year',    NULL, NULL),
-(8,  '07-R-21550', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
-(13, '21-R-70332', CURRENT_DATE + INTERVAL '4 years',   NULL, NULL),
-(14, '11-H-40988', CURRENT_DATE - INTERVAL '9 days',
-                   CURRENT_DATE + INTERVAL '2 years', NULL),
-(15, '16-R-55471', CURRENT_DATE + INTERVAL '2 years',
-                   NULL, CURRENT_TIMESTAMP - INTERVAL '10 days');
+(4,  'doctor',      '12-H-48213', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
+(5,  'doctor',      '15-H-52090', CURRENT_DATE + INTERVAL '18 months', NULL, NULL),
+(6,  'radiologist', '09-R-30177', CURRENT_DATE + INTERVAL '3 years',   NULL, NULL),
+(7,  'doctor',      '18-H-61004', CURRENT_DATE + INTERVAL '1 year',    NULL, NULL),
+(8,  'radiologist', '07-R-21550', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
+(13, 'radiologist', '21-R-70332', CURRENT_DATE + INTERVAL '4 years',   NULL, NULL),
+(14, 'doctor',      '11-H-40988', CURRENT_DATE - INTERVAL '9 days',
+                    CURRENT_DATE + INTERVAL '2 years', NULL),
+(15, 'radiologist', '16-R-55471', CURRENT_DATE + INTERVAL '2 years',
+                    NULL, CURRENT_TIMESTAMP - INTERVAL '10 days');
 
 -- ---------- admin decisions ----------
 -- 7 and 13 are left out on purpose: they are the two licences still waiting.
@@ -70,18 +70,18 @@ INSERT INTO professionals (user_id, scfhs_number, license_expiry,
 -- was turned down once when he applied, got in on his second try, and has
 -- since had a renewal turned down as well - three refusals in all, yet he
 -- may still renew, because a refused renewal is not a refused application.
-INSERT INTO registration_decisions (professional_id, admin_id, applicant_name, applicant_role, kind, decision, reason, decided_at) VALUES
-(4,  1, 'Reem Alqahtani',   'doctor',      'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '200 days'),
-(5,  1, 'Khalid Alzahrani', 'doctor',      'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '180 days'),
-(6,  1, 'Huda Alotaibi',    'radiologist', 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '150 days'),
-(15, 1, 'Amal Alqahtani',   'radiologist', 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '140 days'),
+INSERT INTO registration_decisions (professional_id, admin_id, kind, decision, reason, decided_at) VALUES
+(4,  1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '200 days'),
+(5,  1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '180 days'),
+(6,  1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '150 days'),
+(15, 1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '140 days'),
 -- Lama: two refused applications -> may never apply again
-(8,  1, 'Lama Alsalem',     'radiologist', 'registration', 'rejected', 'The SCFHS registration number could not be verified.', CURRENT_TIMESTAMP - INTERVAL '60 days'),
-(8,  1, 'Lama Alsalem',     'radiologist', 'registration', 'rejected', 'The number still does not match the SCFHS register.',   CURRENT_TIMESTAMP - INTERVAL '20 days'),
+(8,  1, 'registration', 'rejected', 'The SCFHS registration number could not be verified.', CURRENT_TIMESTAMP - INTERVAL '60 days'),
+(8,  1, 'registration', 'rejected', 'The number still does not match the SCFHS register.',   CURRENT_TIMESTAMP - INTERVAL '20 days'),
 -- Sultan: refused once, then let in, and a renewal refused after that
-(14, 1, 'Sultan Alghamdi',  'doctor',      'registration', 'rejected', 'The licence photograph was unreadable.',  CURRENT_TIMESTAMP - INTERVAL '400 days'),
-(14, 1, 'Sultan Alghamdi',  'doctor',      'registration', 'approved', NULL,                                      CURRENT_TIMESTAMP - INTERVAL '390 days'),
-(14, 1, 'Sultan Alghamdi',  'doctor',      'renewal',      'rejected', 'The renewal certificate had no stamp.',   CURRENT_TIMESTAMP - INTERVAL '5 days');
+(14, 1, 'registration', 'rejected', 'The licence photograph was unreadable.',  CURRENT_TIMESTAMP - INTERVAL '400 days'),
+(14, 1, 'registration', 'approved', NULL,                                      CURRENT_TIMESTAMP - INTERVAL '390 days'),
+(14, 1, 'renewal',      'rejected', 'The renewal certificate had no stamp.',   CURRENT_TIMESTAMP - INTERVAL '5 days');
 
 -- =====================================================================
 -- CASES
@@ -152,54 +152,54 @@ INSERT INTO ai_results (case_id, predicted_grade, confidence, prob_grade_0, prob
 
 -- ---------- the reports the doctors signed ----------
 -- Grades 0, 1, 2, 3 and 4 all appear, so every colour on the scale can be seen
-INSERT INTO reports (case_id, doctor_id, doctor_name, final_grade, doctor_notes, report_ar, report_en, approved_at) VALUES
-(2, 5, 'Khalid Alzahrani', 1,
+INSERT INTO reports (case_id, doctor_id, final_grade, doctor_notes, report_ar, report_en, approved_at) VALUES
+(2, 5, 1,
  'Joint space narrowing is minimal and the osteophytes do not match grade 2. Changed to KL1.',
  'نتيجة أشعة الركبة: الدرجة KL1 (تغيّرات بسيطة جدًا). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL1 (very mild changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '18 days'),
 
-(5, 4, 'Reem Alqahtani', 3,
+(5, 4, 3,
  'Clear joint space narrowing with large osteophytes. The model agrees. Referred to orthopaedics.',
  'نتيجة أشعة الركبة: الدرجة KL3 (تغيّرات متوسطة إلى شديدة). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL3 (moderate to severe changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '28 days'),
 
-(6, 5, 'Khalid Alzahrani', 0,
+(6, 5, 0,
  'No narrowing and no osteophytes. A healthy knee.',
  'نتيجة أشعة الركبة: الدرجة KL0 (لا توجد علامات خشونة). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL0 (no signs of osteoarthritis). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '58 days'),
 
-(7, 4, 'Reem Alqahtani', 2,
+(7, 4, 2,
  'Definite osteophytes and possible narrowing. Grade 2 confirmed.',
  'نتيجة أشعة الركبة: الدرجة KL2 (تغيّرات بسيطة). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL2 (mild changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '41 days'),
 
-(9, 4, 'Reem Alqahtani', 4,
+(9, 4, 4,
  'Severe narrowing with bone deformity. Urgent orthopaedic referral.',
  'نتيجة أشعة الركبة: الدرجة KL4 (تغيّرات شديدة). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL4 (severe changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '37 days');
 
 -- ---------- the trail of what happened to each case ----------
-INSERT INTO case_activity (case_id, event_type, doctor_name, note, created_at) VALUES
-(1, 'assigned',   'Reem Alqahtani',   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '2 days'),
-(2, 'assigned',   'Khalid Alzahrani', 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '20 days'),
-(2, 'approved',   'Khalid Alzahrani', 'The doctor approved the case and changed the grade from 2 to 1.', CURRENT_TIMESTAMP - INTERVAL '18 days'),
-(3, 'assigned',   'Reem Alqahtani',   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '12 days'),
-(4, 'assigned',   'Khalid Alzahrani', 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '15 days'),
-(5, 'assigned',   'Reem Alqahtani',   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '30 days'),
-(5, 'approved',   'Reem Alqahtani',   'The doctor approved the case and kept the grade at 3.', CURRENT_TIMESTAMP - INTERVAL '28 days'),
-(6, 'assigned',   'Khalid Alzahrani', 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '60 days'),
-(6, 'approved',   'Khalid Alzahrani', 'The doctor approved the case and kept the grade at 0.', CURRENT_TIMESTAMP - INTERVAL '58 days'),
-(7, 'assigned',   'Khalid Alzahrani', 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '45 days'),
-(7, 'reassigned', 'Reem Alqahtani',   'Moved to another doctor after the patient reported a delay.', CURRENT_TIMESTAMP - INTERVAL '43 days'),
-(7, 'approved',   'Reem Alqahtani',   'The doctor approved the case and kept the grade at 2.', CURRENT_TIMESTAMP - INTERVAL '41 days'),
-(8, 'assigned',   'Khalid Alzahrani', 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '5 days'),
-(9, 'assigned',   'Reem Alqahtani',   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '40 days'),
-(9, 'approved',   'Reem Alqahtani',   'The doctor approved the case and kept the grade at 4.', CURRENT_TIMESTAMP - INTERVAL '37 days');
+INSERT INTO case_activity (case_id, event_type, doctor_id, note, created_at) VALUES
+(1, 'assigned',   4,   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '2 days'),
+(2, 'assigned',   5, 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '20 days'),
+(2, 'approved',   5, 'The doctor approved the case and changed the grade from 2 to 1.', CURRENT_TIMESTAMP - INTERVAL '18 days'),
+(3, 'assigned',   4,   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '12 days'),
+(4, 'assigned',   5, 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '15 days'),
+(5, 'assigned',   4,   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '30 days'),
+(5, 'approved',   4,   'The doctor approved the case and kept the grade at 3.', CURRENT_TIMESTAMP - INTERVAL '28 days'),
+(6, 'assigned',   5, 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '60 days'),
+(6, 'approved',   5, 'The doctor approved the case and kept the grade at 0.', CURRENT_TIMESTAMP - INTERVAL '58 days'),
+(7, 'assigned',   5, 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '45 days'),
+(7, 'reassigned', 4,   'Moved to another doctor after the patient reported a delay.', CURRENT_TIMESTAMP - INTERVAL '43 days'),
+(7, 'approved',   4,   'The doctor approved the case and kept the grade at 2.', CURRENT_TIMESTAMP - INTERVAL '41 days'),
+(8, 'assigned',   5, 'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '5 days'),
+(9, 'assigned',   4,   'Assigned to the doctor with the fewest open cases.', CURRENT_TIMESTAMP - INTERVAL '40 days'),
+(9, 'approved',   4,   'The doctor approved the case and kept the grade at 4.', CURRENT_TIMESTAMP - INTERVAL '37 days');
 
 -- ---------- delays reported with the button on a case ----------
 -- One still open, so the admin's "Delayed requests" page has something in it,

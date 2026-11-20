@@ -54,8 +54,10 @@ def list_delayed():
         for r in rows:
             r["log"] = conn.execute(
                 """
-                SELECT event_type, doctor_name, note, created_at
-                FROM case_activity WHERE case_id = %s ORDER BY created_at, activity_id
+                SELECT a.event_type, doc.full_name AS doctor_name, a.note, a.created_at
+                FROM case_activity a
+                JOIN users doc ON doc.user_id = a.doctor_id
+                WHERE a.case_id = %s ORDER BY a.created_at, a.activity_id
                 """,
                 (r["case_id"],),
             ).fetchall()
@@ -100,8 +102,11 @@ def list_decisions():
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT decision_id, applicant_name, applicant_role, decision, reason, decided_at
-            FROM registration_decisions ORDER BY decided_at DESC, decision_id DESC
+            SELECT d.decision_id, u.full_name AS applicant_name, u.role AS applicant_role,
+                   d.decision, d.reason, d.decided_at
+            FROM registration_decisions d
+            JOIN users u ON u.user_id = d.professional_id
+            ORDER BY d.decided_at DESC, d.decision_id DESC
             """
         ).fetchall()
 

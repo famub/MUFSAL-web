@@ -83,15 +83,12 @@ def create_case(patient_id, uploaded_by, xray_image_path, history):
         )
 
         if doctor_id is not None:
-            doctor = conn.execute(
-                "SELECT full_name FROM users WHERE user_id = %s", (doctor_id,)
-            ).fetchone()
             conn.execute(
                 """
-                INSERT INTO case_activity (case_id, event_type, doctor_name, note)
+                INSERT INTO case_activity (case_id, event_type, doctor_id, note)
                 VALUES (%s, 'assigned', %s, 'Assigned to the doctor with the fewest open cases.')
                 """,
-                (case["case_id"], doctor["full_name"]),
+                (case["case_id"], doctor_id),
             )
 
     filestore.save(xray_image_path)   # keep a copy of the X-ray in the database
@@ -171,7 +168,13 @@ def get_case(case_id):
             "SELECT * FROM ai_results WHERE case_id = %s", (case_id,)
         ).fetchone()
         case["report"] = conn.execute(
-            "SELECT * FROM reports WHERE case_id = %s", (case_id,)
+            # the doctor's name is read through doctor_id, not kept in reports
+            """
+            SELECT r.*, doc.full_name AS doctor_name
+            FROM reports r JOIN users doc ON doc.user_id = r.doctor_id
+            WHERE r.case_id = %s
+            """,
+            (case_id,),
         ).fetchone()
     return case
 
@@ -179,18 +182,13 @@ def get_case(case_id):
 def approve_case(case_id, doctor_id, final_grade, doctor_notes, report_ar, report_en):
     """Save the doctor's report and mark the case as approved."""
     with get_connection() as conn:
-        doctor = conn.execute(
-            "SELECT full_name FROM users WHERE user_id = %s", (doctor_id,)
-        ).fetchone()
-
         conn.execute(
             """
-            INSERT INTO reports (case_id, doctor_id, doctor_name, final_grade,
+            INSERT INTO reports (case_id, doctor_id, final_grade,
                                  doctor_notes, report_ar, report_en)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (case_id, doctor_id, doctor["full_name"], final_grade,
-             doctor_notes, report_ar, report_en),
+            (case_id, doctor_id, final_grade, doctor_notes, report_ar, report_en),
         )
 
         conn.execute(
@@ -199,10 +197,10 @@ def approve_case(case_id, doctor_id, final_grade, doctor_notes, report_ar, repor
 
         conn.execute(
             """
-            INSERT INTO case_activity (case_id, event_type, doctor_name, note)
+            INSERT INTO case_activity (case_id, event_type, doctor_id, note)
             VALUES (%s, 'approved', %s, 'The doctor approved the case.')
             """,
-            (case_id, doctor["full_name"]),
+            (case_id, doctor_id),
         )
 
 
@@ -213,9 +211,11 @@ def get_patient_cases(patient_id):
             """
             SELECT c.case_id, c.status, c.submitted_at,
                    CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
-                   r.final_grade, r.report_ar, r.report_en, r.approved_at, r.doctor_name
+                   r.final_grade, r.report_ar, r.report_en, r.approved_at,
+                   doc.full_name AS doctor_name
             FROM cases c
             LEFT JOIN reports r ON r.case_id = c.case_id
+            LEFT JOIN users doc ON doc.user_id = r.doctor_id
             WHERE c.patient_id = %s
             ORDER BY c.submitted_at DESC
             """,

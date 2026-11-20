@@ -91,8 +91,9 @@ def list_delay_complaints(status="pending"):
 def reassign_case(case_id, new_doctor_id, admin_id):
     """Move the case to another doctor, close any open delay complaint and log it."""
     with get_connection() as conn:
+        # only that such a doctor exists; the name is no longer copied anywhere
         doctor = conn.execute(
-            "SELECT full_name FROM users WHERE user_id = %s AND role = 'doctor' AND status = 'approved'",
+            "SELECT 1 FROM users WHERE user_id = %s AND role = 'doctor' AND status = 'approved'",
             (new_doctor_id,),
         ).fetchone()
         if doctor is None:
@@ -114,9 +115,9 @@ def reassign_case(case_id, new_doctor_id, admin_id):
 
         conn.execute(
             """
-            INSERT INTO case_activity (case_id, event_type, doctor_name, note)
+            INSERT INTO case_activity (case_id, event_type, doctor_id, note)
             VALUES (%s, 'reassigned', %s, 'Reassigned by the admin after a delay complaint.')
             """,
-            (case_id, doctor["full_name"]),
+            (case_id, new_doctor_id),
         )
     return True
