@@ -22,9 +22,11 @@ def _pick_doctor(conn):
         """
         SELECT u.user_id
         FROM users u
+        JOIN professionals p ON p.user_id = u.user_id
         LEFT JOIN cases c ON c.assigned_doctor_id = u.user_id
                          AND c.status = 'under_review'
-        WHERE u.role = 'doctor' AND u.status = 'approved'
+        WHERE u.role = 'doctor' AND p.status = 'approved'
+          AND p.deactivated_at IS NULL
         GROUP BY u.user_id
         ORDER BY COUNT(c.case_id) ASC, u.user_id ASC
         LIMIT 1
