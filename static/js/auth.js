@@ -60,7 +60,7 @@
       submitRequest: "Submit account request",
       pendingTitle: "Request submitted", pendingBody: "Your registration request is pending admin approval. You can log in now, but your account stays locked until the admin approves it.",
       // forgot / reset
-      sendLink: "Send reset link", forgotDone: "If this email is registered, a password reset link has been sent to it.",
+      sendLink: "Send reset link", forgotDone: "A password reset link has been sent to your email.", errEmailNotFound: "This email is not registered. Please check it or create an account.",
       demoOpenReset: "Demo only: open the reset page", backToLogin: "Back to log in",
       newPassword: "New password", resetBtn: "Save new password",
       resetInvalid: "This reset link is not valid or has expired.",
@@ -122,7 +122,7 @@
       nationalId: "رقم الهوية الوطنية / الإقامة", nationalIdHint: "10 أرقام.", scfhs: "رقم ترخيص هيئة التخصصات الصحية", licenseExpiry: "تاريخ انتهاء الرخصة",
       submitRequest: "إرسال طلب إنشاء الحساب",
       pendingTitle: "تم إرسال الطلب", pendingBody: "طلب تسجيلك بانتظار موافقة المشرف. يمكنك تسجيل الدخول الآن، لكن حسابك يبقى مقفلاً حتى يوافق المشرف.",
-      sendLink: "إرسال رابط إعادة التعيين", forgotDone: "إذا كان هذا البريد مسجلًا، فقد أُرسل إليه رابط لإعادة تعيين كلمة المرور.",
+      sendLink: "إرسال رابط إعادة التعيين", forgotDone: "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.", errEmailNotFound: "هذا البريد الإلكتروني غير مسجّل. تأكد منه أو أنشئ حسابًا.",
       demoOpenReset: "للتجربة فقط: افتح صفحة إعادة التعيين", backToLogin: "العودة إلى تسجيل الدخول",
       newPassword: "كلمة المرور الجديدة", resetBtn: "حفظ كلمة المرور الجديدة",
       resetInvalid: "رابط إعادة التعيين غير صالح أو منتهي.",
@@ -454,6 +454,7 @@
       // The answer is the same whether the email exists or not, so nobody can find out who is registered.
       // TODO(email): the server only prints the link now. Connect an email service so it is sent to the user.
       const r = await api("/api/forgot", { email: $("email").value.trim() });
+      if (r.data.error === "email_not_found") { showAlert("error", "errEmailNotFound"); return; }
       if (!r.data.ok) { showAlert("error", "errServer"); return; }
       showAlert("ok", "forgotDone", () => r.data.devLink      // devLink exists only while MUFSAL_DEV=1 (no email yet)
         ? `<br><a class="link" href="${esc(r.data.devLink)}">${esc(t("demoOpenReset"))}</a>` : "");
