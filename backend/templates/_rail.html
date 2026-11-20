@@ -13,13 +13,22 @@
 {% set active = nav_active | default('') %}
 
 {% set counts = nav_counts | default({}) %}
+{% set locked = rail_locked | default(false) %}
 
 {% macro link(href, key, label, count=None) -%}
+  {%- if locked and key != 'dashboard' -%}
+  {# the admin has not approved this account yet: only the home page opens #}
+  <span class="rail-link is-locked" aria-disabled="true" style="opacity:.4;cursor:not-allowed">
+    {{ caller() }}
+    <span class="txt">{{ label }}</span>
+  </span>
+  {%- else -%}
   <a href="{{ href }}" class="rail-link{{ ' is-active' if active == key }}"{{ ' aria-current="page"' | safe if active == key }}>
     {{ caller() }}
     <span class="txt">{{ label }}</span>
     {%- if count %}<span class="count">{{ count }}</span>{% endif %}
   </a>
+  {%- endif -%}
 {%- endmacro %}
 
 <aside class="rail">
@@ -40,7 +49,7 @@
       {% endcall %}
 
     {% elif who == 'radiologist' %}
-      {% call link('/dashboard-radiologist', 'dashboard', 'لوحة التحكم' if ar else 'Dashboard') %}
+      {% call link('/dashboard-radiologist', 'dashboard', 'الرئيسية' if ar else 'Home') %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
       {% endcall %}
       {% call link('/new-case-radiologist', 'newcase', 'حالة جديدة' if ar else 'New case') %}

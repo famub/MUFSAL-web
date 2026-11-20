@@ -10,7 +10,7 @@
 
 <body>
 
-  {% set rail_role = "doctor" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
+  {% set rail_role = "doctor" %}{% set nav_active = "dashboard" %}{% set rail_locked = pending_approval %}{% include "_rail.html" %}
 
   <main class="main">
     <div class="main-inner">
@@ -22,6 +22,9 @@
         </div>
       </div>
 
+      {% if pending_approval %}
+      {% include "_pending-banner.html" %}
+      {% else %}
       <!-- ---------- numbers ---------- -->
       <section class="stats">
         <div class="card stat">
@@ -63,6 +66,8 @@
       <div class="case-list">{% include "_doctor-approved-rows.html" %}</div>
       {% else %}
       <div class="empty"><h3>{{ t.no_approved }}</h3></div>
+      {% endif %}
+
       {% endif %}
 
       {% include "_page-foot.html" %}
