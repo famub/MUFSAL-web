@@ -177,9 +177,11 @@ def resubmit_professional(user_id, full_name, password, national_id,
     with get_connection() as conn:
         conn.execute(
             """
-            UPDATE users
+            UPDATE users u
             SET full_name = %s, password_hash = %s, national_id = %s, role = %s
-            WHERE user_id = %s
+            WHERE u.user_id = %s
+              AND EXISTS (SELECT 1 FROM professionals p
+                          WHERE p.user_id = u.user_id AND p.status = 'rejected')
             """,
             (full_name, hash_password(password), national_id, role, user_id),
         )
