@@ -86,22 +86,11 @@ function setupCard(card) {
     const fieldsAreCorrect = checkFields(form);
     const answersAreCorrect = questionnaire ? checkAnswers(questionnaire) : true;
 
-    if (!fieldsAreCorrect || !answersAreCorrect) {
-      return;
+    // The card goes back to the view only if everything is correct
+    if (fieldsAreCorrect && answersAreCorrect) {
+      stampUpdatedDate(card);
+      closeEditMode(card, form);
     }
-
-    // A card whose form has an action is saved on the server: send it.
-    // form.submit() does not fire this handler again, so there is no loop.
-    // The fields are still enabled here, so their values are sent.
-    if (form.getAttribute('action')) {
-      form.submit();
-      return;
-    }
-
-    // No action: the card is not connected to the server yet, so the page
-    // just goes back to the view as before.
-    stampUpdatedDate(card);
-    closeEditMode(card, form);
   });
 }
 
@@ -237,18 +226,6 @@ function getErrorMessage(field) {
     }
   }
 
-  // Phone: a complete Saudi mobile number, with or without the country code
-  if (check === 'phone') {
-    // Only the digits matter, so spaces and the + sign are removed first
-    const digits = value.replace(/[^0-9]/g, '');
-
-    const localNumber = /^05[0-9]{8}$/;             // 05XXXXXXXX
-    const numberWithCountryCode = /^9665[0-9]{8}$/; // +966 5XXXXXXXX
-
-    if (!localNumber.test(digits) && !numberWithCountryCode.test(digits)) {
-      return 'Please enter a complete mobile number, for example 0512345678';
-    }
-  }
 
   // Date of birth: the patient has to be old enough to use MUFSAL.
   // The smallest age is read from data-min-age in the HTML.

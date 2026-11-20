@@ -49,10 +49,6 @@ def password_error(password):
     return None
 
 
-def phone_error(phone):
-    return None if PHONE_RE.match(clean(phone)) else "phone_invalid"
-
-
 def national_id_error(national_id):
     return None if NATIONAL_ID_RE.match(clean(national_id)) else "national_id_invalid"
 
@@ -72,6 +68,16 @@ def role_error(role):
 def age_on(birth, today=None):
     today = today or date.today()
     return today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+
+
+def license_expiry_error(value):
+    """Licence expiry as 'YYYY-MM-DD'. It has to be a day still ahead of us:
+    a professional cannot register on a licence that has already run out."""
+    try:
+        day = datetime.strptime(clean(value), "%Y-%m-%d").date()
+    except ValueError:
+        return "license_expiry_invalid"
+    return "license_expired" if day <= date.today() else None
 
 
 def dob_error(dob):

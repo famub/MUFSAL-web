@@ -33,7 +33,7 @@
 
       <!-- ---------- card 1: account information ----------
            MUFSAL has one kind of administrator, so the role is fixed.
-           Only the name, the email and the phone number can be edited. -->
+           Only the name and the email can be edited. -->
       <form method="post" action="/profile-admin" novalidate>
         <section class="card{{ ' editing' if errors }}" id="contact-card">
           <div class="card-head">
@@ -66,11 +66,6 @@
               {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
             </div>
 
-            <div class="field{{ ' bad' if errors.phone }}">
-              <label for="phone">{{ 'رقم الجوال' if ar else 'Phone Number' }}</label>
-              <input type="tel" id="phone" name="phone" value="{{ form.phone }}" maxlength="12" placeholder="966XXXXXXXXX" {% if not errors %}disabled{% endif %} />
-              {% if errors.phone %}<p class="err">{{ errors.phone }}</p>{% endif %}
-            </div>
           </div>
 
           <div class="actions">

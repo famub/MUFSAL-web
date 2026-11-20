@@ -21,8 +21,6 @@ PROFILE_TEXT = {
         "edit": "Edit Profile",
         "name_label": "Full Name",
         "email_label": "Email Address",
-        "phone_label": "Phone Number",
-        "phone_hint": "A Saudi mobile number, for example 0512345678",
         "nid_label": "National ID / Iqama",
         "protected": "Protected identifier",
         "save": "Save Changes",
@@ -31,7 +29,7 @@ PROFILE_TEXT = {
         "saved_msg": "Your details have been saved.",
         "err": {
             "email_taken": "That email address is already used by another account.",
-            "bad_value": "Please check the email address and the phone number.",
+            "bad_value": "Please check the email address.",
         },
     },
     "ar": {
@@ -53,8 +51,6 @@ PROFILE_TEXT = {
         "edit": "تعديل الملف",
         "name_label": "الاسم الكامل",
         "email_label": "البريد الإلكتروني",
-        "phone_label": "رقم الجوال",
-        "phone_hint": "رقم جوال سعودي، مثل 0512345678",
         "nid_label": "رقم الهوية / الإقامة",
         "protected": "معرّف محمي",
         "save": "حفظ التغييرات",
@@ -63,7 +59,7 @@ PROFILE_TEXT = {
         "saved_msg": "تم حفظ بياناتك.",
         "err": {
             "email_taken": "هذا البريد الإلكتروني مستخدم في حساب آخر.",
-            "bad_value": "تأكد من البريد الإلكتروني ورقم الجوال.",
+            "bad_value": "تأكد من البريد الإلكتروني.",
         },
     },
 }

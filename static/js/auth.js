@@ -30,7 +30,7 @@
       // common fields
       email: "Email address", password: "Password", confirmPassword: "Confirm password", showHidePw: "Show or hide password",
       pwHint: "8 to 20 characters, with an uppercase letter, a lowercase letter, a number and a special character.",
-      fullName: "Full name", phone: "Phone number", dob: "Date of birth", gender: "Gender", genderSelect: "Select gender",
+      fullName: "Full name", dob: "Date of birth", gender: "Gender", genderSelect: "Select gender",
       female: "Female", male: "Male",
       // login
       loginBtn: "Log in", forgotLink: "Forgot password?", noAccount: "New to MUFSAL?", createAccount: "Create an account",
@@ -54,7 +54,7 @@
       doneTitle: "Account created", doneBody: "Your account is ready. You can now log in.", goLogin: "Go to log in",
       // professional
       role: "Role", roleSelect: "Select your role", radiologist: "Radiologist", doctor: "Doctor",
-      nationalId: "National ID / Iqama number", nationalIdHint: "10 digits.", scfhs: "SCFHS licence number",
+      nationalId: "National ID / Iqama number", nationalIdHint: "10 digits.", scfhs: "SCFHS licence number", licenseExpiry: "Licence expiry date",
       submitRequest: "Submit account request",
       pendingTitle: "Request submitted", pendingBody: "Your registration request is pending admin approval. You will be able to log in once it is approved.",
       // forgot / reset
@@ -67,7 +67,6 @@
       errRequired: "This field is required.",
       errEmailEnglish: "Please write the email in English letters.",
       errEmail: "Please enter a valid email address, for example name@example.com",
-      errPhone: "Enter the 9 digits after +966, starting with 5, for example 512345678",
       errDob: "Please enter a valid date of birth.",
       errMinAge: "You must be at least {n} years old to use MUFSAL.",
       errPwLength: "The password must be 8 to 20 characters long.",
@@ -78,7 +77,10 @@
       errScfhs: "Please enter a valid SCFHS licence number.",
       errEmailTaken: "This email is already registered. Please log in or use another email.",
 
-      phoneHint: "9 digits starting with 5, after +966.", requiredNote: "Fields marked with * are required.",
+      licenseExpiryHint: "The account is suspended once this date passes, until the licence is renewed.",
+      errLicenseExpiry: "Choose the date the licence runs out.",
+      errLicenseExpired: "That date has already passed. A licence must still be valid to register.",
+      requiredNote: "Fields marked with * are required.",
       errNationalIdTaken: "This National ID / Iqama number is already registered.", errScfhsTaken: "This SCFHS licence number is already registered.",
       errInvalidData: "Some information is not accepted. Please check the fields and try again.",
       errServer: "Something went wrong on our side. Please try again in a moment.", errLocked: "Too many wrong attempts. Please wait 15 minutes and try again.", errFixFields: "Please fix the highlighted fields and try again."
@@ -93,7 +95,7 @@
       loggingOut: "جارٍ تسجيل الخروج...",
       email: "البريد الإلكتروني", password: "كلمة المرور", confirmPassword: "تأكيد كلمة المرور", showHidePw: "إظهار أو إخفاء كلمة المرور",
       pwHint: "من 8 إلى 20 خانة، وتحتوي على حرف كبير وحرف صغير ورقم ورمز خاص.",
-      fullName: "الاسم الكامل", phone: "رقم الجوال", dob: "تاريخ الميلاد", gender: "الجنس", genderSelect: "اختر الجنس",
+      fullName: "الاسم الكامل", dob: "تاريخ الميلاد", gender: "الجنس", genderSelect: "اختر الجنس",
       female: "أنثى", male: "ذكر",
       loginBtn: "تسجيل الدخول", forgotLink: "نسيت كلمة المرور؟", noAccount: "مستخدم جديد في مفصل؟", createAccount: "إنشاء حساب",
       demoTitle: "حسابات تجريبية (للاختبار فقط)", demoNote: "كلمة المرور لجميعها: Mufsal@123",
@@ -113,7 +115,7 @@
       createBtn: "إنشاء الحساب",
       doneTitle: "تم إنشاء الحساب", doneBody: "حسابك جاهز. يمكنك الآن تسجيل الدخول.", goLogin: "الذهاب إلى تسجيل الدخول",
       role: "الدور", roleSelect: "اختر دورك", radiologist: "أخصائي أشعة", doctor: "طبيب",
-      nationalId: "رقم الهوية الوطنية / الإقامة", nationalIdHint: "10 أرقام.", scfhs: "رقم ترخيص هيئة التخصصات الصحية",
+      nationalId: "رقم الهوية الوطنية / الإقامة", nationalIdHint: "10 أرقام.", scfhs: "رقم ترخيص هيئة التخصصات الصحية", licenseExpiry: "تاريخ انتهاء الرخصة",
       submitRequest: "إرسال طلب إنشاء الحساب",
       pendingTitle: "تم إرسال الطلب", pendingBody: "طلب تسجيلك بانتظار موافقة المشرف. ستتمكن من تسجيل الدخول بعد الموافقة عليه.",
       sendLink: "إرسال رابط إعادة التعيين", forgotDone: "إذا كان هذا البريد مسجلًا، فقد أُرسل إليه رابط لإعادة تعيين كلمة المرور.",
@@ -124,7 +126,6 @@
       errRequired: "هذا الحقل مطلوب.",
       errEmailEnglish: "يرجى كتابة البريد الإلكتروني بأحرف إنجليزية.",
       errEmail: "يرجى إدخال بريد إلكتروني صحيح، مثال: name@example.com",
-      errPhone: "أدخل 9 أرقام بعد +966 تبدأ بالرقم 5، مثال: 512345678",
       errDob: "يرجى إدخال تاريخ ميلاد صحيح.",
       errMinAge: "يجب أن يكون عمرك {n} سنة على الأقل لاستخدام مفصل.",
       errPwLength: "يجب أن تكون كلمة المرور من 8 إلى 20 خانة.",
@@ -135,7 +136,10 @@
       errScfhs: "يرجى إدخال رقم ترخيص هيئة التخصصات الصحية بشكل صحيح.",
       errEmailTaken: "هذا البريد الإلكتروني مسجل مسبقًا. سجّل الدخول أو استخدم بريدًا آخر.",
 
-      phoneHint: "9 أرقام تبدأ بالرقم 5، بعد +966.", requiredNote: "الحقول المعلّمة بـ * مطلوبة.",
+      licenseExpiryHint: "يُعلَّق الحساب بعد مرور هذا التاريخ حتى تُجدَّد الرخصة.",
+      errLicenseExpiry: "اختر تاريخ انتهاء الرخصة.",
+      errLicenseExpired: "هذا التاريخ مضى. يجب أن تكون الرخصة سارية عند التسجيل.",
+      requiredNote: "الحقول المعلّمة بـ * مطلوبة.",
       errNationalIdTaken: "رقم الهوية / الإقامة هذا مسجل مسبقًا.", errScfhsTaken: "رقم ترخيص هيئة التخصصات الصحية هذا مسجل مسبقًا.",
       errInvalidData: "بعض المعلومات غير مقبولة. يرجى مراجعة الحقول والمحاولة مرة أخرى.",
       errServer: "حدث خطأ من جهتنا. حاول مرة أخرى بعد قليل.", errLocked: "محاولات خاطئة كثيرة. انتظر 15 دقيقة ثم حاول مرة أخرى.", errFixFields: "يرجى تصحيح الحقول المظللة والمحاولة مرة أخرى."
@@ -174,7 +178,9 @@
     email_taken: ["email", "errEmailTaken"], email_invalid: ["email", "errEmail"],
     national_id_taken: ["national-id", "errNationalIdTaken"], national_id_invalid: ["national-id", "errNationalId"],
     scfhs_taken: ["scfhs", "errScfhsTaken"], scfhs_invalid: ["scfhs", "errScfhs"],
-    phone_invalid: ["phone", "errPhone"], dob_invalid: ["dob", "errDob"], min_age: ["dob", "errMinAge"],
+    license_expiry_invalid: ["license-expiry", "errLicenseExpiry"],
+    license_expired: ["license-expiry", "errLicenseExpired"],
+    dob_invalid: ["dob", "errDob"], min_age: ["dob", "errMinAge"],
     gender_invalid: ["gender", "errRequired"], role_invalid: ["role", "errRequired"],
     password_length: ["password", "errPwLength"], password_rules: ["password", "errPwRules"],
     name_required: ["full-name", "errRequired"], name_invalid: ["full-name", "errRequired"]
@@ -266,8 +272,10 @@
       case "email":
         if (hasArabic(value)) return "errEmailEnglish";
         return EMAIL_SHAPE.test(value) ? "" : "errEmail";
-      case "phone": {
-        return /^5[0-9]{8}$/.test(value) ? "" : "errPhone";     // the +966 is fixed on the page
+      case "licenseExpiry": {
+        if (!value) return "errLicenseExpiry";
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        return new Date(value) > today ? "" : "errLicenseExpired";
       }
       case "dob": {
         const age = getAge(value);
@@ -370,16 +378,6 @@
 
   /* ================= REGISTER - PATIENT ================= */
   function setupNumberInputs() {
-    const phone = $("phone");
-    if (phone) {
-      // Only digits. A pasted "+966 5..." / "966 5..." / "05..." is cut down to the 9 digits after +966.
-      phone.addEventListener("input", () => {
-        let d = phone.value.replace(/[^0-9]/g, "");
-        if (d.startsWith("966")) d = d.slice(3);
-        if (d.startsWith("0")) d = d.slice(1);
-        phone.value = d.slice(0, 9);
-      });
-    }
     const nid = $("national-id");
     if (nid) nid.addEventListener("input", () => { nid.value = nid.value.replace(/[^0-9]/g, "").slice(0, 10); });
   }
@@ -396,10 +394,9 @@
       if (!checkFields(form)) { showAlert("error", "errFixFields"); scrollToFirstError(form); return; }
 
       // The server checks the email and the Health ID again against the database, hashes the password and saves the patient
-      const phone = $("phone").value.trim();
       const r = await api("/api/register/patient", {
         name: $("full-name").value.trim(), email: $("email").value.trim(), password: $("password").value,
-        nationalId: $("national-id").value.trim(), phone: "966" + phone,
+        nationalId: $("national-id").value.trim(),
         dob: $("dob").value, gender: $("gender").value
       });
       if (!r.data.ok) { showServerError(form, r.data); return; }
@@ -425,8 +422,9 @@
       // A rejected professional may send a new request: the server keeps the old rejected one in the history.
       const r = await api("/api/register/professional", {
         role: $("role").value, name: $("full-name").value.trim(), email: $("email").value.trim(),
-        password: $("password").value, phone: "966" + $("phone").value.trim(),
-        nationalId: $("national-id").value.trim(), scfhsNumber: $("scfhs").value.trim()
+        password: $("password").value,
+        nationalId: $("national-id").value.trim(), scfhsNumber: $("scfhs").value.trim(),
+        licenseExpiry: $("license-expiry").value
       });
       if (!r.data.ok) { showServerError(form, r.data); return; }
 

@@ -70,13 +70,6 @@
               {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
             </div>
 
-            <div class="field{{ ' bad' if errors.phone }}">
-              <label for="phone">Phone number</label>
-              <input type="tel" id="phone" name="phone" value="{{ form.phone }}"
-                     maxlength="12" {% if not errors %}disabled{% endif %} />
-              {% if errors.phone %}<p class="err">{{ errors.phone }}</p>{% endif %}
-            </div>
-
             <div class="field locked">
               <label for="nid">National ID</label>
               <input type="text" id="nid" value="{{ national_id }}" readonly disabled />

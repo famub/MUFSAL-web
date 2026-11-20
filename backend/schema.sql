@@ -24,16 +24,14 @@ CREATE TABLE users (
     full_name     VARCHAR(100) NOT NULL,
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    phone         VARCHAR(12),
     national_id   CHAR(10)     UNIQUE,
     status        VARCHAR(20)  NOT NULL DEFAULT 'pending',
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist','admin')),
     CONSTRAINT users_status_valid CHECK (status IN ('pending','approved','rejected')),
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
-    CONSTRAINT users_phone_format CHECK (phone ~ '^966[0-9]{9}$'),
     CONSTRAINT users_national_id_format CHECK (national_id ~ '^[0-9]{10}$'),
-    CONSTRAINT users_identity_required CHECK (role = 'admin' OR (national_id IS NOT NULL AND phone IS NOT NULL)),
+    CONSTRAINT users_identity_required CHECK (role = 'admin' OR national_id IS NOT NULL),
     -- lets the two tables below point at (user_id, role) together, so the
     -- database itself refuses a doctor written into patients
     CONSTRAINT users_id_role_unique UNIQUE (user_id, role)

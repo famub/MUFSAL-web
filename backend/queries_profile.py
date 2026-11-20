@@ -9,7 +9,7 @@ def get_doctor_profile(user_id):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT u.user_id, u.role, u.full_name, u.email, u.phone, u.national_id,
+            SELECT u.user_id, u.role, u.full_name, u.email, u.national_id,
                    p.scfhs_number
             FROM users u
             JOIN professionals p ON p.user_id = u.user_id
@@ -19,16 +19,8 @@ def get_doctor_profile(user_id):
         ).fetchone()
 
 
-def normalise_phone(phone):
-    """0503333333 and +966 50 333 3333 both become 966503333333."""
-    digits = "".join(ch for ch in phone if ch.isdigit())
-    if digits.startswith("0"):
-        digits = "966" + digits[1:]
-    return digits
-
-
-def update_contact(user_id, email, phone):
-    """Save the email and the phone number.
+def update_contact(user_id, email):
+    """Save the email address.
 
     Returns True, or a dict with 'error': 'email_taken' or 'bad_value'
     (the database rejected the format).
@@ -36,8 +28,8 @@ def update_contact(user_id, email, phone):
     try:
         with get_connection() as conn:
             conn.execute(
-                "UPDATE users SET email = %s, phone = %s WHERE user_id = %s",
-                (email.strip(), normalise_phone(phone), user_id),
+                "UPDATE users SET email = %s WHERE user_id = %s",
+                (email.strip(), user_id),
             )
     except psycopg.errors.UniqueViolation:
         return {"error": "email_taken"}

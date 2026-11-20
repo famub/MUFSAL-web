@@ -57,7 +57,7 @@
     },
     async pending() {
       const d = await api('/api/admin/requests'); if (!d) return;
-      DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, phone: r.phone, at: ts(r.created_at) }));
+      DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, at: ts(r.created_at) }));
     },
     async history() {
       const d = await api('/api/admin/decisions'); if (!d) return;
@@ -190,7 +190,7 @@
     dhandled: async id => { if (await api(`/api/admin/delayed/${id}/handled`, 'POST', {})) { toast('marked as handled'); await LOAD.delayed(); openDelayed(id); draw(false); } },
     lview: id => {
       const r = by(DB.pending, id);
-      openPanel(r.name, kv({ role: ROLE[r.role], 'SCFHS file number': r.scfhs, 'national ID / iqama': r.nid, email: r.email, phone: r.phone, submitted: fmt(r.at) }) +
+      openPanel(r.name, kv({ role: ROLE[r.role], 'SCFHS file number': r.scfhs, 'national ID / iqama': r.nid, email: r.email, submitted: fmt(r.at) }) +
         `<div class="panel-actions"><button type="button" class="btn btn-primary" data-act="appr" data-id="${id}">approve</button><button type="button" class="btn btn-danger" data-act="rej" data-id="${id}">reject</button></div>`);
     },
     appr: id => decide(by(DB.pending, id), 'approved'),

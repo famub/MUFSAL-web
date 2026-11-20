@@ -4,7 +4,7 @@
     /admin-delayed-requests      delay complaints: reassign, mark as handled
     /admin-license-verification  doctor / radiologist requests, history, active accounts
     /admin-complaints            general complaints: reply and change the status
-    /profile-admin               the administrator's own details (name, email, phone)
+    /profile-admin               the administrator's own details (name and email)
 
 The data itself is loaded by static/js/admin-ui.js from /api/admin/... (routes_admin.py).
 A visitor who is not logged in goes to /login; another role goes to its own home page.
@@ -52,22 +52,19 @@ for _name, _template in PAGES.items():
 
 
 # ------------------------------------------------------------------ the administrator's profile
-# Same shape as the patient's profile: name, email and phone can change, the role is locked.
-# (An administrator has no national ID or date of birth, and the phone number is optional.)
+# Same shape as the patient's profile: the name and the email can change, the role is locked.
+# (An administrator has no national ID and no date of birth.)
 
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")   # same rule as the old profile page
 ARABIC = re.compile(r"[\u0600-\u06FF]")
-PHONE_PATTERN = re.compile(r"^966[0-9]{9}$")
 
 ERR = {
     "en": {"name": "Please write your full name.", "email": "Please enter a valid email address, for example name@example.com",
            "email_ar": "Please write the email in English letters.",
-           "taken": "Another account already uses this email address.",
-           "phone": "The number starts with 966 and has 12 digits in all."},
+           "taken": "Another account already uses this email address."},
     "ar": {"name": "اكتب اسمك الكامل.", "email": "أدخل بريدًا إلكترونيًا صحيحًا، مثال: name@example.com",
            "email_ar": "اكتب البريد الإلكتروني بأحرف إنجليزية.",
-           "taken": "يوجد حساب آخر يستخدم هذا البريد الإلكتروني.",
-           "phone": "يبدأ الرقم بـ 966 ويتكوّن من 12 رقمًا."},
+           "taken": "يوجد حساب آخر يستخدم هذا البريد الإلكتروني."},
 }
 
 
@@ -84,7 +81,7 @@ def admin_or_redirect(request):
 def get_admin_account(user_id):
     with get_connection() as conn:
         return conn.execute(
-            "SELECT full_name, email, phone, created_at FROM users WHERE user_id = %s", (user_id,)
+            "SELECT full_name, email, created_at FROM users WHERE user_id = %s", (user_id,)
         ).fetchone()
 
 
@@ -94,7 +91,7 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
     return templates.TemplateResponse(
         request, "admin/profile.html",
         {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr",
-         "form": form or {"full_name": row["full_name"], "email": row["email"], "phone": row["phone"] or ""},
+         "form": form or {"full_name": row["full_name"], "email": row["email"]},
          "errors": errors or {}, "saved": saved,
          "since": row["created_at"].strftime("%d/%m/%Y")},
         status_code=status_code, headers={"Cache-Control": "no-store"})
@@ -110,15 +107,14 @@ def profile(request: Request, saved: int = 0):
 
 @router.post("/profile-admin", include_in_schema=False)
 async def save_profile(request: Request):
-    """Save the name, the email and the phone number. Checked again here: the page's own checks are only a convenience."""
+    """Save the name and the email. Checked again here: the page's own checks are only a convenience."""
     user_id, redirect = admin_or_redirect(request)
     if redirect:
         return redirect
     msg = ERR[get_lang(request)]
     data = await request.form()
     form = {"full_name": (data.get("full_name") or "").strip(),
-            "email": (data.get("email") or "").strip(),
-            "phone": (data.get("phone") or "").strip()}
+            "email": (data.get("email") or "").strip()}
     errors = {}
     if not 2 <= len(form["full_name"]) <= 100:
         errors["full_name"] = msg["name"]
@@ -132,11 +128,9 @@ async def save_profile(request: Request):
                                  (form["email"], user_id)).fetchone()
         if taken:
             errors["email"] = msg["taken"]
-    if form["phone"] and not PHONE_PATTERN.match(form["phone"]):
-        errors["phone"] = msg["phone"]
     if errors:
         return profile_page(request, user_id, form=form, errors=errors, status_code=400)
     with get_connection() as conn:
-        conn.execute("UPDATE users SET full_name = %s, email = %s, phone = %s WHERE user_id = %s",
-                     (form["full_name"], form["email"], form["phone"] or None, user_id))
+        conn.execute("UPDATE users SET full_name = %s, email = %s WHERE user_id = %s",
+                     (form["full_name"], form["email"], user_id))
     return RedirectResponse("/profile-admin?saved=1", status_code=303)

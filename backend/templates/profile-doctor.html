@@ -57,7 +57,7 @@
         </div>
       </section>
 
-      <!-- ---------- card 2: only the email and the phone can change ---------- -->
+      <!-- ---------- card 2: only the email can change ---------- -->
       <form method="post" action="/profile-doctor" novalidate>
         <section class="card" id="contact-card">
           <div class="card-head">
@@ -84,8 +84,6 @@
               <label for="email">{{ t.email_label }}</label>
               <input type="text" inputmode="email" id="email" name="email" value="{{ profile.email }}" maxlength="255" required disabled />
             </div>
-                        <!-- the phone is not shown on the doctor's profile; it is sent back unchanged -->
-            <input type="hidden" name="phone" value="{{ profile.phone }}" />
           </div>
 
           <div class="decision-foot" id="actions" hidden>
@@ -101,7 +99,7 @@
   </main>
 
   <script>
-    // Edit: unlock the email and the phone and show Save / Cancel.
+    // Edit: unlock the email and show Save / Cancel.
     // Saving is an ordinary form submit, so the server checks everything again.
     document.getElementById('edit-btn').addEventListener('click', function () {
       const boxes = document.querySelectorAll('#contact-card .field:not(.locked) input');

@@ -59,16 +59,6 @@
             </div>
 
             <div class="field">
-              <label for="phone" data-i18n="phone">Phone number</label>
-              <div class="phone-group" dir="ltr">
-                <span class="phone-prefix" aria-hidden="true">+966</span>
-                <input type="tel" id="phone" inputmode="numeric" autocomplete="tel-national" placeholder="5XXXXXXXX" data-check="phone" required />
-              </div>
-              <p class="field-hint" data-i18n="phoneHint">9 digits starting with 5, after +966.</p>
-              <p class="error-message"></p>
-            </div>
-
-            <div class="field">
               <label for="national-id" data-i18n="nationalId">National ID / Iqama number</label>
               <input type="text" inputmode="numeric" id="national-id" data-check="nationalId" required />
               <p class="field-hint" data-i18n="nationalIdHint">10 digits.</p>
@@ -78,6 +68,13 @@
             <div class="field">
               <label for="scfhs" data-i18n="scfhs">SCFHS licence number</label>
               <input type="text" id="scfhs" data-check="scfhs" required />
+              <p class="error-message"></p>
+            </div>
+
+            <div class="field">
+              <label for="license-expiry" data-i18n="licenseExpiry">Licence expiry date</label>
+              <input type="date" id="license-expiry" data-check="licenseExpiry" required />
+              <p class="field-hint" data-i18n="licenseExpiryHint">The account is suspended once this date passes, until the licence is renewed.</p>
               <p class="error-message"></p>
             </div>
 

@@ -1,7 +1,7 @@
 """MUFSAL - profile pages. For now: the doctor and the radiologist.
 
     GET  /profile-doctor        the page
-    POST /profile-doctor        saves the email and the phone number
+    POST /profile-doctor        saves the email address
 
 Include this router in main.py BEFORE routes_pages.
 """
@@ -71,12 +71,12 @@ def profile_doctor(request: Request, saved: Optional[int] = None, error: Optiona
 
 
 @router.post("/profile-doctor", include_in_schema=False)
-def save_profile_doctor(request: Request, email: str = Form(...), phone: str = Form(...)):
+def save_profile_doctor(request: Request, email: str = Form(...)):
     user_id, redirect = doctor_or_redirect(request)
     if redirect:
         return redirect
 
-    result = update_contact(user_id, email, phone)
+    result = update_contact(user_id, email)
     if isinstance(result, dict):
         return RedirectResponse(f"/profile-doctor?error={result['error']}", status_code=303)
     return RedirectResponse("/profile-doctor?saved=1", status_code=303)

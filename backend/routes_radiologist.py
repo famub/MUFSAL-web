@@ -145,7 +145,7 @@ async def submit(request: Request):
 # The other radiologist pages (new design, real data)
 #   GET  /dashboard-radiologist   welcome, "new case" button, numbers, 5 latest cases
 #   GET  /radiologist-cases       all the cases this radiologist uploaded
-#   GET  /profile-radiologist     the profile (email and phone can be changed)
+#   GET  /profile-radiologist     the profile (the email can be changed)
 #   POST /profile-radiologist
 # =====================================================================
 from typing import Optional
@@ -221,11 +221,11 @@ def profile(request: Request, saved: Optional[int] = None, error: Optional[str] 
 
 
 @router.post("/profile-radiologist", include_in_schema=False)
-def save_profile(request: Request, email: str = Form(...), phone: str = Form(...)):
+def save_profile(request: Request, email: str = Form(...)):
     user_id, redirect = radiologist_or_redirect(request)
     if redirect:
         return redirect
-    result = update_contact(user_id, email, phone)
+    result = update_contact(user_id, email)
     if isinstance(result, dict):
         return RedirectResponse(f"/profile-radiologist?error={result['error']}", status_code=303)
     return RedirectResponse("/profile-radiologist?saved=1", status_code=303)

@@ -54,13 +54,13 @@ def public_user(user):
 
 def register_patient(data):
     name, email = rules.clean(data.get("name")), rules.clean(data.get("email")).lower()
-    national_id, phone = rules.clean(data.get("nationalId")), rules.clean(data.get("phone"))
+    national_id = rules.clean(data.get("nationalId"))
     dob, gender = rules.clean(data.get("dob")), rules.clean(data.get("gender")).lower()
     password = data.get("password")
 
     problem = rules.first_error(
         rules.name_error(name), rules.email_error(email), rules.national_id_error(national_id),
-        rules.phone_error(phone), rules.dob_error(dob), rules.gender_error(gender),
+        rules.dob_error(dob), rules.gender_error(gender),
         rules.password_error(password))
     if problem:
         return _err(problem)
@@ -70,7 +70,7 @@ def register_patient(data):
     if db.national_id_exists(national_id):
         return _err("national_id_taken", 409)
     try:
-        db.create_patient(name, email, password, phone, national_id, dob, gender)
+        db.create_patient(name, email, password, national_id, dob, gender)
     except pg_errors.UniqueViolation as exc:
         return _err(_which_unique(exc), 409)
     except pg_errors.CheckViolation:
@@ -80,13 +80,14 @@ def register_patient(data):
 
 def register_professional(data):
     name, email = rules.clean(data.get("name")), rules.clean(data.get("email")).lower()
-    national_id, phone = rules.clean(data.get("nationalId")), rules.clean(data.get("phone"))
+    national_id = rules.clean(data.get("nationalId"))
+    license_expiry = rules.clean(data.get("licenseExpiry"))
     role, scfhs = rules.clean(data.get("role")), rules.clean(data.get("scfhsNumber"))
     password = data.get("password")
 
     problem = rules.first_error(
         rules.name_error(name), rules.role_error(role), rules.email_error(email),
-        rules.phone_error(phone), rules.national_id_error(national_id),
+        rules.national_id_error(national_id), rules.license_expiry_error(license_expiry),
         rules.scfhs_error(scfhs), rules.password_error(password))
     if problem:
         return _err(problem)
@@ -98,10 +99,11 @@ def register_professional(data):
                 return _err("national_id_taken", 409)
             if db.scfhs_exists(scfhs):
                 return _err("scfhs_taken", 409)
-            db.create_professional(name, email, password, phone, national_id, role, scfhs)
+            db.create_professional(name, email, password, national_id, role, scfhs, license_expiry)
         elif existing["status"] == "rejected" and existing["role"] in rules.PROFESSIONAL_ROLES:
             # A rejected professional may apply again; the old rejection stays in the history.
-            db.resubmit_professional(existing["user_id"], name, password, phone, national_id, role, scfhs)
+            db.resubmit_professional(existing["user_id"], name, password, national_id,
+                                     role, scfhs, license_expiry)
         else:
             return _err("email_taken", 409)
     except pg_errors.UniqueViolation as exc:

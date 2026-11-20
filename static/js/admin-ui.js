@@ -22,7 +22,7 @@
       c_pending: 'Pending requests', c_history: 'Decision history', c_accounts: 'Active accounts',
       case: 'Case', source: 'Source', doctor_l: 'Assigned doctor', submitted: 'Submitted', delay: 'Delay', status: 'Status',
       reassign: 'Reassign', view: 'View', approve: 'Approve', reject: 'Reject', del: 'Delete', respond: 'View & reply',
-      applicant: 'Applicant', role: 'Role', scfhs: 'SCFHS file number', nid: 'National ID / iqama', email: 'Email', phone: 'Phone',
+      applicant: 'Applicant', role: 'Role', scfhs: 'SCFHS file number', nid: 'National ID / iqama', email: 'Email',
       decision: 'Decision', reason: 'Reason', date: 'Date', name: 'Name', approved_on: 'Approved on',
       ticket: 'Ticket', complainant: 'Complainant', about: 'About', subject: 'Subject',
       none_delayed: 'No delayed requests. Everything is on schedule.', none_pending: 'No pending requests. All requests have been reviewed.',
@@ -62,7 +62,7 @@
       c_pending: 'الطلبات المعلّقة', c_history: 'سجل القرارات', c_accounts: 'الحسابات النشطة',
       case: 'الحالة', source: 'المصدر', doctor_l: 'الطبيب المسؤول', submitted: 'تاريخ التقديم', delay: 'مدة التأخير', status: 'الحالة',
       reassign: 'إعادة إسناد', view: 'عرض', approve: 'قبول', reject: 'رفض', del: 'حذف', respond: 'عرض والرد',
-      applicant: 'مقدّم الطلب', role: 'الدور', scfhs: 'رقم ملف هيئة التخصصات', nid: 'الهوية / الإقامة', email: 'البريد الإلكتروني', phone: 'الجوال',
+      applicant: 'مقدّم الطلب', role: 'الدور', scfhs: 'رقم ملف هيئة التخصصات', nid: 'الهوية / الإقامة', email: 'البريد الإلكتروني',
       decision: 'القرار', reason: 'السبب', date: 'التاريخ', name: 'الاسم', approved_on: 'تاريخ القبول',
       ticket: 'الشكوى', complainant: 'مقدّم الشكوى', about: 'الموضوع', subject: 'العنوان',
       none_delayed: 'لا توجد طلبات متأخرة. كل شيء في موعده.', none_pending: 'لا توجد طلبات معلّقة. تمت مراجعة كل الطلبات.',
@@ -129,7 +129,7 @@
         return { id: String(r.delay_complaint_id), no: '#' + r.case_id, src: r.source, dr: r.doctor_name || '', at: ts(r.submitted_at), rep: ts(r.reported_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
       });
     },
-    async pending() { const d = await api('/api/admin/requests'); if (d) DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, phone: r.phone, at: ts(r.created_at) })); },
+    async pending() { const d = await api('/api/admin/requests'); if (d) DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, at: ts(r.created_at) })); },
     async history() { const d = await api('/api/admin/decisions'); if (d) DB.history = d.decisions.map(r => ({ name: r.applicant_name, role: r.applicant_role, d: r.decision, why: r.reason || '', at: ts(r.decided_at) })); },
     async accounts() { const d = await api('/api/admin/accounts'); if (d) DB.accounts = d.accounts.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, at: ts(r.approved_at) })); },
     async complaints() { const d = await api('/api/admin/complaints'); if (d) DB.cmp = d.complaints.map(c => ({ id: String(c.complaint_id), no: '#' + c.complaint_id, who: c.complainant_role, name: c.complainant, sub: c.subject, kind: kindOf(c.subject), body: c.body, st: c.status, at: ts(c.created_at), th: c.replies.map(m => ({ t: ts(m.created_at), txt: m.body })) })); }
@@ -362,7 +362,7 @@
     dhandled: async id => { if (await api(`/api/admin/delayed/${id}/handled`, 'POST', {})) { toast(T.handled_ok); await LOAD.delayed(); openDelayed(id); draw(false); } },
     lview: id => {
       const r = by(DB.pending, id);
-      openPanel(r.name, kv({ [T.role]: T[r.role] || r.role, [T.scfhs]: r.scfhs, [T.nid]: r.nid, [T.email]: r.email, [T.phone]: r.phone, [T.submitted]: fmt(r.at) }) +
+      openPanel(r.name, kv({ [T.role]: T[r.role] || r.role, [T.scfhs]: r.scfhs, [T.nid]: r.nid, [T.email]: r.email, [T.submitted]: fmt(r.at) }) +
         `<div class="panel-actions">${btn('appr', id, T.approve, 'btn-primary')}${btn('rej', id, T.reject, 'btn-danger')}</div>`);
     },
     appr: id => decide(by(DB.pending, id), 'approved'),

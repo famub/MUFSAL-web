@@ -146,7 +146,7 @@ def get_profile(user_id):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT u.full_name, u.email, u.phone, u.national_id,
+            SELECT u.full_name, u.email, u.national_id,
                    p.date_of_birth, p.gender
             FROM users u
             JOIN patients p ON p.user_id = u.user_id
@@ -170,7 +170,7 @@ def email_belongs_to_someone_else(email, user_id):
     return row is not None
 
 
-def update_profile(user_id, full_name, email, phone):
+def update_profile(user_id, full_name, email):
     """Save the three details a patient is allowed to change.
 
     The national ID, the date of birth and the sex are left out on
@@ -178,8 +178,8 @@ def update_profile(user_id, full_name, email, phone):
     """
     with get_connection() as conn:
         conn.execute(
-            "UPDATE users SET full_name = %s, email = %s, phone = %s WHERE user_id = %s",
-            (full_name, email, phone, user_id),
+            "UPDATE users SET full_name = %s, email = %s WHERE user_id = %s",
+            (full_name, email, user_id),
         )
 
 

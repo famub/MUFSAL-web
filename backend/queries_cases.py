@@ -149,7 +149,7 @@ def get_case(case_id):
                    -- than read from a column of its own
                    CASE WHEN c.uploaded_by = c.patient_id
                         THEN 'patient' ELSE 'radiologist' END AS source,
-                   p.full_name AS patient_name, p.national_id, p.phone,
+                   p.full_name AS patient_name, p.national_id,
                    pt.date_of_birth, pt.gender
             FROM cases c
             JOIN users p ON p.user_id = c.patient_id

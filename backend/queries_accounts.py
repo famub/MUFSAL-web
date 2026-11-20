@@ -18,16 +18,16 @@ def check_password(plain_password, password_hash):
 DUMMY_HASH = hash_password("not-a-real-password")
 
 
-def create_patient(full_name, email, password, phone, national_id, date_of_birth, gender):
+def create_patient(full_name, email, password, national_id, date_of_birth, gender):
     """Create a patient account. Returns the new user_id."""
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO users (role, full_name, email, password_hash, phone, national_id, status)
-            VALUES ('patient', %s, %s, %s, %s, %s, 'approved')
+            INSERT INTO users (role, full_name, email, password_hash, national_id, status)
+            VALUES ('patient', %s, %s, %s, %s, 'approved')
             RETURNING user_id
             """,
-            (full_name, email, hash_password(password), phone, national_id),
+            (full_name, email, hash_password(password), national_id),
         ).fetchone()
 
         conn.execute(
@@ -37,22 +37,25 @@ def create_patient(full_name, email, password, phone, national_id, date_of_birth
     return row["user_id"]
 
 
-def create_professional(full_name, email, password, phone, national_id,
-                        role, scfhs_number):
+def create_professional(full_name, email, password, national_id,
+                        role, scfhs_number, license_expiry):
     """Create a doctor or radiologist account, waiting for admin approval."""
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO users (role, full_name, email, password_hash, phone, national_id, status)
-            VALUES (%s, %s, %s, %s, %s, %s, 'pending')
+            INSERT INTO users (role, full_name, email, password_hash, national_id, status)
+            VALUES (%s, %s, %s, %s, %s, 'pending')
             RETURNING user_id
             """,
-            (role, full_name, email, hash_password(password), phone, national_id),
+            (role, full_name, email, hash_password(password), national_id),
         ).fetchone()
 
+        # role is repeated here only so the composite key can check it, and
+        # license_expiry is required of every professional when registering
         conn.execute(
-            "INSERT INTO professionals (user_id, scfhs_number) VALUES (%s, %s)",
-            (row["user_id"], scfhs_number),
+            "INSERT INTO professionals (user_id, role, scfhs_number, license_expiry)"
+            " VALUES (%s, %s, %s, %s)",
+            (row["user_id"], role, scfhs_number, license_expiry),
         )
     return row["user_id"]
 
@@ -146,8 +149,8 @@ def get_rejection_reason(user_id):
     return row["reason"] if row else ""
 
 
-def resubmit_professional(user_id, full_name, password, phone, national_id,
-                          role, scfhs_number):
+def resubmit_professional(user_id, full_name, password, national_id,
+                          role, scfhs_number, license_expiry):
     """A rejected professional sends a new request with the same email.
 
     The email column is unique, so the old row is reused and goes back to
@@ -157,15 +160,17 @@ def resubmit_professional(user_id, full_name, password, phone, national_id,
         conn.execute(
             """
             UPDATE users
-            SET full_name = %s, password_hash = %s, phone = %s, national_id = %s,
+            SET full_name = %s, password_hash = %s, national_id = %s,
                 role = %s, status = 'pending'
             WHERE user_id = %s AND status = 'rejected'
             """,
-            (full_name, hash_password(password), phone, national_id, role, user_id),
+            (full_name, hash_password(password), national_id, role, user_id),
         )
+        # the role is kept in step here too, or the composite key would refuse
         conn.execute(
-            "UPDATE professionals SET scfhs_number = %s WHERE user_id = %s",
-            (scfhs_number, user_id),
+            "UPDATE professionals SET role = %s, scfhs_number = %s, license_expiry = %s"
+            " WHERE user_id = %s",
+            (role, scfhs_number, license_expiry, user_id),
         )
     return user_id
 
@@ -175,7 +180,7 @@ def list_pending_professionals():
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT u.user_id, u.full_name, u.role, u.email, u.phone, u.national_id,
+            SELECT u.user_id, u.full_name, u.role, u.email, u.national_id,
                    p.scfhs_number, u.created_at
             FROM users u JOIN professionals p ON p.user_id = u.user_id
             WHERE u.status = 'pending'

@@ -93,7 +93,6 @@ COMPLAINT_TAGS = {
 }
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-PHONE_PATTERN = re.compile(r"^966[0-9]{9}$")
 
 
 # ------------------------------------------------------------------ helpers
@@ -312,7 +311,7 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
         return RedirectResponse("/login", status_code=303)
 
     if form is None:
-        form = {"full_name": row["full_name"], "email": row["email"], "phone": row["phone"]}
+        form = {"full_name": row["full_name"], "email": row["email"]}
 
     header = get_patient_header(user_id)
 
@@ -341,7 +340,7 @@ def profile(request: Request, saved: int = 0):
 
 @router.post("/profile-patient", include_in_schema=False)
 async def save_profile(request: Request):
-    """Save the name, the email and the phone number.
+    """Save the name and the email address.
 
     Everything is checked again here: the page's own checks can be
     switched off in the browser, so they are a convenience, not a rule.
@@ -354,7 +353,6 @@ async def save_profile(request: Request):
     form = {
         "full_name": (data.get("full_name") or "").strip(),
         "email": (data.get("email") or "").strip(),
-        "phone": (data.get("phone") or "").strip(),
     }
 
     errors = {}
@@ -364,13 +362,11 @@ async def save_profile(request: Request):
         errors["email"] = "That does not look like an email address."
     elif email_belongs_to_someone_else(form["email"], user_id):
         errors["email"] = "Another account already uses this email address."
-    if not PHONE_PATTERN.match(form["phone"]):
-        errors["phone"] = "The number starts with 966 and has 12 digits in all."
 
     if errors:
         return profile_page(request, user_id, form=form, errors=errors, status_code=400)
 
-    update_profile(user_id, form["full_name"], form["email"], form["phone"])
+    update_profile(user_id, form["full_name"], form["email"])
 
     # redirect after saving, so refreshing the page does not save it twice
     return RedirectResponse("/profile-patient?saved=1", status_code=303)
