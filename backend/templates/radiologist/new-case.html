@@ -439,7 +439,10 @@
     }
 
     document.getElementById('pick').addEventListener('click', function () { file.click(); });
-    drop.addEventListener('click', function (e) { if (e.target === drop) file.click(); });
+    // a click anywhere on the box (the icon, the words, the empty space) opens the file picker;
+    // the "Choose a file" button has its own handler, so it is skipped here to avoid opening it twice
+    drop.style.cursor = 'pointer';
+    drop.addEventListener('click', function (e) { if (!e.target.closest('#pick')) file.click(); });
     file.addEventListener('change', showFile);
 
     document.getElementById('undo').addEventListener('click', function () {
