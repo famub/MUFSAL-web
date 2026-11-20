@@ -167,11 +167,15 @@ def _hash_token(token):
 
 
 def forgot(data):
-    """Same answer whether the email exists or not, so nobody can find out who is registered."""
+    """Tells the person when the email is not registered (the register page already says "email taken",
+    so keeping this one secret would hide nothing). An account that exists but cannot sign in
+    (a rejected request) gets the normal answer and no mail."""
     email = rules.clean(data.get("email")).lower()
     answer = {"ok": True}
     user = db.get_user_by_email(email) if rules.email_error(email) is None else None
-    if user and db.can_sign_in(user):
+    if user is None:
+        return _err("email_not_found", 404)
+    if db.can_sign_in(user):
         token = secrets.token_urlsafe(32)
         db.create_password_reset(user["user_id"], _hash_token(token))
         link = f"/reset-password.html?token={token}"
