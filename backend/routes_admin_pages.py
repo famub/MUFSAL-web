@@ -81,7 +81,7 @@ def admin_or_redirect(request):
 def get_admin_account(user_id):
     with get_connection() as conn:
         return conn.execute(
-            "SELECT full_name, email, created_at FROM users WHERE user_id = %s", (user_id,)
+            "SELECT full_name, email FROM users WHERE user_id = %s", (user_id,)
         ).fetchone()
 
 
@@ -92,8 +92,7 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
         request, "admin/profile.html",
         {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr",
          "form": form or {"full_name": row["full_name"], "email": row["email"]},
-         "errors": errors or {}, "saved": saved,
-         "since": row["created_at"].strftime("%d/%m/%Y")},
+         "errors": errors or {}, "saved": saved},
         status_code=status_code, headers={"Cache-Control": "no-store"})
 
 

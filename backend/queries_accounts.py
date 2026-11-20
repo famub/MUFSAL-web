@@ -23,8 +23,8 @@ def create_patient(full_name, email, password, national_id, date_of_birth, gende
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO users (role, full_name, email, password_hash, national_id, status)
-            VALUES ('patient', %s, %s, %s, %s, 'approved')
+            INSERT INTO users (role, full_name, email, password_hash, national_id)
+            VALUES ('patient', %s, %s, %s, %s)
             RETURNING user_id
             """,
             (full_name, email, hash_password(password), national_id),
@@ -43,8 +43,8 @@ def create_professional(full_name, email, password, national_id,
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO users (role, full_name, email, password_hash, national_id, status)
-            VALUES (%s, %s, %s, %s, %s, 'pending')
+            INSERT INTO users (role, full_name, email, password_hash, national_id)
+            VALUES (%s, %s, %s, %s, %s)
             RETURNING user_id
             """,
             (role, full_name, email, hash_password(password), national_id),
@@ -68,7 +68,7 @@ def find_patient_by_national_id(national_id):
             """
             SELECT u.user_id AS patient_id, u.full_name
             FROM users u JOIN patients p ON p.user_id = u.user_id
-            WHERE u.national_id = %s AND u.status = 'approved'
+            WHERE u.national_id = %s
             """,
             (national_id,),
         ).fetchone()
@@ -78,7 +78,12 @@ def get_user_by_email(email):
     """Return the account with this email, or None."""
     with get_connection() as conn:
         return conn.execute(
-            "SELECT * FROM users WHERE LOWER(email) = LOWER(%s)", (email,)
+            """
+            SELECT u.*, p.status
+            FROM users u LEFT JOIN professionals p ON p.user_id = u.user_id
+            WHERE LOWER(u.email) = LOWER(%s)
+            """,
+            (email,),
         ).fetchone()
 
 
@@ -90,6 +95,19 @@ def is_deactivated(user_id):
             (user_id,),
         ).fetchone()
     return row is not None
+
+
+def can_sign_in(user):
+    """True when this account is allowed through the door.
+
+    Only a doctor or a radiologist is ever approved or rejected, and the
+    status now lives in professionals, so it is NULL for everybody else. A
+    patient account is live the moment it is made and the admin account is
+    not applied for, so for those two there is nothing to check.
+    """
+    if user["role"] not in ("doctor", "radiologist"):
+        return True
+    return user["status"] == "approved"
 
 
 def login(email, password):
@@ -104,7 +122,7 @@ def login(email, password):
         return {"error": "not_found"}
     if not check_password(password, user["password_hash"]):
         return {"error": "wrong_password"}
-    if user["status"] != "approved":
+    if not can_sign_in(user):
         return {"error": user["status"]}
     # A closed account keeps the status it was approved with, because that part
     # of its history did happen. What stops it logging in is the closing itself.
@@ -160,16 +178,15 @@ def resubmit_professional(user_id, full_name, password, national_id,
         conn.execute(
             """
             UPDATE users
-            SET full_name = %s, password_hash = %s, national_id = %s,
-                role = %s, status = 'pending'
-            WHERE user_id = %s AND status = 'rejected'
+            SET full_name = %s, password_hash = %s, national_id = %s, role = %s
+            WHERE user_id = %s
             """,
             (full_name, hash_password(password), national_id, role, user_id),
         )
         # the role is kept in step here too, or the composite key would refuse
         conn.execute(
-            "UPDATE professionals SET role = %s, scfhs_number = %s, license_expiry = %s"
-            " WHERE user_id = %s",
+            "UPDATE professionals SET role = %s, scfhs_number = %s, license_expiry = %s,"
+            " status = 'pending' WHERE user_id = %s AND status = 'rejected'",
             (role, scfhs_number, license_expiry, user_id),
         )
     return user_id
@@ -181,10 +198,10 @@ def list_pending_professionals():
         return conn.execute(
             """
             SELECT u.user_id, u.full_name, u.role, u.email, u.national_id,
-                   p.scfhs_number, u.created_at
+                   p.scfhs_number, p.created_at
             FROM users u JOIN professionals p ON p.user_id = u.user_id
-            WHERE u.status = 'pending'
-            ORDER BY u.created_at, u.user_id
+            WHERE p.status = 'pending'
+            ORDER BY p.created_at, u.user_id
             """
         ).fetchall()
 
@@ -199,15 +216,16 @@ def decide_professional(user_id, admin_id, decision, reason=None):
     with get_connection() as conn:
         row = conn.execute(
             """
-            SELECT full_name, role FROM users
-            WHERE user_id = %s AND status = 'pending' AND role IN ('doctor','radiologist')
-            FOR UPDATE
+            SELECT u.full_name, u.role FROM users u
+            JOIN professionals p ON p.user_id = u.user_id
+            WHERE u.user_id = %s AND p.status = 'pending'
+            FOR UPDATE OF p
             """,
             (user_id,),
         ).fetchone()
         if row is None:
             return False
-        conn.execute("UPDATE users SET status = %s WHERE user_id = %s", (decision, user_id))
+        conn.execute("UPDATE professionals SET status = %s WHERE user_id = %s", (decision, user_id))
         conn.execute(
             """
             INSERT INTO registration_decisions

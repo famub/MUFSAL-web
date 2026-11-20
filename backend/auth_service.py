@@ -164,7 +164,7 @@ def forgot(data):
     email = rules.clean(data.get("email")).lower()
     answer = {"ok": True}
     user = db.get_user_by_email(email) if rules.email_error(email) is None else None
-    if user and user["status"] == "approved":
+    if user and db.can_sign_in(user):
         token = secrets.token_urlsafe(32)
         db.create_password_reset(user["user_id"], _hash_token(token))
         link = f"/reset-password.html?token={token}"

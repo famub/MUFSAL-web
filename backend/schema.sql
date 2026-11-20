@@ -25,10 +25,7 @@ CREATE TABLE users (
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     national_id   CHAR(10)     UNIQUE,
-    status        VARCHAR(20)  NOT NULL DEFAULT 'pending',
-    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist','admin')),
-    CONSTRAINT users_status_valid CHECK (status IN ('pending','approved','rejected')),
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
     CONSTRAINT users_national_id_format CHECK (national_id ~ '^[0-9]{10}$'),
     CONSTRAINT users_identity_required CHECK (role = 'admin' OR national_id IS NOT NULL),
@@ -66,12 +63,21 @@ CREATE TABLE professionals (
                            CHECK (role IN ('doctor','radiologist')),
     scfhs_number           VARCHAR(20) NOT NULL UNIQUE,
     license_expiry         DATE        NOT NULL,
+    status                 VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at             TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     pending_license_expiry DATE,
     delete_requested_at    TIMESTAMP,
     deactivated_at         TIMESTAMP,
     CONSTRAINT professionals_is_a_professional FOREIGN KEY (user_id, role)
-        REFERENCES users(user_id, role) ON DELETE CASCADE
+        REFERENCES users(user_id, role) ON DELETE CASCADE,
+    CONSTRAINT professionals_status_valid CHECK (status IN ('pending','approved','rejected'))
 );
+
+COMMENT ON COLUMN professionals.status IS
+    'Where the application has got to: pending while the admin has not looked at it, then approved or rejected. It is here and not in users because only a doctor or a radiologist is ever approved: a patient account is live the moment it is made, and the one admin account is not applied for. In users the column would read ''approved'' for every patient and every admin for good, which is a column that says nothing.';
+
+COMMENT ON COLUMN professionals.created_at IS
+    'When the application was made. The admin''s list is ordered by it so the oldest request is dealt with first, and it is the fallback date for when an account was approved. It sits here for the same reason as the column above: for a patient the date was never looked at anywhere in the system.';
 
 COMMENT ON COLUMN professionals.license_expiry IS
     'The day the practising licence runs out, given by the professional when registering. There is no "suspended" column: whether an account is suspended is read from this date (license_expiry < CURRENT_DATE), so the answer is right at every moment and no nightly job has to keep it so. What time alone decides is not stored.';

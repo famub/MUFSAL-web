@@ -12,24 +12,24 @@ TRUNCATE TABLE users, cases RESTART IDENTITY CASCADE;
 
 -- ---------- accounts ----------
 -- 1 admin - 6 patients - 3 doctors - 3 radiologists
-INSERT INTO users (user_id, role, full_name, email, password_hash, national_id, status) VALUES
-(1,  'admin',       'MUFSAL Admin',      'admin@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', NULL,         'approved'),
-(2,  'patient',     'Sarah Ahmed',       'sarah@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1011111111', 'approved'),
-(3,  'patient',     'Noura Alharbi',     'noura@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1022222222', 'approved'),
-(4,  'doctor',      'Reem Alqahtani',    'reem@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1033333333', 'approved'),
-(5,  'doctor',      'Khalid Alzahrani',  'khalid@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1044444444', 'approved'),
-(6,  'radiologist', 'Huda Alotaibi',     'huda@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1055555555', 'approved'),
-(7,  'doctor',      'Maha Alsaif',       'maha@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1066666666', 'pending'),
-(8,  'radiologist', 'Lama Alsalem',      'lama@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1077777777', 'rejected'),
-(9,  'patient',     'Dana Alqahtani',    'dana@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1088888888', 'approved'),
-(10, 'patient',     'Aisha Almutairi',   'aisha@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1099999999', 'approved'),
-(11, 'patient',     'Fatimah Alshehri',  'fatimah@mufsal.test',  '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1012121212', 'approved'),
-(12, 'patient',     'Abdullah Alharbi',  'abdullah@mufsal.test', '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1013131313', 'approved'),
-(13, 'radiologist', 'Yazeed Alomar',     'yazeed@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1014141414', 'pending'),
+INSERT INTO users (user_id, role, full_name, email, password_hash, national_id) VALUES
+(1,  'admin',       'MUFSAL Admin',      'admin@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', NULL),
+(2,  'patient',     'Sarah Ahmed',       'sarah@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1011111111'),
+(3,  'patient',     'Noura Alharbi',     'noura@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1022222222'),
+(4,  'doctor',      'Reem Alqahtani',    'reem@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1033333333'),
+(5,  'doctor',      'Khalid Alzahrani',  'khalid@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1044444444'),
+(6,  'radiologist', 'Huda Alotaibi',     'huda@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1055555555'),
+(7,  'doctor',      'Maha Alsaif',       'maha@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1066666666'),
+(8,  'radiologist', 'Lama Alsalem',      'lama@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1077777777'),
+(9,  'patient',     'Dana Alqahtani',    'dana@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1088888888'),
+(10, 'patient',     'Aisha Almutairi',   'aisha@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1099999999'),
+(11, 'patient',     'Fatimah Alshehri',  'fatimah@mufsal.test',  '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1012121212'),
+(12, 'patient',     'Abdullah Alharbi',  'abdullah@mufsal.test', '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1013131313'),
+(13, 'radiologist', 'Yazeed Alomar',     'yazeed@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1014141414'),
 -- 14 and 15 carry the two licence states. They are extra accounts so that the
 -- six above keep working as the demo logins everybody already uses.
-(14, 'doctor',      'Sultan Alghamdi',   'sultan@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1015151515', 'pending'),
-(15, 'radiologist', 'Amal Alqahtani',    'amal@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1016161616', 'approved');
+(14, 'doctor',      'Sultan Alghamdi',   'sultan@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1015151515'),
+(15, 'radiologist', 'Amal Alqahtani',    'amal@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1016161616');
 
 SELECT setval('users_user_id_seq', (SELECT MAX(user_id) FROM users));
 
@@ -49,17 +49,17 @@ INSERT INTO patients (user_id, date_of_birth, gender) VALUES
 --   14            licence ran out, a renewal is waiting for the admin
 --                 (users.status is 'pending', so he cannot log in meanwhile)
 --   15            licence in force, but the account was taken out of service
-INSERT INTO professionals (user_id, role, scfhs_number, license_expiry,
+INSERT INTO professionals (user_id, role, scfhs_number, license_expiry, status,
                            pending_license_expiry, deactivated_at) VALUES
-(4,  'doctor',      '12-H-48213', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
-(5,  'doctor',      '15-H-52090', CURRENT_DATE + INTERVAL '18 months', NULL, NULL),
-(6,  'radiologist', '09-R-30177', CURRENT_DATE + INTERVAL '3 years',   NULL, NULL),
-(7,  'doctor',      '18-H-61004', CURRENT_DATE + INTERVAL '1 year',    NULL, NULL),
-(8,  'radiologist', '07-R-21550', CURRENT_DATE + INTERVAL '2 years',   NULL, NULL),
-(13, 'radiologist', '21-R-70332', CURRENT_DATE + INTERVAL '4 years',   NULL, NULL),
-(14, 'doctor',      '11-H-40988', CURRENT_DATE - INTERVAL '9 days',
+(4,  'doctor',      '12-H-48213', CURRENT_DATE + INTERVAL '2 years', 'approved',   NULL, NULL),
+(5,  'doctor',      '15-H-52090', CURRENT_DATE + INTERVAL '18 months', 'approved', NULL, NULL),
+(6,  'radiologist', '09-R-30177', CURRENT_DATE + INTERVAL '3 years', 'approved',   NULL, NULL),
+(7,  'doctor',      '18-H-61004', CURRENT_DATE + INTERVAL '1 year', 'pending',    NULL, NULL),
+(8,  'radiologist', '07-R-21550', CURRENT_DATE + INTERVAL '2 years', 'rejected',   NULL, NULL),
+(13, 'radiologist', '21-R-70332', CURRENT_DATE + INTERVAL '4 years', 'pending',   NULL, NULL),
+(14, 'doctor',      '11-H-40988', CURRENT_DATE - INTERVAL '9 days', 'pending',
                     CURRENT_DATE + INTERVAL '2 years', NULL),
-(15, 'radiologist', '16-R-55471', CURRENT_DATE + INTERVAL '2 years',
+(15, 'radiologist', '16-R-55471', CURRENT_DATE + INTERVAL '2 years', 'approved',
                     NULL, CURRENT_TIMESTAMP - INTERVAL '10 days');
 
 -- ---------- admin decisions ----------

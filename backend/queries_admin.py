@@ -19,8 +19,7 @@ def get_summary():
             """
             SELECT
               (SELECT COUNT(*) FROM delay_complaints WHERE status = 'pending')::int       AS delayed,
-              (SELECT COUNT(*) FROM users WHERE status = 'pending'
-                                          AND role IN ('doctor','radiologist'))::int      AS licenses,
+              (SELECT COUNT(*) FROM professionals WHERE status = 'pending')::int          AS licenses,
               (SELECT COUNT(*) FROM complaints WHERE status <> 'resolved')::int           AS complaints
             """
         ).fetchone()
@@ -91,7 +90,9 @@ def list_doctors():
     """Approved doctors - the choices in the reassign dialog."""
     with get_connection() as conn:
         return conn.execute(
-            "SELECT user_id, full_name FROM users WHERE role = 'doctor' AND status = 'approved' ORDER BY full_name"
+            "SELECT u.user_id, u.full_name FROM users u"
+            " JOIN professionals p ON p.user_id = u.user_id"
+            " WHERE u.role = 'doctor' AND p.status = 'approved' ORDER BY u.full_name"
         ).fetchall()
 
 
@@ -120,9 +121,9 @@ def list_active_accounts():
                    COALESCE(
                        (SELECT MAX(decided_at) FROM registration_decisions r
                         WHERE r.professional_id = u.user_id AND r.decision = 'approved'),
-                       u.created_at) AS approved_at
+                       p.created_at) AS approved_at
             FROM users u JOIN professionals p ON p.user_id = u.user_id
-            WHERE u.status = 'approved' AND u.role IN ('doctor','radiologist')
+            WHERE p.status = 'approved' AND u.role IN ('doctor','radiologist')
               AND p.deactivated_at IS NULL
             ORDER BY u.full_name
             """
