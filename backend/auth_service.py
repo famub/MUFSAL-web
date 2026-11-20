@@ -25,6 +25,8 @@ HOME = {
     "admin": "/dashboard-admin",
 }
 
+MAX_REJECTED_APPLICATIONS = 2   # refused twice by the admin = barred for good (see schema.sql, registration_decisions)
+
 MAX_FAILS = 5                 # wrong passwords in a row ...
 FAIL_WINDOW = 15 * 60         # ... inside 15 minutes lock the email for the rest of the window
 _fails = {}                   # email -> times of the wrong attempts (kept in memory, one server process)
@@ -47,7 +49,7 @@ def _which_unique(exc):
 
 def public_user(user):
     return {"email": user["email"], "role": user["role"], "name": user["full_name"],
-            "home": HOME[user["role"]]}
+            "home": HOME[user["role"]], "pending": bool(user.get("pending"))}
 
 
 # ---------------------------------------------------------------- registration
@@ -101,7 +103,10 @@ def register_professional(data):
                 return _err("scfhs_taken", 409)
             db.create_professional(name, email, password, national_id, role, scfhs, license_expiry)
         elif existing["status"] == "rejected" and existing["role"] in rules.PROFESSIONAL_ROLES:
-            # A rejected professional may apply again; the old rejection stays in the history.
+            # A rejected professional may apply again ONCE: after the second rejection the door is closed.
+            # The old rejection stays in the history.
+            if db.count_registration_rejections(existing["user_id"]) >= MAX_REJECTED_APPLICATIONS:
+                return _err("resubmit_blocked", 403)
             db.resubmit_professional(existing["user_id"], name, password, national_id,
                                      role, scfhs, license_expiry)
         else:
@@ -146,7 +151,9 @@ def login(data):
         return (*_err("deactivated", 403), None)
     if error == "rejected":
         user = db.get_user_by_email(email)
-        return (*_err("rejected", 403, reason=db.get_rejection_reason(user["user_id"])), None)
+        can_retry = db.count_registration_rejections(user["user_id"]) < MAX_REJECTED_APPLICATIONS
+        return (*_err("rejected", 403, reason=db.get_rejection_reason(user["user_id"]),
+                      canResubmit=can_retry), None)
 
     with _fails_lock:
         _fails.pop(email, None)

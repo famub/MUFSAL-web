@@ -8,6 +8,8 @@ so closing or editing the browser cannot skip the rule.
 import os
 import time
 
+from starlette.concurrency import run_in_threadpool
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
@@ -19,6 +21,11 @@ NOT_COUNTED = ("/static/", "/assets/")  # css/js/images are not "activity"
 
 # An account that asked to be deleted (routes_account.py) can only see these until the admin decides
 WHILE_DELETING = ("/account-deletion", "/logout", "/logout.html", "/api/logout", "/set-lang", "/login")
+
+
+# A doctor or radiologist whose request the admin has not decided yet can only see their own (locked) home page.
+WHILE_PENDING = ("/dashboard-doctor", "/dashboard-radiologist", "/", "/logout", "/logout.html",
+                 "/api/logout", "/api/me", "/set-lang", "/login")
 
 
 def install(app):
@@ -33,7 +40,21 @@ def install(app):
                 if path.startswith("/api/"):
                     return JSONResponse({"ok": False, "error": "expired"}, status_code=401)
                 return RedirectResponse("/login?expired=1", status_code=303)
-            session["seen"] = now 
+            session["seen"] = now
+            if session.get("pending"):
+                import queries_accounts                       # late import: tests replace this module
+                status = await run_in_threadpool(queries_accounts.get_professional_status, session["user_id"])
+                if status == "approved":
+                    session.pop("pending", None)              # the admin said yes: the account opens by itself
+                elif status != "pending":                     # refused (or gone): out, and back to the login page
+                    session.clear()
+                    if path.startswith("/api/"):
+                        return JSONResponse({"ok": False, "error": "expired"}, status_code=401)
+                    return RedirectResponse("/login", status_code=303)
+                elif path not in WHILE_PENDING:
+                    if path.startswith("/api/"):
+                        return JSONResponse({"ok": False, "error": "pending"}, status_code=403)
+                    return RedirectResponse(f"/dashboard-{session.get('role')}", status_code=303)
             if session.get("deleting") and path not in WHILE_DELETING:
                 if path.startswith("/api/"):
                     return JSONResponse({"ok": False, "error": "deleting"}, status_code=403)

@@ -97,6 +97,16 @@ def is_deactivated(user_id):
     return row is not None
 
 
+def has_asked_to_delete(user_id):
+    """True when this professional pressed "Delete account" and the admin has not closed the account yet."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM professionals WHERE user_id = %s AND delete_requested_at IS NOT NULL",
+            (user_id,),
+        ).fetchone()
+    return row is not None
+
+
 def can_sign_in(user):
     """True when this account is allowed through the door.
 
@@ -107,7 +117,9 @@ def can_sign_in(user):
     """
     if user["role"] not in ("doctor", "radiologist"):
         return True
-    return user["status"] == "approved"
+    # A request still waiting is let in too, but only to a locked home page
+    # (session_guard.py); a rejected one is not.
+    return user["status"] in ("approved", "pending")
 
 
 def login(email, password):
@@ -124,6 +136,10 @@ def login(email, password):
         return {"error": "wrong_password"}
     if not can_sign_in(user):
         return {"error": user["status"]}
+    if user["status"] == "pending":
+        user["pending"] = True      # routes_auth.py puts this in the session
+    if user["role"] in ("doctor", "radiologist") and has_asked_to_delete(user["user_id"]):
+        user["deleting"] = True     # asked to delete the account: still locked after logging in again
     # A closed account keeps the status it was approved with, because that part
     # of its history did happen. What stops it logging in is the closing itself.
     if user["role"] in ("doctor", "radiologist") and is_deactivated(user["user_id"]):
@@ -190,6 +206,27 @@ def resubmit_professional(user_id, full_name, password, national_id,
             (role, scfhs_number, license_expiry, user_id),
         )
     return user_id
+
+
+def count_registration_rejections(user_id):
+    """How many times the admin refused this professional's registration (renewals do not count)."""
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) AS n FROM registration_decisions
+            WHERE professional_id = %s AND decision = 'rejected' AND kind = 'registration'
+            """,
+            (user_id,),
+        ).fetchone()
+    return int(row["n"])
+
+
+def get_professional_status(user_id):
+    """'pending', 'approved' or 'rejected' for a doctor / radiologist, None for anybody else.
+    session_guard.py asks this on every request of a professional who is still waiting."""
+    with get_connection() as conn:
+        row = conn.execute("SELECT status FROM professionals WHERE user_id = %s", (user_id,)).fetchone()
+    return row["status"] if row else None
 
 
 def list_pending_professionals():

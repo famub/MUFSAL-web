@@ -30,6 +30,8 @@ PROFILE_TEXT = {
         "err": {
             "email_taken": "That email address is already used by another account.",
             "bad_value": "Please check the email address.",
+            "name_required": "Please enter your name.",
+            "name_invalid": "The name is too long (100 characters at most).",
         },
     },
     "ar": {
@@ -60,6 +62,8 @@ PROFILE_TEXT = {
         "err": {
             "email_taken": "هذا البريد الإلكتروني مستخدم في حساب آخر.",
             "bad_value": "تأكد من البريد الإلكتروني.",
+            "name_required": "اكتب اسمك.",
+            "name_invalid": "الاسم طويل (100 حرف كحد أقصى).",
         },
     },
 }

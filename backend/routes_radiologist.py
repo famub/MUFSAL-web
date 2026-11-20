@@ -145,14 +145,15 @@ async def submit(request: Request):
 # The other radiologist pages (new design, real data)
 #   GET  /dashboard-radiologist   welcome, "new case" button, numbers, 5 latest cases
 #   GET  /radiologist-cases       all the cases this radiologist uploaded
-#   GET  /profile-radiologist     the profile (the email can be changed)
+#   GET  /profile-radiologist     the profile (the name can be changed, the email is locked)
 #   POST /profile-radiologist
 # =====================================================================
 from typing import Optional
 
 from fastapi import Form
 
-from queries_profile import get_doctor_profile, update_contact
+from auth_rules import name_error
+from queries_profile import get_doctor_profile, update_name
 from queries_radiologist import get_radiologist_cases, get_radiologist_stats
 from routes_profile import mask_national_id
 from routes_dashboard import get_full_name
@@ -168,8 +169,9 @@ def _lang(request):
 
 def _case_rows(radiologist_id, lang, limit=None):
     rows = get_radiologist_cases(radiologist_id, limit)
-    return [dict(r, date=f"{r['submitted_at'].day} {MONTHS[lang][r['submitted_at'].month - 1]} {r['submitted_at'].year}")
-            for r in rows]
+    def fmt(d):
+        return f"{d.day} {MONTHS[lang][d.month - 1]} {d.year}" if d else ""
+    return [dict(r, date=fmt(r["submitted_at"]), approved_date=fmt(r["approved_at"])) for r in rows]
 
 
 @router.get("/dashboard-radiologist", include_in_schema=False)
@@ -178,13 +180,16 @@ def dashboard(request: Request, case_created: Optional[int] = None):
     if redirect:
         return redirect
     lang = _lang(request)
+    rows = _case_rows(user_id, lang)
     return templates.TemplateResponse(
         request, "radiologist/dashboard.html",
         {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr",
          "t": RADIOLOGIST_TEXT[lang],
+         "pending_approval": bool(request.session.get("pending")),
          "name": get_full_name(user_id).split(" ")[0],
          "stats": get_radiologist_stats(user_id),
-         "cases": _case_rows(user_id, lang, RECENT_LIMIT),
+         "pending": [c for c in rows if c["status"] != "approved"][:RECENT_LIMIT],
+         "approved": [c for c in rows if c["status"] == "approved"][:RECENT_LIMIT],
          "created": case_created})
 
 
@@ -221,11 +226,12 @@ def profile(request: Request, saved: Optional[int] = None, error: Optional[str] 
 
 
 @router.post("/profile-radiologist", include_in_schema=False)
-def save_profile(request: Request, email: str = Form(...)):
+def save_profile(request: Request, full_name: str = Form(...)):
     user_id, redirect = radiologist_or_redirect(request)
     if redirect:
         return redirect
-    result = update_contact(user_id, email)
-    if isinstance(result, dict):
-        return RedirectResponse(f"/profile-radiologist?error={result['error']}", status_code=303)
+    problem = name_error(full_name)
+    if problem:
+        return RedirectResponse(f"/profile-radiologist?error={problem}", status_code=303)
+    update_name(user_id, full_name)
     return RedirectResponse("/profile-radiologist?saved=1", status_code=303)

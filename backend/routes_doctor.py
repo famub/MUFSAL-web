@@ -77,6 +77,7 @@ def dashboard_doctor(request: Request):
         request, "dashboard-doctor.html",
         {
             **base_context(request, lang),
+            "pending_approval": bool(request.session.get("pending")),
             "name": get_full_name(user_id).split(" ")[0],
             "stats": get_doctor_stats(user_id),          # the totals ("Showing 3 of 8")
             "pending": pending_rows(user_id, lang, RECENT_LIMIT),
