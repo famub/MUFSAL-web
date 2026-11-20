@@ -19,6 +19,14 @@ def get_doctor_profile(user_id):
         ).fetchone()
 
 
+def update_name(user_id, full_name):
+    """Save the full name (the email is locked, only the name can be changed here)."""
+    with get_connection() as conn:
+        conn.execute("UPDATE users SET full_name = %s WHERE user_id = %s",
+                     (full_name.strip(), user_id))
+    return True
+
+
 def update_contact(user_id, email):
     """Save the email address.
 

@@ -1,0 +1,9 @@
+{# Shown on the home page of a doctor / radiologist whose request the admin has not decided yet. Needs: lang. #}
+{% set ar = (lang | default('en')) == 'ar' %}
+<div class="banner show" role="status" style="background:#fff4e0;color:#8a5a00">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+  <span>
+    <strong>{{ 'حسابك بانتظار موافقة المشرف' if ar else 'Your account is waiting for the admin' }}</strong><br />
+    {{ 'تم استلام طلب تسجيلك. كل الخدمات مغلقة حتى يوافق المشرف على طلبك، وبعدها تُفتح تلقائياً.' if ar else 'Your registration request was received. Everything stays locked until the admin approves it, then it opens by itself.' }}
+  </span>
+</div>

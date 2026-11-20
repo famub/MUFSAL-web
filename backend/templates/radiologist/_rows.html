@@ -1,4 +1,5 @@
-{# One card per case the radiologist uploaded. Needs: t, cases. #}
+{# One card per case the radiologist uploaded - same look and words as the doctor's rows.
+   Needs: t, cases. #}
 {% for c in cases %}
 <article class="row case-row{{ ' is-approved' if c.status == 'approved' }}">
   <div class="who">
@@ -9,22 +10,25 @@
     </div>
   </div>
   <div class="cell hide-sm">
-    <span class="lbl">{{ t.uploaded }}</span>
-    <span>{{ c.date }}</span>
+    <span class="lbl">{{ t.th_approved if c.status == 'approved' else t.th_submitted }}</span>
+    <span>{{ c.approved_date if c.status == 'approved' else c.date }}</span>
   </div>
   <div class="cell hide-sm">
     <span>{{ t.knee_left if c.knee == 'left' else t.knee_right if c.knee == 'right' else '-' }}</span>
   </div>
   <div class="cell">
     {% if c.status == 'approved' %}
+      <span class="lbl">{{ t.th_final_grade }}</span>
       <span class="num g-{{ c.final_grade }}">KL{{ c.final_grade }}</span>
-      <span class="tag tag-done">{{ t.approved }}</span>
     {% else %}
       <span class="tag tag-wait">{{ t.waiting }}</span>
     {% endif %}
   </div>
   {% if c.status == 'approved' %}
-  <a class="btn btn-soft btn-sm" href="/cases/{{ c.case_id }}/report">{{ t.view_report }}</a>
+  <a class="btn btn-soft btn-sm" href="/cases/{{ c.case_id }}/report">
+    {{ t.view_report }}
+    <svg class="flip" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h11m0 0-4-4m4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+  </a>
   {% else %}<span></span>{% endif %}
 </article>
 {% endfor %}

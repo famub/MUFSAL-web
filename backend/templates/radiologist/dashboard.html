@@ -10,7 +10,7 @@
 
 <body>
 
-  {% set rail_role = "radiologist" %}{% set nav_active = "dashboard" %}{% include "_rail.html" %}
+  {% set rail_role = "radiologist" %}{% set nav_active = "dashboard" %}{% set rail_locked = pending_approval %}{% include "_rail.html" %}
 
   <main class="main">
     <div class="main-inner">
@@ -22,6 +22,9 @@
         </div>
       </div>
 
+      {% if pending_approval %}
+      {% include "_pending-banner.html" %}
+      {% else %}
       {% if created %}
       <div class="banner banner-ok show" role="status">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8.5 12.3 2.4 2.4 4.6-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -52,16 +55,34 @@
         </div>
       </section>
 
+      <!-- ---------- pending cases ---------- -->
       <div class="sec-head">
-        <h2>{{ t.recent_title }}</h2>
-        <span>{{ t.showing.format(shown=cases|length, total=stats.total) }}</span>
-        {% if stats.total > cases|length %}<a href="/radiologist-cases">{{ t.all_cases }} {{ '&larr;' | safe if lang == 'ar' else '&rarr;' | safe }}</a>{% endif %}
+        <h2>{{ t.pending_title }}</h2>
+        <span>{{ t.showing.format(shown=pending|length, total=stats.waiting) }}</span>
+        {% if stats.waiting > pending|length %}<a href="/radiologist-cases">{{ t.all_pending }} {{ '&larr;' | safe if lang == 'ar' else '&rarr;' | safe }}</a>{% endif %}
       </div>
 
-      {% if cases %}
+      {% if pending %}
+      {% set cases = pending %}
       <div class="case-list">{% include "radiologist/_rows.html" %}</div>
       {% else %}
-      <div class="empty"><h3>{{ t.none }}</h3></div>
+      <div class="empty"><h3>{{ t.no_pending }}</h3></div>
+      {% endif %}
+
+      <!-- ---------- recently approved ---------- -->
+      <div class="sec-head">
+        <h2>{{ t.approved_title }}</h2>
+        <span>{{ t.showing.format(shown=approved|length, total=stats.approved) }}</span>
+        {% if stats.approved > approved|length %}<a href="/radiologist-cases">{{ t.all_approved }} {{ '&larr;' | safe if lang == 'ar' else '&rarr;' | safe }}</a>{% endif %}
+      </div>
+
+      {% if approved %}
+      {% set cases = approved %}
+      <div class="case-list">{% include "radiologist/_rows.html" %}</div>
+      {% else %}
+      <div class="empty"><h3>{{ t.no_approved }}</h3></div>
+      {% endif %}
+
       {% endif %}
 
       {% include "_page-foot.html" %}

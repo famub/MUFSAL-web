@@ -59,6 +59,10 @@ async def login(request: Request):
         request.session.clear()                       # a new session for every login
         request.session["user_id"] = user["user_id"]
         request.session["role"] = user["role"]
+        if user.get("deleting"):                      # asked to delete the account: only /account-deletion opens
+            request.session["deleting"] = True
+        if user.get("pending"):                       # still waiting for the admin: session_guard.py keeps the account locked
+            request.session["pending"] = True
     return JSONResponse(payload, status_code=status)
 
 

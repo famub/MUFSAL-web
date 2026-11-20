@@ -57,7 +57,7 @@
         </div>
       </section>
 
-      <!-- ---------- card 2: only the email can change ---------- -->
+      <!-- ---------- card 2: only the name can change (the email is locked) ---------- -->
       <form method="post" action="/profile-radiologist" novalidate>
         <section class="card" id="contact-card">
           <div class="card-head">
@@ -69,22 +69,19 @@
           </div>
 
           <div class="grid-2">
-            <div class="field locked">
+            <div class="field">
               <label for="name">{{ t.name_label }}</label>
-              <input type="text" id="name" value="{{ profile.full_name }}" readonly disabled />
-              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+              <input type="text" id="name" name="full_name" value="{{ profile.full_name }}" maxlength="100" required disabled />
             </div>
             <div class="field locked">
               <label for="nid">{{ t.nid_label }}</label>
               <input type="text" id="nid" value="{{ masked_id }}" readonly disabled />
               <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
             </div>
-            <!-- a text box, not type="email": the browser would rewrite an Arabic domain by itself -->
-            <div class="field">
+            <div class="field locked">
               <label for="email">{{ t.email_label }}</label>
-              <input type="text" inputmode="email" id="email" name="email" value="{{ profile.email }}" maxlength="255" required disabled />
-            </div>
-            <div class="field">
+              <input type="text" id="email" value="{{ profile.email }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
             </div>
           </div>
 
@@ -101,7 +98,7 @@
   </main>
 
   <script>
-    // Edit: unlock the email and show Save / Cancel.
+    // Edit: unlock the name and show Save / Cancel.
     // Saving is an ordinary form submit, so the server checks everything again.
     document.getElementById('edit-btn').addEventListener('click', function () {
       const boxes = document.querySelectorAll('#contact-card .field:not(.locked) input');

@@ -11,7 +11,6 @@ from datetime import date, datetime
 MIN_AGE = 18   # same rule as patients_age_18_plus in schema.sql
 
 EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-PHONE_RE = re.compile(r"^966[0-9]{9}$")           # 966 + 9 digits, e.g. 966512345678
 NATIONAL_ID_RE = re.compile(r"^[12][0-9]{9}$")    # National ID starts with 1, Iqama with 2
 SCFHS_RE = re.compile(r"^[A-Za-z0-9\-/]{5,20}$")  # TODO: confirm the real SCFHS format (column max is 20)
 
