@@ -63,11 +63,14 @@
       {% call link('/dashboard-admin', 'dashboard', 'لوحة التحكم' if ar else 'Dashboard') %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" /></svg>
       {% endcall %}
-      {% call link('/admin-delayed-requests', 'delayed', 'الطلبات المتأخرة' if ar else 'Delayed requests', counts.get('delayed')) %}
+      {% call link('/admin-delayed-reports', 'delayed', 'التقارير المتأخرة' if ar else 'Delayed reports', counts.get('delayed')) %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" /></svg>
       {% endcall %}
       {% call link('/admin-license-verification', 'licenses', 'التحقق من التراخيص' if ar else 'License verification', counts.get('licenses')) %}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 4.4 3.4 8.3 8 9 4.6-.7 8-4.6 8-9V6l-8-3Z" stroke-linejoin="round" /><path d="m8.8 12.2 2.3 2.3 4.2-4.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      {% endcall %}
+      {% call link('/admin-account-requests', 'accounts', 'طلبات حذف الحساب' if ar else 'Deletion requests') %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="8" r="4" /><path d="M2.5 21a7.5 7.5 0 0 1 15 0" stroke-linecap="round" /><path d="m16.5 9.5 5 5m0-5-5 5" stroke-linecap="round" /></svg>
       {% endcall %}
 
 {% else %}

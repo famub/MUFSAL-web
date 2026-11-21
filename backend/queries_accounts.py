@@ -250,6 +250,20 @@ def get_professional_status(user_id):
     return row["status"] if row else None
 
 
+def get_access_state(user_id):
+    """What session_guard.py needs to know about a doctor / radiologist on every request:
+    status, whether they asked to delete the account, whether it was closed, and whether the
+    licence date has passed (expired is derived from the date, never stored). None for anybody else."""
+    with get_connection() as conn:
+        return conn.execute(
+            "SELECT status, (delete_requested_at IS NOT NULL) AS delete_requested,"
+            "       (deactivated_at IS NOT NULL) AS deactivated,"
+            "       (license_expiry < CURRENT_DATE) AS expired "
+            "FROM professionals WHERE user_id = %s",
+            (user_id,),
+        ).fetchone()
+
+
 def list_pending_professionals():
     """The registration requests waiting for the admin, oldest first."""
     with get_connection() as conn:

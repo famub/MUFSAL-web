@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MUFSAL — {{ "الطلبات المتأخرة" if ar else "Delayed requests" }}</title>
+  <title>MUFSAL — {{ "التقارير المتأخرة" if ar else "Delayed reports" }}</title>
   {% include "_new-head.html" %}
-  <link rel="stylesheet" href="/static/NewCss/admin.css?v=9" />
+  <link rel="stylesheet" href="/static/NewCss/admin.css?v=11" />
 </head>
 
 <body data-page="delayed">
@@ -18,8 +18,8 @@
 
       <div class="topbar">
         <div>
-          <h1>{{ 'الطلبات المتأخرة' if ar else 'Delayed requests' }}</h1>
-          <p>{{ 'بلاغات التأخير من المرضى وأخصائيي الأشعة. أعد إسناد الحالة إلى طبيب آخر أو علّمها كمعالَجة.' if ar else 'Delay reports from patients and radiologists. Move the case to another doctor, or mark it as handled.' }}</p>
+          <h1>{{ 'التقارير المتأخرة' if ar else 'Delayed reports' }}</h1>
+          <p>{{ 'بلاغات تأخّر التقارير من المرضى وأخصائيي الأشعة. أعد إسناد الحالة إلى طبيب آخر أو علّمها كمعالَجة.' if ar else 'Reports that came late, raised by patients and radiologists. Move the case to another doctor, or mark it as handled.' }}</p>
         </div>
       </div>
 

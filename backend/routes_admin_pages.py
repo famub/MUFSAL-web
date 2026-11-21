@@ -1,11 +1,13 @@
-"""MUFSAL - the four administrator pages (built by the server, new design).
+"""MUFSAL - the administrator pages (built by the server, new design).
 
-    /dashboard-admin             three cards that open the pages below
-    /admin-delayed-requests      delay complaints: reassign, mark as handled
-    /admin-license-verification  doctor / radiologist requests, history, active accounts
-    /admin-support            general support requests: reply and change the status
+    /dashboard-admin             the dashboard: urgent items, weekly activity, one chart card per section
+    /admin-delayed-reports       delayed reports: reassign, mark as handled
+    /admin-license-verification  registration AND renewal requests, history, active accounts
+    /admin-account-requests      doctors / radiologists asking to close their account
+    /admin-support               support messages: reply (answering resolves them)
     /profile-admin               the administrator's own details (name and email)
 
+The old addresses /admin-delayed-requests and /admin-complaints still work: they send the visitor to the new ones.
 The data itself is loaded by static/js/admin-ui.js from /api/admin/... (routes_admin.py).
 A visitor who is not logged in goes to /login; another role goes to its own home page.
 """
@@ -26,10 +28,12 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 PAGES = {
     "dashboard-admin": "admin/home.html",
-    "admin-delayed-requests": "admin/delayed.html",
+    "admin-delayed-reports": "admin/delayed.html",
     "admin-license-verification": "admin/licenses.html",
+    "admin-account-requests": "admin/accounts.html",
     "admin-support": "admin/support.html",
 }
+OLD_ADDRESSES = {"admin-delayed-requests": "/admin-delayed-reports", "admin-complaints": "/admin-support"}
 
 
 def make_page(name, template):
@@ -49,6 +53,10 @@ def make_page(name, template):
 
 for _name, _template in PAGES.items():
     make_page(_name, _template)
+
+for _old, _new in OLD_ADDRESSES.items():
+    router.add_api_route("/" + _old, (lambda target: lambda: RedirectResponse(target, status_code=303))(_new),
+                         methods=["GET"], include_in_schema=False)
 
 
 # ------------------------------------------------------------------ the administrator's profile

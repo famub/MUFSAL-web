@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+{% set ar = lang == "ar" %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ "طلبات حذف الحساب" if ar else "Account deletion requests" }}</title>
+  {% include "_new-head.html" %}
+  <link rel="stylesheet" href="/static/NewCss/admin.css?v=11" />
+</head>
+
+<body data-page="accounts">
+
+  {% set rail_role = "admin" %}{% set nav_active = "accounts" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>{{ 'طلبات حذف الحساب' if ar else 'Account deletion requests' }}</h1>
+          <p>{{ 'أطباء وأخصائيو أشعة طلبوا إغلاق حساباتهم. الحساب يبقى مقفلًا حتى تقرّر: وافق (تُنقل حالات الطبيب تلقائيًا) أو ارفض.' if ar else 'Doctors and radiologists who asked to close their account. It stays locked until you decide: approve (a doctor’s cases move automatically) or decline.' }}</p>
+        </div>
+      </div>
+
+      <div class="filters" id="bar"></div>
+      <div class="a-list" id="list"></div>
+
+      {% include "admin/_foot.html" %}
+    </div>
+  </main>
+
+  {% include "admin/_end.html" %}
+</body>
+
+</html>

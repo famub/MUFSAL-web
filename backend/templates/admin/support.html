@@ -4,22 +4,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MUFSAL — {{ "الشكاوى العامة" if ar else "General complaints" }}</title>
+  <title>MUFSAL — {{ "الدعم" if ar else "Support" }}</title>
   {% include "_new-head.html" %}
-  <link rel="stylesheet" href="/static/NewCss/admin.css?v=9" />
+  <link rel="stylesheet" href="/static/NewCss/admin.css?v=11" />
 </head>
 
-<body data-page="complaints">
+<body data-page="support">
 
-  {% set rail_role = "admin" %}{% set nav_active = "complaints" %}{% include "_rail.html" %}
+  {% set rail_role = "admin" %}{% set nav_active = "support" %}{% include "_rail.html" %}
 
   <main class="main">
     <div class="main-inner">
 
       <div class="topbar">
         <div>
-          <h1>{{ 'الشكاوى العامة' if ar else 'General complaints' }}</h1>
-          <p>{{ 'الشكاوى التي أرسلها المرضى والأطباء وأخصائيو الأشعة. رُدّ عليها وحدّث حالتها.' if ar else 'Complaints sent by patients, doctors and radiologists. Reply to them and update their status.' }}</p>
+          <h1>{{ 'الدعم' if ar else 'Support' }}</h1>
+          <p>{{ 'رسائل الدعم من المرضى والأطباء وأخصائيي الأشعة. رُدّ على الرسالة وتصير «تم الحل» تلقائيًا.' if ar else 'Support messages from patients, doctors and radiologists. Send an answer and the message is marked resolved automatically.' }}</p>
         </div>
       </div>
 

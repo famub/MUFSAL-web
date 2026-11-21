@@ -55,6 +55,27 @@ def install(app):
                     if path.startswith("/api/"):
                         return JSONResponse({"ok": False, "error": "pending"}, status_code=403)
                     return RedirectResponse(f"/dashboard-{session.get('role')}", status_code=303)
+            if session.get("role") in IDLE_ROLES:
+                import queries_accounts
+                state = await run_in_threadpool(queries_accounts.get_access_state, session["user_id"])
+                if state and state["deactivated"]:                # the admin closed the account: out
+                    session.clear()
+                    if path.startswith("/api/"):
+                        return JSONResponse({"ok": False, "error": "expired"}, status_code=401)
+                    return RedirectResponse("/login", status_code=303)
+                if state:
+                    # the admin's answer to a deletion request reaches the open session at once
+                    if state["delete_requested"]:
+                        session["deleting"] = True
+                    else:
+                        session.pop("deleting", None)
+                    # a licence whose date has passed: the account can only see the locked home page
+                    # (same list as a request still waiting) until the admin accepts a renewal
+                    if state["expired"] and state["status"] == "approved" and not state["delete_requested"] \
+                            and path not in WHILE_PENDING:
+                        if path.startswith("/api/"):
+                            return JSONResponse({"ok": False, "error": "license_expired"}, status_code=403)
+                        return RedirectResponse(f"/dashboard-{session.get('role')}", status_code=303)
             if session.get("deleting") and path not in WHILE_DELETING:
                 if path.startswith("/api/"):
                     return JSONResponse({"ok": False, "error": "deleting"}, status_code=403)
