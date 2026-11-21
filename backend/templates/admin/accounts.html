@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MUFSAL — {{ "طلبات حذف الحساب" if ar else "Account deletion requests" }}</title>
+  <title>MUFSAL — {{ "طلبات إيقاف الحساب" if ar else "Account deactivation requests" }}</title>
   {% include "_new-head.html" %}
   <link rel="stylesheet" href="/static/NewCss/admin.css?v=11" />
 </head>
@@ -18,7 +18,7 @@
 
       <div class="topbar">
         <div>
-          <h1>{{ 'طلبات حذف الحساب' if ar else 'Account deletion requests' }}</h1>
+          <h1>{{ 'طلبات إيقاف الحساب' if ar else 'Account deactivation requests' }}</h1>
           <p>{{ 'أطباء وأخصائيو أشعة طلبوا إغلاق حساباتهم. الحساب يبقى مقفلًا حتى تقرّر: وافق (تُنقل حالات الطبيب تلقائيًا) أو ارفض.' if ar else 'Doctors and radiologists who asked to close their account. It stays locked until you decide: approve (a doctor’s cases move automatically) or decline.' }}</p>
         </div>
       </div>
