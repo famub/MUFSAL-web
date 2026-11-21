@@ -96,7 +96,7 @@
               <strong>{%- if c.case_id %}{{ t.c_about_case.format(id=c.case_id) }}{% else %}{{ t.c_case_none }}{% endif %}</strong>
               <p>{{ t.c_sent_on.format(date=c.date) }}</p>
             </div>
-            <span class="tag {{ 'tag-done' if c.status == 'resolved' else ('tag-review' if c.status == 'investigating' else 'tag-wait') }}">{{ t.c_status[c.status] }}</span>
+            <span class="tag {{ 'tag-done' if c.status == 'resolved' else 'tag-wait' }}">{{ t.c_status[c.status] }}</span>
           </div>
 
           <p class="said">{{ c.body }}</p>

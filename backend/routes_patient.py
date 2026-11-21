@@ -68,14 +68,12 @@ DELAY_ERRORS = {
 BODY_MAX_WORDS = 120     # the limit the person sees and the page counts
 BODY_MAX = 2000          # a safety net in characters, so nothing huge is posted
 
-# How a support request's status is shown. 'open' and 'investigating' come from
+# How a support request's status is shown. 'pending' and 'resolved' come from
 # the support requests table, 'pending' and 'handled' from delay complaints.
 COMPLAINT_TAGS = {
-    "open":          ("tag-wait",   "Waiting for the team"),
-    "investigating": ("tag-review", "Being looked at"),
-    "resolved":      ("tag-done",   "Answered"),
-    "pending":       ("tag-wait",   "Waiting for the team"),
-    "handled":       ("tag-done",   "Handled"),
+    "pending":  ("tag-wait", "Waiting for the team"),
+    "resolved": ("tag-done", "Answered"),
+    "handled":  ("tag-done", "Handled"),
 }
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")

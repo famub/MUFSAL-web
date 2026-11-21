@@ -181,16 +181,20 @@ def get_case(case_id):
     return case
 
 
-def approve_case(case_id, doctor_id, final_grade, doctor_notes, report_ar, report_en):
-    """Save the doctor's report and mark the case as approved."""
+def approve_case(case_id, doctor_id, final_grade, doctor_notes, report_text):
+    """Save the doctor's report and mark the case as approved.
+
+    One report is saved, in the language the case asked for: see
+    cases.report_language.
+    """
     with get_connection() as conn:
         conn.execute(
             """
             INSERT INTO reports (case_id, doctor_id, final_grade,
-                                 doctor_notes, report_ar, report_en)
-            VALUES (%s, %s, %s, %s, %s, %s)
+                                 doctor_notes, report_text)
+            VALUES (%s, %s, %s, %s, %s)
             """,
-            (case_id, doctor_id, final_grade, doctor_notes, report_ar, report_en),
+            (case_id, doctor_id, final_grade, doctor_notes, report_text),
         )
 
         conn.execute(
@@ -213,7 +217,7 @@ def get_patient_cases(patient_id):
             """
             SELECT c.case_id, c.status, c.submitted_at,
                    CASE WHEN c.uploaded_by = c.patient_id THEN 'patient' ELSE 'radiologist' END AS source,
-                   r.final_grade, r.report_ar, r.report_en, r.approved_at,
+                   r.final_grade, r.report_text, r.approved_at,
                    doc.full_name AS doctor_name
             FROM cases c
             LEFT JOIN reports r ON r.case_id = c.case_id

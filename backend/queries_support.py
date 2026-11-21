@@ -32,7 +32,7 @@ def get_user_support_requests(user_id):
 
 
 def create_support_request(user_id, body, case_id=None):
-    """Save a new support request with status 'open'. Returns the new request_id.
+    """Save a new support request with status 'pending'. Returns the new request_id.
 
     case_id says which case the support request is about, and stays empty when it
     is about nothing in particular.

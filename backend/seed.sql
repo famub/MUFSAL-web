@@ -94,25 +94,28 @@ INSERT INTO registration_decisions (professional_id, admin_id, kind, decision, r
 -- the site enforces.
 -- =====================================================================
 
-INSERT INTO cases (case_id, patient_id, uploaded_by, assigned_doctor_id, xray_image_path, status, submitted_at) VALUES
+-- report_language is the language the patient asked her own report in. Both
+-- values appear below, so a reader of the data can see that the choice is the
+-- patient's and not the page's.
+INSERT INTO cases (case_id, patient_id, uploaded_by, assigned_doctor_id, xray_image_path, report_language, status, submitted_at) VALUES
 -- 1  Sarah, 2 days ago       -> in progress, the delay button is still off
-(1,  2,  2,  4, 'uploads/xrays/1.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '2 days'),
+(1,  2,  2,  4, 'uploads/xrays/1.png', 'ar', 'under_review', CURRENT_TIMESTAMP - INTERVAL '2 days'),
 -- 2  Noura, by a radiologist -> finished, grade 1 (green)
-(2,  3,  6,  5, 'uploads/xrays/2.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '20 days'),
+(2,  3,  6,  5, 'uploads/xrays/2.png', 'ar', 'approved',     CURRENT_TIMESTAMP - INTERVAL '20 days'),
 -- 3  Dana, 12 days ago       -> in progress, the delay button is ON
-(3,  9,  9,  4, 'uploads/xrays/3.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '12 days'),
+(3,  9,  9,  4, 'uploads/xrays/3.png', 'ar', 'under_review', CURRENT_TIMESTAMP - INTERVAL '12 days'),
 -- 4  Aisha, 15 days ago      -> in progress with a delay already reported
-(4,  10, 10, 5, 'uploads/xrays/4.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '15 days'),
--- 5  Abdullah, radiologist   -> finished, grade 3 (red)
-(5,  12, 6,  4, 'uploads/xrays/5.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '30 days'),
+(4,  10, 10, 5, 'uploads/xrays/4.png', 'en', 'under_review', CURRENT_TIMESTAMP - INTERVAL '15 days'),
+-- 5  Abdullah, radiologist   -> finished, grade 3 (red), asked for English
+(5,  12, 6,  4, 'uploads/xrays/5.png', 'en', 'approved',     CURRENT_TIMESTAMP - INTERVAL '30 days'),
 -- 6  Sarah, older case       -> finished, grade 0 (green)
-(6,  2,  2,  5, 'uploads/xrays/6.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '60 days'),
+(6,  2,  2,  5, 'uploads/xrays/6.png', 'ar', 'approved',     CURRENT_TIMESTAMP - INTERVAL '60 days'),
 -- 7  Noura, older case       -> finished, grade 2 (amber), had a delay that was handled
-(7,  3,  3,  4, 'uploads/xrays/7.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '45 days'),
+(7,  3,  3,  4, 'uploads/xrays/7.png', 'en', 'approved',     CURRENT_TIMESTAMP - INTERVAL '45 days'),
 -- 8  Abdullah, 5 days ago    -> in progress with NO AI result, the way a real upload arrives today
-(8,  12, 12, 5, 'uploads/xrays/8.png', 'under_review', CURRENT_TIMESTAMP - INTERVAL '5 days'),
+(8,  12, 12, 5, 'uploads/xrays/8.png', 'ar', 'under_review', CURRENT_TIMESTAMP - INTERVAL '5 days'),
 -- 9  Aisha, older case       -> finished, grade 4 (red)
-(9,  10, 10, 4, 'uploads/xrays/9.png', 'approved',     CURRENT_TIMESTAMP - INTERVAL '40 days');
+(9,  10, 10, 4, 'uploads/xrays/9.png', 'ar', 'approved',     CURRENT_TIMESTAMP - INTERVAL '40 days');
 
 SELECT setval('cases_case_id_seq', (SELECT MAX(case_id) FROM cases));
 
@@ -156,35 +159,32 @@ INSERT INTO ai_results (case_id, predicted_grade, confidence, prob_grade_0, prob
 
 -- ---------- the reports the doctors signed ----------
 -- Grades 0, 1, 2, 3 and 4 all appear, so every colour on the scale can be seen
-INSERT INTO reports (case_id, doctor_id, final_grade, doctor_notes, report_ar, report_en, approved_at) VALUES
+-- Each report is written in the language its own case asked for: cases 2, 6
+-- and 9 asked for Arabic, cases 5 and 7 for English.
+INSERT INTO reports (case_id, doctor_id, final_grade, doctor_notes, report_text, approved_at) VALUES
 (2, 5, 1,
  'Joint space narrowing is minimal and the osteophytes do not match grade 2. Changed to KL1.',
  'نتيجة أشعة الركبة: الدرجة KL1 (تغيّرات بسيطة جدًا). راجع طبيبك لأي استفسار.',
- 'Your knee X-ray result: KL1 (very mild changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '18 days'),
 
 (5, 4, 3,
  'Clear joint space narrowing with large osteophytes. The model agrees. Referred to orthopaedics.',
- 'نتيجة أشعة الركبة: الدرجة KL3 (تغيّرات متوسطة إلى شديدة). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL3 (moderate to severe changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '28 days'),
 
 (6, 5, 0,
  'No narrowing and no osteophytes. A healthy knee.',
  'نتيجة أشعة الركبة: الدرجة KL0 (لا توجد علامات خشونة). راجع طبيبك لأي استفسار.',
- 'Your knee X-ray result: KL0 (no signs of osteoarthritis). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '58 days'),
 
 (7, 4, 2,
  'Definite osteophytes and possible narrowing. Grade 2 confirmed.',
- 'نتيجة أشعة الركبة: الدرجة KL2 (تغيّرات بسيطة). راجع طبيبك لأي استفسار.',
  'Your knee X-ray result: KL2 (mild changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '41 days'),
 
 (9, 4, 4,
  'Severe narrowing with bone deformity. Urgent orthopaedic referral.',
  'نتيجة أشعة الركبة: الدرجة KL4 (تغيّرات شديدة). راجع طبيبك لأي استفسار.',
- 'Your knee X-ray result: KL4 (severe changes). Talk to your doctor if you have questions.',
  CURRENT_TIMESTAMP - INTERVAL '37 days');
 
 -- ---------- the trail of what happened to each case ----------
@@ -213,13 +213,13 @@ INSERT INTO delay_complaints (case_id, user_id, status, created_at, handled_at, 
 (7, 3,  'handled', CURRENT_TIMESTAMP - INTERVAL '44 days', CURRENT_TIMESTAMP - INTERVAL '43 days', 1);
 
 -- ---------- written support requests ----------
--- The subjects match the choices the site offers, so they read the same way
--- here as they do on the screen.
+-- A request is 'pending' until the admin answers it; the answer is what
+-- makes it 'resolved'. Both states appear below.
 INSERT INTO support_requests (user_id, case_id, body, status, created_at) VALUES
 (2,  6,    'I received my report but the grade explanation uses medical terms I did not understand.', 'resolved',      CURRENT_TIMESTAMP - INTERVAL '50 days'),
-(2,  NULL, 'The upload box kept rejecting my X-ray photo even though it was a JPG under 5 MB.',        'open',          CURRENT_TIMESTAMP - INTERVAL '6 days'),
-(9,  3,    'I would like to know whether I can upload the other knee before this one comes back.',     'investigating', CURRENT_TIMESTAMP - INTERVAL '9 days'),
-(4,  1,    'The model marked this one high priority but the X-ray looks mild to me. Worth a check.',   'open',          CURRENT_TIMESTAMP - INTERVAL '1 day'),
+(2,  NULL, 'The upload box kept rejecting my X-ray photo even though it was a JPG under 5 MB.',        'pending',       CURRENT_TIMESTAMP - INTERVAL '6 days'),
+(9,  3,    'I would like to know whether I can upload the other knee before this one comes back.',     'pending',       CURRENT_TIMESTAMP - INTERVAL '9 days'),
+(4,  1,    'The model marked this one high priority but the X-ray looks mild to me. Worth a check.',   'pending',       CURRENT_TIMESTAMP - INTERVAL '1 day'),
 (6,  NULL, 'The page times out when I upload two X-rays one after the other.',                         'resolved',      CURRENT_TIMESTAMP - INTERVAL '25 days');
 
 INSERT INTO support_replies (request_id, admin_id, body, created_at) VALUES

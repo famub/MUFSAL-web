@@ -77,7 +77,7 @@ DASHBOARD_TEXT = {
         "c_case_label": "Case #{id} - {knee} knee - {date}",
         "c_err_case": "Please choose one of your own cases.",
         "c_about_case": "Case #{id}",
-        "c_status": {"open": "Open", "investigating": "Investigating", "resolved": "Resolved"},
+        "c_status": {"pending": "Pending", "resolved": "Resolved"},
 
         "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         "lang_button": "ع",
@@ -157,7 +157,7 @@ DASHBOARD_TEXT = {
         "c_case_label": "الحالة رقم {id} - ركبة {knee} - {date}",
         "c_err_case": "اختر حالة من حالاتك.",
         "c_about_case": "الحالة رقم {id}",
-        "c_status": {"open": "مفتوحة", "investigating": "قيد المتابعة", "resolved": "تم الحل"},
+        "c_status": {"pending": "قيد الانتظار", "resolved": "تم الحل"},
 
         "months": ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو",
                    "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],

@@ -162,13 +162,24 @@ CREATE TABLE cases (
     uploaded_by        INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     assigned_doctor_id INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
     xray_image_path    VARCHAR(255) NOT NULL UNIQUE,
+    -- The language the patient wants her own report written in. It belongs to
+    -- the case, not to the account, because the report is written once for
+    -- this case and never rewritten; a patient who changes her mind later
+    -- would otherwise be left with a report whose language no longer matches
+    -- the column. The upload form does not ask the question yet, so the
+    -- default stands in until it does.
+    report_language    VARCHAR(2)   NOT NULL DEFAULT 'ar',
     status             VARCHAR(20)  NOT NULL DEFAULT 'under_review',
     submitted_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT cases_status_valid CHECK (status IN ('under_review','approved'))
+    CONSTRAINT cases_status_valid CHECK (status IN ('under_review','approved')),
+    CONSTRAINT cases_report_language_valid CHECK (report_language IN ('ar','en'))
 );
 
 COMMENT ON COLUMN cases.uploaded_by IS
     'Who sent the X-ray in: the patient herself, or the radiologist who did it for her. Comparing it with patient_id is what answers that question, which is why there is no column of its own repeating the answer.';
+
+COMMENT ON COLUMN cases.report_language IS
+    'The language the patient asked her report to be written in: ar or en. It is chosen once, when the case is sent, and is never changed afterwards, so the report that is written from it can never end up in a language the case no longer names.';
 
 COMMENT ON COLUMN cases.xray_image_path IS
     'Where the file sits under backend/uploads. The file name is a random id, never the case number, so one patient cannot reach another patient''s X-ray by changing a number in the address.';
@@ -236,11 +247,16 @@ CREATE TABLE reports (
     doctor_id    INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     final_grade  SMALLINT     NOT NULL,
     doctor_notes TEXT         NOT NULL,
-    report_ar    TEXT         NOT NULL,
-    report_en    TEXT         NOT NULL,
+    -- One report, in one language: the one asked for in cases.report_language.
+    -- Keeping an Arabic column and an English one would mean writing every
+    -- report twice when the patient only ever reads one of them.
+    report_text  TEXT         NOT NULL,
     approved_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT reports_grade_valid CHECK (final_grade BETWEEN 0 AND 4)
 );
+
+COMMENT ON COLUMN reports.report_text IS
+    'The simplified report the patient reads, written from the final grade in the language her case asked for (cases.report_language). It is the patient''s copy of the result, not the doctor''s: doctor_notes holds what the doctor wrote for the record.';
 
 CREATE TABLE case_activity (
     activity_id SERIAL      PRIMARY KEY,
@@ -261,9 +277,9 @@ CREATE TABLE support_requests (
     -- The request survives the case, so the admin can still read it.
     case_id    INTEGER     REFERENCES cases(case_id) ON DELETE SET NULL,
     body       TEXT        NOT NULL,
-    status     VARCHAR(20) NOT NULL DEFAULT 'open',
+    status     VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT support_requests_status_valid CHECK (status IN ('open','investigating','resolved'))
+    CONSTRAINT support_requests_status_valid CHECK (status IN ('pending','resolved'))
 );
 
 CREATE TABLE support_replies (

@@ -195,17 +195,21 @@ def render_review(request, case, final_grade=None, notes="", errors_=None, statu
     )
 
 
-def generate_reports(case, final_grade, doctor_notes):
-    """TEMPORARY: returns (report_ar, report_en).
+def generate_report(case, final_grade, doctor_notes):
+    """TEMPORARY: returns the one report the patient reads.
+
+    It is written in the language her case asked for, cases.report_language,
+    not in the language of whoever happens to be looking at the page.
 
     TODO: replace with the Gemini call that writes the simplified report.
     """
-    en = TEXT["en"]["kl"][final_grade]
-    ar = TEXT["ar"]["kl"][final_grade]
-    return (
-        f"نتيجة أشعة الركبة: الدرجة KL{final_grade} ({ar}). راجع طبيبك لأي استفسار.",
-        f"Your knee X-ray result: KL{final_grade} ({en}). Talk to your doctor if you have questions.",
-    )
+    lang = case["report_language"]
+    grade_name = TEXT[lang]["kl"][final_grade]
+    if lang == "ar":
+        return (f"نتيجة أشعة الركبة: الدرجة KL{final_grade} ({grade_name}). "
+                f"راجع طبيبك لأي استفسار.")
+    return (f"Your knee X-ray result: KL{final_grade} ({grade_name}). "
+            f"Talk to your doctor if you have questions.")
 
 
 # ---------------------------------------------------------------- pages
@@ -263,9 +267,9 @@ def confirm_case(request: Request, case_id: int,
                              errors_=form_errors, status_code=400)
 
     # ---- save ----
-    report_ar, report_en = generate_reports(case, grade, notes)
+    report_text = generate_report(case, grade, notes)
     try:
-        approve_case(case_id, user["user_id"], grade, notes, report_ar, report_en)
+        approve_case(case_id, user["user_id"], grade, notes, report_text)
     except errors.UniqueViolation:
         pass  # the form was sent twice: the report already exists
 
@@ -300,7 +304,8 @@ def view_report(request: Request, case_id: int, confirmed: int = 0):
     report_text, confidence = None, None
     has_xray = has_gradcam = False
     if approved:
-        report_text = report["report_ar"] if lang == "ar" else report["report_en"]
+        # one report only, in the language the patient asked for
+        report_text = report["report_text"]
         if ai is not None:
             confidence = round(float(ai["confidence"]) * 100)
         xray_file = safe_upload_path(case["xray_image_path"])
