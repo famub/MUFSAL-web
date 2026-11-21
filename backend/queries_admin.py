@@ -1,6 +1,6 @@
 """MUFSAL - queries used only by the administrator pages.
 
-Delayed requests, registration history, active accounts and general complaints.
+Delayed requests, registration history, active accounts and general support requests.
 (Registration requests and reassigning a case already live in queries_accounts.py and queries_delays.py.)
 Every function returns plain dictionaries, like the other queries_*.py files.
 """
@@ -20,7 +20,7 @@ def get_summary():
             SELECT
               (SELECT COUNT(*) FROM delay_complaints WHERE status = 'pending')::int       AS delayed,
               (SELECT COUNT(*) FROM professionals WHERE status = 'pending')::int          AS licenses,
-              (SELECT COUNT(*) FROM complaints WHERE status <> 'resolved')::int           AS complaints
+              (SELECT COUNT(*) FROM support_requests WHERE status <> 'resolved')::int           AS support requests
             """
         ).fetchone()
 
@@ -153,55 +153,55 @@ def deactivate_professional_account(user_id):
     return row is not None
 
 
-# ------------------------------------------------------------------ general complaints
+# ------------------------------------------------------------------ general support requests
 
-def list_complaints():
-    """Every complaint with the complainant and the admin replies (oldest first), newest complaint first."""
+def list_support_requests():
+    """Every support request with the requester and the admin replies (oldest first), newest support request first."""
     with get_connection() as conn:
         rows = conn.execute(
             """
-            SELECT c.complaint_id, c.subject, c.body, c.status, c.created_at,
-                   u.full_name AS complainant, u.role AS complainant_role
-            FROM complaints c JOIN users u ON u.user_id = c.user_id
-            ORDER BY c.created_at DESC, c.complaint_id DESC
+            SELECT c.request_id, c.body, c.status, c.created_at,
+                   u.full_name AS requester, u.role AS requester_role
+            FROM support_requests c JOIN users u ON u.user_id = c.user_id
+            ORDER BY c.created_at DESC, c.request_id DESC
             """
         ).fetchall()
         for c in rows:
             c["replies"] = conn.execute(
-                "SELECT body, created_at FROM complaint_replies WHERE complaint_id = %s ORDER BY created_at, reply_id",
-                (c["complaint_id"],),
+                "SELECT body, created_at FROM support_replies WHERE request_id = %s ORDER BY created_at, reply_id",
+                (c["request_id"],),
             ).fetchall()
     return rows
 
 
-# A complaint's status is never picked by hand. It moves by itself:
+# A support request's status is never picked by hand. It moves by itself:
 #   open           - just arrived, nobody has looked at it
-#   investigating  - the admin opened its details (mark_complaint_seen)
-#   resolved       - the admin sent a reply (respond_to_complaint)
+#   investigating  - the admin opened its details (mark_request_seen)
+#   resolved       - the admin sent a reply (respond_to_request)
 
-def mark_complaint_seen(complaint_id):
-    """The admin opened the complaint: 'open' becomes 'investigating'. Any other status stays as it is.
-    Returns the status after the call, or None when there is no such complaint."""
+def mark_request_seen(request_id):
+    """The admin opened the support request: 'open' becomes 'investigating'. Any other status stays as it is.
+    Returns the status after the call, or None when there is no such support request."""
     with get_connection() as conn:
         conn.execute(
-            "UPDATE complaints SET status = 'investigating' WHERE complaint_id = %s AND status = 'open'",
-            (complaint_id,),
+            "UPDATE support_requests SET status = 'investigating' WHERE request_id = %s AND status = 'open'",
+            (request_id,),
         )
-        row = conn.execute("SELECT status FROM complaints WHERE complaint_id = %s", (complaint_id,)).fetchone()
+        row = conn.execute("SELECT status FROM support_requests WHERE request_id = %s", (request_id,)).fetchone()
     return row["status"] if row else None
 
 
-def respond_to_complaint(complaint_id, admin_id, reply):
-    """Save the admin's reply and mark the complaint 'resolved'. Returns False when not found."""
+def respond_to_request(request_id, admin_id, reply):
+    """Save the admin's reply and mark the support request 'resolved'. Returns False when not found."""
     with get_connection() as conn:
         row = conn.execute(
-            "UPDATE complaints SET status = 'resolved' WHERE complaint_id = %s RETURNING complaint_id",
-            (complaint_id,),
+            "UPDATE support_requests SET status = 'resolved' WHERE request_id = %s RETURNING request_id",
+            (request_id,),
         ).fetchone()
         if row is None:
             return False
         conn.execute(
-            "INSERT INTO complaint_replies (complaint_id, admin_id, body) VALUES (%s, %s, %s)",
-            (complaint_id, admin_id, reply),
+            "INSERT INTO support_replies (request_id, admin_id, body) VALUES (%s, %s, %s)",
+            (request_id, admin_id, reply),
         )
     return True

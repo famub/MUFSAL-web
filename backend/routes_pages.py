@@ -30,7 +30,7 @@ ROLE_PAGES = {
     "patient": {"profile-patient", "patient-cases"},
     "radiologist": {"dashboard-radiologist", "profile-radiologist", "radiologist-cases"},
     "doctor": {"dashboard-doctor", "profile-doctor", "pending-cases", "approved-cases", "review-case"},
-    "admin": {"dashboard-admin", "profile-admin", "admin-complaints",
+    "admin": {"dashboard-admin", "profile-admin", "admin-support",
               "admin-delayed-requests", "admin-license-verification"},
 }
 # pages shared by several roles

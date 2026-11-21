@@ -7,13 +7,13 @@ Registration requests (list / approve / reject) are in routes_auth.py: GET /api/
     GET    /api/admin/delayed                    delayed requests (+ what happened on each case)
     GET    /api/admin/doctors                    approved doctors (reassign dialog)
     POST   /api/admin/delayed/{id}/reassign      {"doctor_id": 5}
-    POST   /api/admin/delayed/{id}/handled       close the complaint without moving the case
+    POST   /api/admin/delayed/{id}/handled       close the support request without moving the case
     GET    /api/admin/decisions                  decision history
     GET    /api/admin/accounts                   active doctor / radiologist accounts
     DELETE /api/admin/accounts/{id}              delete an account
-    GET    /api/admin/complaints                 general complaints
-    POST   /api/admin/complaints/{id}/seen       the admin opened it: open -> investigating (automatic)
-    POST   /api/admin/complaints/{id}/respond    {"reply": "..."}  saves the reply: -> resolved (automatic)
+    GET    /api/admin/support                 general support requests
+    POST   /api/admin/support/{id}/seen       the admin opened it: open -> investigating (automatic)
+    POST   /api/admin/support/{id}/respond    {"reply": "..."}  saves the reply: -> resolved (automatic)
 """
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -86,10 +86,10 @@ async def reassign(request: Request):
         doctor_id = int((await read_json(request)).get("doctor_id"))
     except (TypeError, ValueError):
         return JSONResponse({"ok": False, "error": "doctor_required"}, status_code=400)
-    complaint = await run_in_threadpool(db.get_delay_complaint, delay_id) if delay_id else None
-    if complaint is None:
+    support_request = await run_in_threadpool(db.get_delay_complaint, delay_id) if delay_id else None
+    if support_request is None:
         return _not_found()
-    result = await run_in_threadpool(reassign_case, complaint["case_id"], doctor_id, admin)
+    result = await run_in_threadpool(reassign_case, support_request["case_id"], doctor_id, admin)
     if result is not True:
         return JSONResponse({"ok": False, **result}, status_code=400)
     return {"ok": True}
@@ -130,37 +130,37 @@ async def delete_account(request: Request):
     return {"ok": True}
 
 
-# ---------------------------------------------------------------- general complaints
+# ---------------------------------------------------------------- general support requests
 
-@router.get("/api/admin/complaints")
-async def complaints(request: Request):
-    return await _list(request, db.list_complaints, "complaints")
+@router.get("/api/admin/support")
+async def support_requests(request: Request):
+    return await _list(request, db.list_support_requests, "support_requests")
 
 
-@router.post("/api/admin/complaints/{complaint_id}/respond")
+@router.post("/api/admin/support/{request_id}/respond")
 async def respond(request: Request):
     admin = admin_id(request)
     if admin is None:
         return FORBIDDEN
-    complaint_id = _int(request, "complaint_id")
+    request_id = _int(request, "request_id")
     data = await read_json(request)
     reply = (data.get("reply") or "").strip()
-    if not reply:                        # the reply is what resolves the complaint, so it cannot be empty
+    if not reply:                        # the reply is what resolves the support request, so it cannot be empty
         return JSONResponse({"ok": False, "error": "reply_required"}, status_code=400)
     if len(reply) > 2000:
         return JSONResponse({"ok": False, "error": "reply_too_long"}, status_code=400)
-    if not complaint_id or not await run_in_threadpool(db.respond_to_complaint, complaint_id, admin, reply):
+    if not request_id or not await run_in_threadpool(db.respond_to_request, request_id, admin, reply):
         return _not_found()
     return {"ok": True, "status": "resolved"}
 
 
-@router.post("/api/admin/complaints/{complaint_id}/seen")
+@router.post("/api/admin/support/{request_id}/seen")
 async def seen(request: Request):
-    """The admin opened the details of a complaint: a new one ('open') becomes 'investigating'."""
+    """The admin opened the details of a support request: a new one ('open') becomes 'investigating'."""
     if admin_id(request) is None:
         return FORBIDDEN
-    complaint_id = _int(request, "complaint_id")
-    status = await run_in_threadpool(db.mark_complaint_seen, complaint_id) if complaint_id else None
+    request_id = _int(request, "request_id")
+    status = await run_in_threadpool(db.mark_request_seen, request_id) if request_id else None
     if status is None:
         return _not_found()
     return {"ok": True, "status": status}

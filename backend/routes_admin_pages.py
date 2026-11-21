@@ -3,7 +3,7 @@
     /dashboard-admin             three cards that open the pages below
     /admin-delayed-requests      delay complaints: reassign, mark as handled
     /admin-license-verification  doctor / radiologist requests, history, active accounts
-    /admin-complaints            general complaints: reply and change the status
+    /admin-support            general support requests: reply and change the status
     /profile-admin               the administrator's own details (name and email)
 
 The data itself is loaded by static/js/admin-ui.js from /api/admin/... (routes_admin.py).
@@ -28,7 +28,7 @@ PAGES = {
     "dashboard-admin": "admin/home.html",
     "admin-delayed-requests": "admin/delayed.html",
     "admin-license-verification": "admin/licenses.html",
-    "admin-complaints": "admin/complaints.html",
+    "admin-support": "admin/support.html",
 }
 
 

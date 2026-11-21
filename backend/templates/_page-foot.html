@@ -1,4 +1,4 @@
-{# Small print at the bottom of a page: the AI disclaimer and the complaints link.
+{# Small print at the bottom of a page: the AI disclaimer and the support link.
    Only reads `lang`. {% include "_page-foot.html" %} #}
 {% set ar = (lang | default('en')) == 'ar' %}
 <footer class="page-foot">
@@ -6,5 +6,5 @@
     {% if ar %}نظام يعمل بالذكاء الاصطناعي ونتائجه تدعم الطبيب، ولا يُعتمد عليه مصدراً رئيسياً للتشخيص.
     {% else %}An AI-powered system. It supports the doctor and must not be used as the main source for a diagnosis.{% endif %}
   </span>
-  <a href="/complaints">{{ 'الشكاوى' if ar else 'Complaints' }}</a>
+  <a href="/support">{{ 'الدعم' if ar else 'Support' }}</a>
 </footer>

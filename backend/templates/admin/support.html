@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+{% set ar = lang == "ar" %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ "الشكاوى العامة" if ar else "General complaints" }}</title>
+  {% include "_new-head.html" %}
+  <link rel="stylesheet" href="/static/NewCss/admin.css?v=9" />
+</head>
+
+<body data-page="complaints">
+
+  {% set rail_role = "admin" %}{% set nav_active = "complaints" %}{% include "_rail.html" %}
+
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="topbar">
+        <div>
+          <h1>{{ 'الشكاوى العامة' if ar else 'General complaints' }}</h1>
+          <p>{{ 'الشكاوى التي أرسلها المرضى والأطباء وأخصائيو الأشعة. رُدّ عليها وحدّث حالتها.' if ar else 'Complaints sent by patients, doctors and radiologists. Reply to them and update their status.' }}</p>
+        </div>
+      </div>
+
+      <div class="filters" id="bar"></div>
+      <div class="a-list" id="list"></div>
+
+      {% include "admin/_foot.html" %}
+    </div>
+  </main>
+
+  {% include "admin/_end.html" %}
+</body>
+
+</html>

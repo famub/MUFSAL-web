@@ -16,7 +16,7 @@ import routes_account
 import routes_admin
 import routes_admin_pages
 import routes_auth
-import routes_complaints
+import routes_support
 import routes_dashboard
 import routes_doctor
 import routes_new_case
@@ -57,7 +57,7 @@ app.include_router(routes_radiologist.router)  # /new-case-radiologist (find the
 app.include_router(routes_patient.router)     # the patient's new pages - must come BEFORE routes_dashboard
 app.include_router(routes_dashboard.router)   # the older patient pages that have not moved over yet
 app.include_router(routes_doctor.router)      # /dashboard-doctor (built by the server)
-app.include_router(routes_complaints.router)  # /complaints (built by the server)
+app.include_router(routes_support.router)  # /support (built by the server)
 app.include_router(routes_new_case.router)    # /new-case (built by the server)
 app.include_router(routes_review.router)      # /cases/{id}/review, /cases/{id}/report, /set-lang ...
 app.include_router(routes_profile.router)    # /profile-doctor (built by the server) 

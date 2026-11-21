@@ -26,10 +26,10 @@
   const ST = { pending: ['pending', 'status-review'], handled: ['handled', 'status-approved'] }; // delayed requests: only these two statuses exist in the database
   const CST = { open: ['open', 'status-review'], investigating: ['under investigation', 'pill-info'], resolved: ['resolved', 'status-approved'] };
   const ROLE = { doctor: 'doctor', radiologist: 'radiologist' };     // registration roles (as in the backlog)
-  const WHO = { doctor: 'doctor', radiologist: 'radiologist', patient: 'patient' }; // complainant roles
+  const WHO = { doctor: 'doctor', radiologist: 'radiologist', patient: 'patient' }; // requester roles
 
   // ---- data: everything comes from the FastAPI backend (backend/routes_admin.py and routes_auth.py) ----
-  const DB = { delayed: [], pending: [], history: [], accounts: [], cmp: [], summary: { delayed: 0, licenses: 0, complaints: 0 } };
+  const DB = { delayed: [], pending: [], history: [], accounts: [], cmp: [], summary: { delayed: 0, licenses: 0, support: 0 } };
   const ts = v => (v ? Date.parse(v) : 0);
 
   async function api(url, method = 'GET', body) {
@@ -52,7 +52,7 @@
         const log = r.log.map(e => ({ t: ts(e.created_at), txt: `${EVENT[e.event_type] || e.event_type} ${e.doctor_name || '-'}.` + (e.note ? ' ' + e.note : '') }));
         log.push({ t: ts(r.reported_at), txt: `delay reported by ${r.raised_by} (${r.source}).` });
         if (r.handled_at) log.push({ t: ts(r.handled_at), txt: 'marked as handled.' });
-        return { id: String(r.delay_complaint_id), no: 'C-' + r.case_id, src: r.source, dr: r.doctor_name || 'not assigned', at: ts(r.submitted_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
+        return { id: String(r.delay_request_id), no: 'C-' + r.case_id, src: r.source, dr: r.doctor_name || 'not assigned', at: ts(r.submitted_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
       });
     },
     async pending() {
@@ -67,14 +67,14 @@
       const d = await api('/api/admin/accounts'); if (!d) return;
       DB.accounts = d.accounts.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, at: ts(r.approved_at) }));
     },
-    async complaints() {
-      const d = await api('/api/admin/complaints'); if (!d) return;
-      DB.cmp = d.complaints.map(c => ({ id: String(c.complaint_id), no: 'T-' + c.complaint_id, who: c.complainant_role, name: c.complainant, sub: c.subject, body: c.body, st: c.status, at: ts(c.created_at), th: c.replies.map(m => ({ t: ts(m.created_at), txt: m.body })) }));
+    async support() {
+      const d = await api('/api/admin/support'); if (!d) return;
+      DB.cmp = d.support.map(c => ({ id: String(c.request_id), no: 'T-' + c.request_id, who: c.requester_role, name: c.requester, sub: c.subject, body: c.body, st: c.status, at: ts(c.created_at), th: c.replies.map(m => ({ t: ts(m.created_at), txt: m.body })) }));
     }
   };
   const reload = (...names) => Promise.all(names.map(n => LOAD[n]())).then(() => draw());
 
-  const PAGE = document.body.dataset.page || 'home'; // home | delayed | licenses | complaints (one HTML page each)
+  const PAGE = document.body.dataset.page || 'home'; // home | delayed | licenses | support (one HTML page each)
   const S = { tab: PAGE, sub: PAGE === 'licenses' && location.hash === '#accounts' ? 'accounts' : 'pending', who: '', f: {} };
   const inp = (f, ph, type = 'text') => `<input data-f="${f}" type="${type}" placeholder="${ph}" aria-label="${ph}" value="${esc(S.f[f] || '')}">`;
   const sel = (f, list, all) => `<select data-f="${f}" aria-label="${all}"><option value="">${all}</option>${list.map(([v, l]) => `<option value="${v}"${S.f[f] === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
@@ -86,7 +86,7 @@
       (S.sub === 'pending' ? sel('r', Object.entries(ROLE), 'all roles') : '') +
       (S.sub === 'history' ? inp('q', 'search applicant') + sel('d', [['approved', 'approved'], ['rejected', 'rejected']], 'all decisions') + inp('from', 'from date', 'date') + inp('to', 'to date', 'date') : '') +
       (S.sub === 'accounts' ? inp('q', 'search name or SCFHS number') + sel('r', Object.entries(ROLE), 'all roles') : ''),
-    complaints: () => inp('q', 'search subject or name') + sel('w', Object.entries(WHO), 'all roles') + sel('s', Object.entries(CST).map(([k, v]) => [k, v[0]]), 'all statuses')
+    support: () => inp('q', 'search subject or name') + sel('w', Object.entries(WHO), 'all roles') + sel('s', Object.entries(CST).map(([k, v]) => [k, v[0]]), 'all statuses')
   };
 
   const OUT = {
@@ -113,10 +113,10 @@
       const rows = DB.accounts.filter(r => has(r.name + r.scfhs, f.q) && (!f.r || r.role === f.r)).map(r => `<tr><td><strong>${esc(r.name)}</strong></td><td>${ROLE[r.role]}</td><td>${esc(r.scfhs)}</td><td>${dateCell(r.at)}</td><td><div class="actions-cell">${ib('del', r.id, 'trash', 'delete account', 'bad')}</div></td></tr>`).join('');
       return tbl(['name', 'role', 'SCFHS file number', 'approval date', 'actions'], rows) || empty('no matching accounts.');
     },
-    complaints(lim) {
+    support(lim) {
       const f = S.f, rows = DB.cmp.filter(c => (!f.w || c.who === f.w) && (!f.s || c.st === f.s) && has(c.sub + c.name, f.q)).sort((a, b) => b.at - a.at).slice(0, lim || 999)
         .map(c => `<tr><td>${idCell(c.no)}</td><td><strong>${esc(c.name)}</strong> ${pill(WHO[c.who], 'pill-mute')}</td><td>${esc(c.sub)}</td><td>${pill(...CST[c.st])}</td><td>${dateCell(c.at)}</td><td><div class="actions-cell">${ib('cview', c.id, 'eye', 'view and respond')}</div></td></tr>`).join('');
-      return tbl(['ticket', 'complainant', 'subject', 'status', 'submitted', 'actions'], rows) || empty('no complaints match these filters.');
+      return tbl(['ticket', 'requester', 'subject', 'status', 'submitted', 'actions'], rows) || empty('no support match these filters.');
     }
   };
 
@@ -125,11 +125,11 @@
     const ICO = { // same icon style as the doctor dashboard (heroicons outline)
       delayed: ['', 'M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z'],
       licenses: ['', 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z'],
-      complaints: [' icon-box--warning', 'M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5']
+      support: [' icon-box--warning', 'M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5']
     };
     const card = (k, num, l, tag, attrs) => `<${tag} class="card stat-card"${attrs}><div class="icon-box${ICO[k][0]}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="${ICO[k][1]}"/></svg></div><div class="stat-info"><strong class="stat-number">${num}</strong><span class="stat-label">${l}</span></div></${tag}>`;
     if (PAGE === 'home') {
-      $('#stats').innerHTML = [['delayed', 'delayed requests', 'admin-delayed-requests.html'], ['licenses', 'pending license requests', 'admin-license-verification.html'], ['complaints', 'general complaints', 'admin-complaints.html']].map(([k, l, href]) => card(k, n[k], l, 'a', ` href="${href}"`)).join('');
+      $('#stats').innerHTML = [['delayed', 'delayed requests', 'admin-delayed-requests.html'], ['licenses', 'pending license requests', 'admin-license-verification.html'], ['support', 'general support', 'admin-support.html']].map(([k, l, href]) => card(k, n[k], l, 'a', ` href="${href}"`)).join('');
       return;
     }
     const p = $('#p-' + PAGE);
@@ -166,9 +166,9 @@
       `<h3>what happened</h3>${[...r.log].reverse().map(m => `<div class="msg"><small>${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}
       ${r.st === 'pending' ? `<div class="panel-actions"><button type="button" class="btn btn-primary" data-act="dhandled" data-id="${r.id}">mark as handled</button></div>` : ''}`);
   }
-  function openComplaint(id) {
+  function openRequest(id) {
     const c = by(DB.cmp, id);
-    openPanel(`${c.id} · ${c.sub}`, kv({ complainant: `${c.name} (${WHO[c.who]})`, status: CST[c.st][0], submitted: fmt(c.at) }) +
+    openPanel(`${c.id} · ${c.sub}`, kv({ requester: `${c.name} (${WHO[c.who]})`, status: CST[c.st][0], submitted: fmt(c.at) }) +
       `<div class="msg">${esc(c.body)}</div>${c.th.map(m => `<div class="msg"><small>admin · ${fmt(m.t)}</small>${esc(m.txt)}</div>`).join('')}
       <label>status<select id="c-st">${Object.entries(CST).map(([k, v]) => `<option value="${k}"${k === c.st ? ' selected' : ''}>${v[0]}</option>`).join('')}</select></label>
       <label>your response<textarea id="c-txt" rows="4"></textarea></label><small class="err" hidden>write a response or change the status first.</small>
@@ -196,11 +196,11 @@
     appr: id => decide(by(DB.pending, id), 'approved'),
     rej: id => { const r = by(DB.pending, id); ask({ title: `reject ${r.name}`, text: 'the applicant will see this reason and can submit a new request.', ok: 'reject', danger: true, field: 'rejection reason', req: true }, v => decide(r, 'rejected', v)); },
     del: id => { const r = by(DB.accounts, id); ask({ title: `delete ${r.name}?`, text: 'this permanently removes the account and blocks future logins with these credentials.', ok: 'delete account', danger: true }, async () => { if (await api(`/api/admin/accounts/${id}`, 'DELETE')) { toast('account deleted'); reload('accounts'); } }); },
-    cview: openComplaint,
+    cview: openRequest,
     reply: async id => {
       const c = by(DB.cmp, id), txt = $('#c-txt', panel).value.trim(), st = $('#c-st', panel).value;
       if (!txt && st === c.st) { $('.err', panel).hidden = false; return; }
-      if (await api(`/api/admin/complaints/${id}/respond`, 'POST', { status: st, reply: txt })) { toast(txt ? 'response sent' : 'status updated'); await LOAD.complaints(); openComplaint(id); draw(false); }
+      if (await api(`/api/admin/support/${id}/respond`, 'POST', { status: st, reply: txt })) { toast(txt ? 'response sent' : 'status updated'); await LOAD.support(); openRequest(id); draw(false); }
     }
   };
 
@@ -208,5 +208,5 @@
   document.addEventListener('input', e => { const f = e.target.dataset.f; if (f) { S.f[f] = e.target.value; draw(false); } });
   window.AdminUI = { redraw: () => draw() };
   draw(); // empty tables while the data loads
-  reload(...({ home: ['summary'], delayed: ['delayed'], licenses: ['pending', 'history', 'accounts'], complaints: ['complaints'] }[PAGE]));
+  reload(...({ home: ['summary'], delayed: ['delayed'], licenses: ['pending', 'history', 'accounts'], support: ['support'] }[PAGE]));
 })();

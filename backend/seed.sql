@@ -212,16 +212,16 @@ INSERT INTO delay_complaints (case_id, user_id, status, created_at, handled_at, 
 (4, 10, 'pending', CURRENT_TIMESTAMP - INTERVAL '3 days',  NULL, NULL),
 (7, 3,  'handled', CURRENT_TIMESTAMP - INTERVAL '44 days', CURRENT_TIMESTAMP - INTERVAL '43 days', 1);
 
--- ---------- written complaints ----------
+-- ---------- written support requests ----------
 -- The subjects match the choices the site offers, so they read the same way
 -- here as they do on the screen.
-INSERT INTO complaints (user_id, case_id, subject, body, status, created_at) VALUES
-(2,  6,    'Something in my report',  'I received my report but the grade explanation uses medical terms I did not understand.', 'resolved',      CURRENT_TIMESTAMP - INTERVAL '50 days'),
-(2,  NULL, 'A problem with the site', 'The upload box kept rejecting my X-ray photo even though it was a JPG under 5 MB.',        'open',          CURRENT_TIMESTAMP - INTERVAL '6 days'),
-(9,  3,    'Something else',          'I would like to know whether I can upload the other knee before this one comes back.',     'investigating', CURRENT_TIMESTAMP - INTERVAL '9 days'),
-(4,  1,    'Something in a report',   'The model marked this one high priority but the X-ray looks mild to me. Worth a check.',   'open',          CURRENT_TIMESTAMP - INTERVAL '1 day'),
-(6,  NULL, 'A problem with the site', 'The page times out when I upload two X-rays one after the other.',                         'resolved',      CURRENT_TIMESTAMP - INTERVAL '25 days');
+INSERT INTO support_requests (user_id, case_id, body, status, created_at) VALUES
+(2,  6,    'I received my report but the grade explanation uses medical terms I did not understand.', 'resolved',      CURRENT_TIMESTAMP - INTERVAL '50 days'),
+(2,  NULL, 'The upload box kept rejecting my X-ray photo even though it was a JPG under 5 MB.',        'open',          CURRENT_TIMESTAMP - INTERVAL '6 days'),
+(9,  3,    'I would like to know whether I can upload the other knee before this one comes back.',     'investigating', CURRENT_TIMESTAMP - INTERVAL '9 days'),
+(4,  1,    'The model marked this one high priority but the X-ray looks mild to me. Worth a check.',   'open',          CURRENT_TIMESTAMP - INTERVAL '1 day'),
+(6,  NULL, 'The page times out when I upload two X-rays one after the other.',                         'resolved',      CURRENT_TIMESTAMP - INTERVAL '25 days');
 
-INSERT INTO complaint_replies (complaint_id, admin_id, body, created_at) VALUES
+INSERT INTO support_replies (request_id, admin_id, body, created_at) VALUES
 (1, 1, 'Thank you for telling us. We have rewritten the grade explanation in plainer words.', CURRENT_TIMESTAMP - INTERVAL '48 days'),
 (5, 1, 'Fixed. The upload now waits for the first X-ray to finish before starting the second.', CURRENT_TIMESTAMP - INTERVAL '23 days');

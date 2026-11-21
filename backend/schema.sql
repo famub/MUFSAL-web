@@ -254,25 +254,24 @@ CREATE TABLE case_activity (
     CONSTRAINT activity_event_valid CHECK (event_type IN ('assigned','reassigned','approved'))
 );
 
-CREATE TABLE complaints (
-    complaint_id SERIAL       PRIMARY KEY,
-    user_id      INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
-    -- which case the complaint is about, when it is about one at all.
-    -- The complaint survives the case, so the admin can still read it.
-    case_id      INTEGER      REFERENCES cases(case_id) ON DELETE SET NULL,
-    subject      VARCHAR(200) NOT NULL,
-    body         TEXT         NOT NULL,
-    status       VARCHAR(20)  NOT NULL DEFAULT 'open',
-    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT complaints_status_valid CHECK (status IN ('open','investigating','resolved'))
+CREATE TABLE support_requests (
+    request_id SERIAL      PRIMARY KEY,
+    user_id    INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    -- which case the request is about, when it is about one at all.
+    -- The request survives the case, so the admin can still read it.
+    case_id    INTEGER     REFERENCES cases(case_id) ON DELETE SET NULL,
+    body       TEXT        NOT NULL,
+    status     VARCHAR(20) NOT NULL DEFAULT 'open',
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT support_requests_status_valid CHECK (status IN ('open','investigating','resolved'))
 );
 
-CREATE TABLE complaint_replies (
-    reply_id     SERIAL    PRIMARY KEY,
-    complaint_id INTEGER   NOT NULL REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-    admin_id     INTEGER   NOT NULL REFERENCES admins(admin_id) ON DELETE RESTRICT,
-    body         TEXT      NOT NULL,
-    created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE support_replies (
+    reply_id   SERIAL    PRIMARY KEY,
+    request_id INTEGER   NOT NULL REFERENCES support_requests(request_id) ON DELETE CASCADE,
+    admin_id   INTEGER   NOT NULL REFERENCES admins(admin_id) ON DELETE RESTRICT,
+    body       TEXT      NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Accounts live in two tables, so a reset row points at one or the other and

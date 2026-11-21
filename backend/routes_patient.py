@@ -1,7 +1,7 @@
 """MUFSAL - the patient's pages (new design).
 
 Shahd owns every page the patient sees: the home page, the list of cases,
-the profile, starting a new case, reading a report and raising a complaint.
+the profile, starting a new case, reading a report and raising a support request.
 They all live in THIS file and in templates/patient/, so nothing here
 collides with the pages the rest of the team is building.
 
@@ -13,10 +13,10 @@ Pages finished so far:
     /dashboard-patient   the home page
     /patient-cases       every X-ray the patient has sent
     /profile-patient     the patient's details, and changing them
-    /complaints          raising a complaint and following it
+    /support          raising a support request and following it
     /new-case            uploading an X-ray and answering the questions
 
-/complaints belongs to every role, not only the patient, so the two
+/support belongs to every role, not only the patient, so the two
 handlers here hand a doctor or a radiologist straight back to the older
 page. Nothing changes for them.
 
@@ -33,7 +33,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from psycopg import errors as pg_errors
 
-import routes_complaints           # only to hand the other roles their own page
+import routes_support           # only to hand the other roles their own page
 # The checks for a new case were already written and work well, so they are
 # used as they are instead of being written a second time. Only the page
 # itself is new here.
@@ -42,11 +42,11 @@ from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
 from auth_service import HOME
 from ai_analysis import analyze_case_later
 from queries_cases import create_case
-from queries_patient import (create_complaint, email_belongs_to_someone_else,
+from queries_patient import (create_support_request, email_belongs_to_someone_else,
                              get_all_cases, get_case_choices, get_latest_case,
                              get_delay_complaints, get_open_case,
                              get_patient_header, get_profile,
-                             get_written_complaints, update_profile)
+                             get_written_support_requests, update_profile)
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
@@ -65,25 +65,11 @@ DELAY_ERRORS = {
     "case_not_found": "We could not find that case.",
 }
 
-# The four things a complaint can be about. The key is what the form
-# sends, the value is what is saved and what the admin reads.
-COMPLAINT_SUBJECTS = {
-    "report": "Something in my report",
-    "site": "A problem with the site",
-    "other": "Something else",
-}
-
-# the small grey line under each choice
-COMPLAINT_HINTS = {
-    "report": "The result or the note looks wrong",
-    "site": "Upload failed, page not loading",
-    "other": "Anything not listed here",
-}
 BODY_MAX_WORDS = 120     # the limit the person sees and the page counts
 BODY_MAX = 2000          # a safety net in characters, so nothing huge is posted
 
-# How a complaint's status is shown. 'open' and 'investigating' come from
-# the complaints table, 'pending' and 'handled' from delay complaints.
+# How a support request's status is shown. 'open' and 'investigating' come from
+# the support requests table, 'pending' and 'handled' from delay complaints.
 COMPLAINT_TAGS = {
     "open":          ("tag-wait",   "Waiting for the team"),
     "investigating": ("tag-review", "Being looked at"),
@@ -372,17 +358,20 @@ async def save_profile(request: Request):
     return RedirectResponse("/profile-patient?saved=1", status_code=303)
 
 
-# ------------------------------------------------------------ complaints
+# ------------------------------------------------------------ support requests
 
-def complaint_rows(user_id):
-    """The written complaints and the one-click delay reports, in one list,
+def support_rows(user_id):
+    """The written support requests and the one-click delay reports, in one list,
     newest first."""
     rows = []
 
-    for c in get_written_complaints(user_id):
+    for c in get_written_support_requests(user_id):
         tag, label = COMPLAINT_TAGS.get(c["status"], ("tag-wait", "Waiting for the team"))
         rows.append({
-            "subject": c["subject"],
+            # the title is worked out for the page, not stored: the request
+            # itself no longer carries one, so the case it is about names it.
+            "title": (f"Case #{c['case_id']}" if c["case_id"]
+                      else "Not about a specific case"),
             "body": c["body"],
             "case_id": c["case_id"],
             "date": long_date(c["created_at"]),
@@ -397,7 +386,7 @@ def complaint_rows(user_id):
     for d in get_delay_complaints(user_id):
         tag, label = COMPLAINT_TAGS.get(d["status"], ("tag-wait", "Waiting for the team"))
         rows.append({
-            "subject": "My report is late",
+            "title": "Report is late",
             "body": "",
             "case_id": d["case_id"],
             "date": long_date(d["created_at"]),
@@ -412,7 +401,7 @@ def complaint_rows(user_id):
     return rows
 
 
-def complaints_page(request, user_id, form=None, errors=None, sent=False, status_code=200):
+def support_page(request, user_id, form=None, errors=None, sent=False, status_code=200):
     header = get_patient_header(user_id)
 
     choices = [{"case_id": c["case_id"],
@@ -421,66 +410,60 @@ def complaints_page(request, user_id, form=None, errors=None, sent=False, status
                for c in get_case_choices(user_id)]
 
     return templates.TemplateResponse(
-        request, "patient/complaints.html",
+        request, "patient/support.html",
         page_context(request, {
             "nav_counts": {"cases": header["total_cases"] if header else 0},
-            "kinds": COMPLAINT_SUBJECTS,
-            "hints": COMPLAINT_HINTS,
             "choices": choices,
-            "form": form or {"kind": "report", "case_id": "", "body": ""},
+            "form": form or {"case_id": "", "body": ""},
             "errors": errors or {},
             "sent": sent,
             "body_max": BODY_MAX,
             "body_max_words": BODY_MAX_WORDS,
-            "complaints": complaint_rows(user_id),
+            "support_requests": support_rows(user_id),
         }),
         status_code=status_code,
     )
 
 
-@router.get("/complaints", include_in_schema=False)
-def complaints(request: Request, sent: int = 0):
-    """The patient's complaints page. A doctor or a radiologist gets the
-    older page, which is still theirs. The admin reads complaints rather
+@router.get("/support", include_in_schema=False)
+def support_requests(request: Request, sent: int = 0):
+    """The patient's support requests page. A doctor or a radiologist gets the
+    older page, which is still theirs. The admin reads support requests rather
     than writing them, so he is sent to the page that lists them all."""
     if request.session.get("user_id") is None:
         return RedirectResponse("/login", status_code=303)
     if request.session.get("role") == "admin":
-        return RedirectResponse("/admin-complaints", status_code=303)
+        return RedirectResponse("/admin-support", status_code=303)
     if request.session.get("role") != "patient":
-        return routes_complaints.complaints_page(request, sent=sent)
+        return routes_support.support_page(request, sent=sent)
 
-    return complaints_page(request, request.session["user_id"], sent=bool(sent))
+    return support_page(request, request.session["user_id"], sent=bool(sent))
 
 
-@router.post("/complaints", include_in_schema=False)
-async def send_complaint(request: Request):
-    """Save a complaint, then redirect so a refresh cannot send it twice."""
+@router.post("/support", include_in_schema=False)
+async def send_support_request(request: Request):
+    """Save a support request, then redirect so a refresh cannot send it twice."""
     if request.session.get("user_id") is None:
         return RedirectResponse("/login", status_code=303)
     if request.session.get("role") == "admin":
-        return RedirectResponse("/admin-complaints", status_code=303)
+        return RedirectResponse("/admin-support", status_code=303)
 
     data = await request.form()
 
     if request.session.get("role") != "patient":
-        return routes_complaints.send_complaint(
+        return routes_support.send_support_request(
             request,
-            kind=(data.get("kind") or ""),
             case_id=(data.get("case_id") or ""),
             body=(data.get("body") or ""),
         )
 
     user_id = request.session["user_id"]
     form = {
-        "kind": data.get("kind") or "",
         "case_id": (data.get("case_id") or "").strip(),
         "body": (data.get("body") or "").strip(),
     }
 
     errors = {}
-    if form["kind"] not in COMPLAINT_SUBJECTS:
-        errors["kind"] = "Please choose what this is about."
     words = len(form["body"].split())
     if not form["body"]:
         errors["body"] = "Please tell us what happened."
@@ -498,10 +481,10 @@ async def send_complaint(request: Request):
             errors["case_id"] = "Please choose one of your own cases."
 
     if errors:
-        return complaints_page(request, user_id, form=form, errors=errors, status_code=400)
+        return support_page(request, user_id, form=form, errors=errors, status_code=400)
 
-    create_complaint(user_id, COMPLAINT_SUBJECTS[form["kind"]], form["body"], case_id)
-    return RedirectResponse("/complaints?sent=1", status_code=303)
+    create_support_request(user_id, form["body"], case_id)
+    return RedirectResponse("/support?sent=1", status_code=303)
 
 
 # ------------------------------------------------------------- new case

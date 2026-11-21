@@ -183,10 +183,10 @@ def update_profile(user_id, full_name, email):
         )
 
 
-# =============================================================== complaints
+# =============================================================== support requests
 
 def get_case_choices(patient_id):
-    """The patient's cases, for the "which case?" list on the complaint form."""
+    """The patient's cases, for the "which case?" list on the support request form."""
     with get_connection() as conn:
         return conn.execute(
             """
@@ -200,29 +200,29 @@ def get_case_choices(patient_id):
         ).fetchall()
 
 
-def create_complaint(user_id, subject, body, case_id=None):
-    """Save a complaint. case_id may be None when it is about nothing in
-    particular. Returns the new complaint_id."""
+def create_support_request(user_id, body, case_id=None):
+    """Save a support request. case_id may be None when it is about nothing in
+    particular. Returns the new request_id."""
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO complaints (user_id, subject, body, case_id)
-            VALUES (%s, %s, %s, %s)
-            RETURNING complaint_id
+            INSERT INTO support_requests (user_id, body, case_id)
+            VALUES (%s, %s, %s)
+            RETURNING request_id
             """,
-            (user_id, subject, body, case_id),
+            (user_id, body, case_id),
         ).fetchone()
-    return row["complaint_id"]
+    return row["request_id"]
 
 
-def get_written_complaints(user_id):
-    """The complaints this user typed, newest first, each with the admin's
+def get_written_support_requests(user_id):
+    """The support requests this user typed, newest first, each with the admin's
     answers underneath."""
     with get_connection() as conn:
         rows = conn.execute(
             """
-            SELECT complaint_id, subject, body, status, created_at, case_id
-            FROM complaints
+            SELECT request_id, body, status, created_at, case_id
+            FROM support_requests
             WHERE user_id = %s
             ORDER BY created_at DESC
             """,
@@ -233,11 +233,11 @@ def get_written_complaints(user_id):
             row["replies"] = conn.execute(
                 """
                 SELECT body, created_at
-                FROM complaint_replies
-                WHERE complaint_id = %s
+                FROM support_replies
+                WHERE request_id = %s
                 ORDER BY created_at ASC
                 """,
-                (row["complaint_id"],),
+                (row["request_id"],),
             ).fetchall()
     return rows
 
@@ -246,7 +246,7 @@ def get_delay_complaints(user_id):
     """The delays this user reported with the one-click button on a case.
 
     They live in their own table because they carry no text, so the
-    complaints page reads both and shows them in one list.
+    support requests page reads both and shows them in one list.
     """
     with get_connection() as conn:
         return conn.execute(

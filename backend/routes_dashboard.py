@@ -31,7 +31,7 @@ DELAY_ERRORS = {"too_early", "already_reported", "already_approved",
 
 
 # ---------------------------------------------------------------- helpers
-# routes_complaints.py imports these too.
+# routes_support.py imports these too.
 
 def get_lang(request):
     """Page language from the 'lang' cookie (English by default)."""

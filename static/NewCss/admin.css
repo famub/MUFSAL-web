@@ -73,7 +73,7 @@ dialog .field { margin: 16px 0 0; }
   .filters .search, .filters .search input { width: 100%; }
 }
 
-/* long titles (complaint subjects) wrap instead of running into the next column */
+/* long titles (request excerpts) wrap instead of running into the next column */
 .a-row .who > div { min-width: 0; }
 .a-row .who strong { white-space: normal; line-height: 1.35; }
 .a-row .cell .tag { margin-top: 2px; }
