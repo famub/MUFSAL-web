@@ -75,13 +75,32 @@ def find_patient_by_national_id(national_id):
 
 
 def get_user_by_email(email):
-    """Return the account with this email, or None."""
+    """Return the account with this email, or None.
+
+    Accounts live in two tables: users holds patients, doctors and
+    radiologists, admins holds the single account that runs the system. A pair
+    of triggers in the database stops one address from naming a row in both,
+    so at most one of the two reads below can match. The admin is handed back
+    in the same shape as everybody else, so nothing further down has to know
+    which table the account came from.
+    """
     with get_connection() as conn:
-        return conn.execute(
+        row = conn.execute(
             """
             SELECT u.*, p.status
             FROM users u LEFT JOIN professionals p ON p.user_id = u.user_id
             WHERE LOWER(u.email) = LOWER(%s)
+            """,
+            (email,),
+        ).fetchone()
+        if row is not None:
+            return row
+        return conn.execute(
+            """
+            SELECT admin_id AS user_id, 'admin' AS role, full_name, email,
+                   password_hash, NULL AS national_id, NULL AS status
+            FROM admins
+            WHERE LOWER(email) = LOWER(%s)
             """,
             (email,),
         ).fetchone()
@@ -276,15 +295,21 @@ def decide_professional(user_id, admin_id, decision, reason=None):
     return True
 
 
-def create_password_reset(user_id, token_hash):
-    """Save a one-time reset token (only its hash) that works for one hour."""
+def create_password_reset(account_id, token_hash, role):
+    """Save a one-time reset token (only its hash) that works for one hour.
+
+    The row names one account, and accounts sit in two tables, so which of
+    the two columns is filled depends on the role. The other stays empty;
+    a CHECK in schema.sql refuses a row that fills both or neither.
+    """
+    column = "admin_id" if role == "admin" else "user_id"
     with get_connection() as conn:
         conn.execute(
-            """
-            INSERT INTO password_resets (user_id, token, expires_at)
+            f"""
+            INSERT INTO password_resets ({column}, token, expires_at)
             VALUES (%s, %s, CURRENT_TIMESTAMP + INTERVAL '1 hour')
             """,
-            (user_id, token_hash),
+            (account_id, token_hash),
         )
 
 
@@ -293,18 +318,25 @@ def get_valid_password_reset(token_hash):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT reset_id, user_id FROM password_resets
+            SELECT reset_id, user_id, admin_id FROM password_resets
             WHERE token = %s AND used = FALSE AND expires_at > CURRENT_TIMESTAMP
             """,
             (token_hash,),
         ).fetchone()
 
 
-def complete_password_reset(reset_id, user_id, new_password):
-    """Save the new password and make the token unusable."""
+def complete_password_reset(reset_id, user_id, admin_id, new_password):
+    """Save the new password and make the token unusable.
+
+    Exactly one of the two ids is filled, so the one that is not empty says
+    which table holds the password being changed.
+    """
+    table, column, account_id = (
+        ("admins", "admin_id", admin_id) if admin_id is not None
+        else ("users", "user_id", user_id))
     with get_connection() as conn:
         conn.execute(
-            "UPDATE users SET password_hash = %s WHERE user_id = %s",
-            (hash_password(new_password), user_id),
+            f"UPDATE {table} SET password_hash = %s WHERE {column} = %s",
+            (hash_password(new_password), account_id),
         )
         conn.execute("UPDATE password_resets SET used = TRUE WHERE reset_id = %s", (reset_id,))

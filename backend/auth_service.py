@@ -177,7 +177,7 @@ def forgot(data):
         return _err("email_not_found", 404)
     if db.can_sign_in(user):
         token = secrets.token_urlsafe(32)
-        db.create_password_reset(user["user_id"], _hash_token(token))
+        db.create_password_reset(user["user_id"], _hash_token(token), user["role"])
         link = f"/reset-password.html?token={token}"
         sent = mailer.send_reset_link(email, user["full_name"], link)   # real e-mail (see mailer.py)
         if not sent:
@@ -199,7 +199,7 @@ def reset_password(data):
     problem = rules.password_error(password)
     if problem:
         return _err(problem)
-    db.complete_password_reset(row["reset_id"], row["user_id"], password)
+    db.complete_password_reset(row["reset_id"], row["user_id"], row["admin_id"], password)
     return 200, {"ok": True}
 
 

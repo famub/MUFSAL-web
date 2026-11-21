@@ -8,12 +8,11 @@
 -- =====================================================================
 
 -- Clear any previous demo data and restart the id counters
-TRUNCATE TABLE users, cases RESTART IDENTITY CASCADE;
+TRUNCATE TABLE users, admins, cases RESTART IDENTITY CASCADE;
 
 -- ---------- accounts ----------
--- 1 admin - 6 patients - 3 doctors - 3 radiologists
+-- 6 patients - 3 doctors - 3 radiologists  (the admin is in its own table below)
 INSERT INTO users (user_id, role, full_name, email, password_hash, national_id) VALUES
-(1,  'admin',       'MUFSAL Admin',      'admin@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', NULL),
 (2,  'patient',     'Sarah Ahmed',       'sarah@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1011111111'),
 (3,  'patient',     'Noura Alharbi',     'noura@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1022222222'),
 (4,  'doctor',      'Reem Alqahtani',    'reem@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1033333333'),
@@ -30,6 +29,11 @@ INSERT INTO users (user_id, role, full_name, email, password_hash, national_id) 
 -- six above keep working as the demo logins everybody already uses.
 (14, 'doctor',      'Sultan Alghamdi',   'sultan@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1015151515'),
 (15, 'radiologist', 'Amal Alqahtani',    'amal@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1016161616');
+
+-- ---------- the admin, in its own table ----------
+INSERT INTO admins (admin_id, full_name, email, password_hash) VALUES
+(1, 'MUFSAL Admin', 'admin@mufsal.test', '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.');
+SELECT setval('admins_admin_id_seq', 1, true);
 
 SELECT setval('users_user_id_seq', (SELECT MAX(user_id) FROM users));
 

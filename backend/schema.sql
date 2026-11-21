@@ -24,11 +24,10 @@ CREATE TABLE users (
     full_name     VARCHAR(100) NOT NULL,
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    national_id   CHAR(10)     UNIQUE,
-    CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist','admin')),
+    national_id   CHAR(10)     NOT NULL UNIQUE,
+    CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist')),
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
     CONSTRAINT users_national_id_format CHECK (national_id ~ '^[0-9]{10}$'),
-    CONSTRAINT users_identity_required CHECK (role = 'admin' OR national_id IS NOT NULL),
     -- lets the two tables below point at (user_id, role) together, so the
     -- database itself refuses a doctor written into patients
     CONSTRAINT users_id_role_unique UNIQUE (user_id, role)
@@ -91,12 +90,53 @@ COMMENT ON COLUMN professionals.delete_requested_at IS
 COMMENT ON COLUMN professionals.deactivated_at IS
     'When the account was taken out of service, empty while it is in service. This is the admin acting on the request above: the asking is recorded there, the decision here, so a request still waiting is one column filled and the other empty. The row is never deleted, because a doctor signs reports and a radiologist uploads X-rays, and removing it would leave medical records with no author.';
 
+-- The admin is not a user of the clinical system but the account that runs it:
+-- it holds no national id, owns no case and is never approved by anyone. Keeping
+-- it out of users lets national_id be required of every row there without an
+-- exception, and lets the three columns below point at the admin alone instead
+-- of at any user at all.
+CREATE TABLE admins (
+    admin_id      SERIAL       PRIMARY KEY,
+    full_name     VARCHAR(100) NOT NULL,
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    CONSTRAINT admins_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$')
+);
+
+CREATE UNIQUE INDEX admins_email_lower_unique ON admins (lower(email));
+
+-- An address may name one account only, and accounts now live in two tables.
+-- No CHECK can look at another table and no foreign key can forbid a value, so
+-- the rule is kept by a pair of triggers, one on each side: whichever table is
+-- written to, the other is consulted first.
+CREATE OR REPLACE FUNCTION email_free_in_admins() RETURNS trigger AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM admins WHERE lower(email) = lower(NEW.email)) THEN
+        RAISE EXCEPTION 'email_taken';
+    END IF;
+    RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION email_free_in_users() RETURNS trigger AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM users WHERE lower(email) = lower(NEW.email)) THEN
+        RAISE EXCEPTION 'email_taken';
+    END IF;
+    RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER users_email_not_an_admin  BEFORE INSERT OR UPDATE OF email ON users
+    FOR EACH ROW EXECUTE FUNCTION email_free_in_admins();
+
+CREATE TRIGGER admins_email_not_a_user   BEFORE INSERT OR UPDATE OF email ON admins
+    FOR EACH ROW EXECUTE FUNCTION email_free_in_users();
+
 CREATE TABLE registration_decisions (
     decision_id     SERIAL PRIMARY KEY,
     -- the applicant's name and role are not copied here either: both are read
     -- through professional_id, for the same reason as reports.doctor_id above.
     professional_id INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
-    admin_id        INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    admin_id        INTEGER      NOT NULL REFERENCES admins(admin_id) ON DELETE RESTRICT,
     kind            VARCHAR(15)  NOT NULL DEFAULT 'registration',
     decision        VARCHAR(10)  NOT NULL,
     reason          TEXT,
@@ -230,18 +270,24 @@ CREATE TABLE complaints (
 CREATE TABLE complaint_replies (
     reply_id     SERIAL    PRIMARY KEY,
     complaint_id INTEGER   NOT NULL REFERENCES complaints(complaint_id) ON DELETE CASCADE,
-    admin_id     INTEGER   NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    admin_id     INTEGER   NOT NULL REFERENCES admins(admin_id) ON DELETE RESTRICT,
     body         TEXT      NOT NULL,
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Accounts live in two tables, so a reset row points at one or the other and
+-- never at both. The check below is what makes the pair behave as one column:
+-- without it a row could name nobody, or name a user and an admin at once.
 CREATE TABLE password_resets (
     reset_id   SERIAL       PRIMARY KEY,
-    user_id    INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id    INTEGER      REFERENCES users(user_id)   ON DELETE CASCADE,
+    admin_id   INTEGER      REFERENCES admins(admin_id) ON DELETE CASCADE,
     token      VARCHAR(255) NOT NULL UNIQUE,
     expires_at TIMESTAMP    NOT NULL,
     used       BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT reset_belongs_to_one_account
+        CHECK ((user_id IS NOT NULL) <> (admin_id IS NOT NULL))
 );
 
 CREATE TABLE delay_complaints (
@@ -251,7 +297,7 @@ CREATE TABLE delay_complaints (
     status             VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     handled_at         TIMESTAMP,
-    handled_by         INTEGER     REFERENCES users(user_id) ON DELETE RESTRICT,
+    handled_by         INTEGER     REFERENCES admins(admin_id) ON DELETE RESTRICT,
     CONSTRAINT delay_status_valid CHECK (status IN ('pending','handled'))
 );
 

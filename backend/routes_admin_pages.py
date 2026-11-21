@@ -78,10 +78,10 @@ def admin_or_redirect(request):
     return request.session["user_id"], None
 
 
-def get_admin_account(user_id):
+def get_admin_account(admin_id):
     with get_connection() as conn:
         return conn.execute(
-            "SELECT full_name, email FROM users WHERE user_id = %s", (user_id,)
+            "SELECT full_name, email FROM admins WHERE admin_id = %s", (admin_id,)
         ).fetchone()
 
 
@@ -122,14 +122,21 @@ async def save_profile(request: Request):
     elif not EMAIL_PATTERN.match(form["email"]) or len(form["email"]) > 255:
         errors["email"] = msg["email"]
     else:
+        # An address may name one account only, and accounts sit in two
+        # tables, so both are asked. The database would refuse the write
+        # anyway (the triggers in schema.sql), but asking first turns a
+        # crash into the same worded message the rest of the form gives.
         with get_connection() as conn:
-            taken = conn.execute("SELECT 1 FROM users WHERE lower(email) = lower(%s) AND user_id <> %s",
-                                 (form["email"], user_id)).fetchone()
+            taken = conn.execute(
+                "SELECT 1 FROM users WHERE lower(email) = lower(%s)"
+                " UNION ALL"
+                " SELECT 1 FROM admins WHERE lower(email) = lower(%s) AND admin_id <> %s",
+                (form["email"], form["email"], user_id)).fetchone()
         if taken:
             errors["email"] = msg["taken"]
     if errors:
         return profile_page(request, user_id, form=form, errors=errors, status_code=400)
     with get_connection() as conn:
-        conn.execute("UPDATE users SET full_name = %s, email = %s WHERE user_id = %s",
+        conn.execute("UPDATE admins SET full_name = %s, email = %s WHERE admin_id = %s",
                      (form["full_name"], form["email"], user_id))
     return RedirectResponse("/profile-admin?saved=1", status_code=303)
