@@ -57,35 +57,53 @@
         </div>
       </section>
 
-      <!-- ---------- card 2: personal information - read only (the email cannot be changed here) ---------- -->
-      <section class="card">
-        <div class="card-head">
-          <div><h2>{{ t.personal_title }}</h2></div>
-        </div>
+      <!-- ---------- card 2: personal information - only the name can be edited ---------- -->
+      <form method="post" action="/profile-doctor" novalidate>
+        <section class="card" id="contact-card">
+          <div class="card-head">
+            <div><h2>{{ t.personal_title }}</h2></div>
+            <button type="button" class="btn btn-soft btn-sm" id="edit-btn">{{ t.edit }}</button>
+          </div>
 
-        <div class="grid-2">
-          <div class="field locked">
-            <label for="name">{{ t.name_label }}</label>
-            <input type="text" id="name" value="{{ profile.full_name }}" readonly disabled />
-            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+          <div class="grid-2">
+            <div class="field">
+              <label for="name">{{ t.name_label }}</label>
+              <input type="text" id="name" name="full_name" value="{{ profile.full_name }}" maxlength="100" required disabled />
+            </div>
+            <div class="field locked">
+              <label for="nid">{{ t.nid_label }}</label>
+              <input type="text" id="nid" value="{{ masked_id }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+            <div class="field locked">
+              <label for="email">{{ t.email_label }}</label>
+              <input type="text" id="email" value="{{ profile.email }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
           </div>
-          <div class="field locked">
-            <label for="nid">{{ t.nid_label }}</label>
-            <input type="text" id="nid" value="{{ masked_id }}" readonly disabled />
-            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+
+          <div class="decision-foot" id="actions" hidden>
+            <button type="submit" class="btn btn-primary">{{ t.save }}</button>
+            <a class="btn btn-ghost" href="/profile-doctor">{{ t.cancel }}</a>
           </div>
-          <div class="field locked">
-            <label for="email">{{ t.email_label }}</label>
-            <input type="text" id="email" value="{{ profile.email }}" readonly disabled />
-            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
-          </div>
-        </div>
-      </section>
+        </section>
+      </form>
 
       {% include "_delete-account.html" %}
       {% include "_page-foot.html" %}
     </div>
   </main>
+
+  <script>
+    // Edit -> unlock only the name box and show Save / Cancel
+    document.getElementById('edit-btn').addEventListener('click', function () {
+      const box = document.getElementById('name');
+      box.disabled = false;
+      document.getElementById('actions').hidden = false;
+      this.hidden = true;
+      box.focus();
+    });
+  </script>
 
 </body>
 
