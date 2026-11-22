@@ -1,7 +1,7 @@
 """MUFSAL - profile pages. For now: the doctor and the radiologist.
 
     GET  /profile-doctor        the page
-    POST /profile-doctor        saves the email address
+    POST /profile-doctor        saves the full name (email is locked)
 
 Include this router in main.py BEFORE routes_pages.
 """
@@ -13,7 +13,8 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from queries_profile import get_doctor_profile, update_contact
+from auth_rules import name_error
+from queries_profile import get_doctor_profile, update_name
 from routes_dashboard import get_lang
 from texts_profile import PROFILE_TEXT
 
@@ -71,12 +72,12 @@ def profile_doctor(request: Request, saved: Optional[int] = None, error: Optiona
 
 
 @router.post("/profile-doctor", include_in_schema=False)
-def save_profile_doctor(request: Request, email: str = Form(...)):
+def save_profile_doctor(request: Request, full_name: str = Form("")):
     user_id, redirect = doctor_or_redirect(request)
     if redirect:
         return redirect
-
-    result = update_contact(user_id, email)
-    if isinstance(result, dict):
-        return RedirectResponse(f"/profile-doctor?error={result['error']}", status_code=303)
+    problem = name_error(full_name)          # empty -> name_required, over 100 -> name_invalid
+    if problem:
+        return RedirectResponse(f"/profile-doctor?error={problem}", status_code=303)
+    update_name(user_id, full_name)          # only the name changes, the email stays locked
     return RedirectResponse("/profile-doctor?saved=1", status_code=303)
