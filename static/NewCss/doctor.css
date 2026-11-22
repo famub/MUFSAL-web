@@ -166,3 +166,15 @@ bdi { unicode-bidi: isolate; }
   body { background: #fff; }
   .card { box-shadow: none; border: 1px solid var(--line); }
 }
+
+/* ---------- profile: change password (same look as the patient's page) ---------- */
+.pw-when { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; background: var(--mint); color: var(--grey); border-radius: 999px; padding: 8px 15px; font-size: .82rem; }
+.pw-when svg { width: 15px; height: 15px; flex: none; }
+.pw-rules { display: none; grid-template-columns: 1fr 1fr; gap: 9px 24px; list-style: none; margin: 20px 0 6px; padding: 0; }
+.card.editing .pw-rules { display: grid; }
+.pw-rules li { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--grey); transition: color .16s ease; }
+.pw-rules li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.pw-rules li.is-met { color: var(--brand); }
+.pw-rules li.is-bad { color: var(--red); }
+#security-card .decision-foot { margin-top: 18px; }
+@media (max-width: 620px) { .pw-rules { grid-template-columns: 1fr; } }
