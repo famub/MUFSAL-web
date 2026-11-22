@@ -45,8 +45,23 @@
 .pw { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .pw p { color: var(--grey); font-size: .9rem; }
 .pw .btn-edit { margin-inline-start: auto; }
+/* a quiet chip saying when the password was last set - it reads as a note
+   about the boxes above it, not as another box to fill in */
+.pw-when { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; background: var(--mint); color: var(--grey); border-radius: 999px; padding: 8px 15px; font-size: .82rem; }
+.pw-when svg { width: 15px; height: 15px; flex: none; }
+/* ---------- what a new password has to be ----------
+   One line per rule, hidden until Change password is pressed. Grey is
+   "not yet", blue is "done", red is a rule the server sent back. The dot
+   is drawn from the line's own colour, so all three follow along. */
+.pw-rules { display: none; grid-template-columns: 1fr 1fr; gap: 9px 24px; list-style: none; margin-top: 20px; }
+.card.editing .pw-rules { display: grid; }
+.pw-rules li { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--grey); transition: color .16s ease; }
+.pw-rules li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.pw-rules li.is-met { color: var(--brand); }
+.pw-rules li.is-bad { color: var(--red); }
 @media (max-width: 900px) {
   .grid { grid-template-columns: 1fr; }
+  .pw-rules { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) {
   .card { padding: 22px 20px; }

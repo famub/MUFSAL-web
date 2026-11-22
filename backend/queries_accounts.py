@@ -213,7 +213,8 @@ def resubmit_professional(user_id, full_name, password, national_id,
         conn.execute(
             """
             UPDATE users u
-            SET full_name = %s, password_hash = %s, national_id = %s, role = %s
+            SET full_name = %s, password_hash = %s, national_id = %s, role = %s,
+                password_changed_at = CURRENT_TIMESTAMP
             WHERE u.user_id = %s
               AND EXISTS (SELECT 1 FROM professionals p
                           WHERE p.user_id = u.user_id AND p.status = 'rejected')
@@ -350,7 +351,8 @@ def complete_password_reset(reset_id, user_id, admin_id, new_password):
         else ("users", "user_id", user_id))
     with get_connection() as conn:
         conn.execute(
-            f"UPDATE {table} SET password_hash = %s WHERE {column} = %s",
+            f"UPDATE {table} SET password_hash = %s,"
+            f" password_changed_at = CURRENT_TIMESTAMP WHERE {column} = %s",
             (hash_password(new_password), account_id),
         )
         conn.execute("UPDATE password_resets SET used = TRUE WHERE reset_id = %s", (reset_id,))

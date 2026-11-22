@@ -13,7 +13,7 @@
   <!-- shared across every MUFSAL page -->
   <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=7" />
   <!-- only what this page needs on top of it -->
-  <link rel="stylesheet" href="/static/NewCss/profile-patient.css?v=8" />
+  <link rel="stylesheet" href="/static/NewCss/profile-patient.css?v=10" />
 </head>
 
 <body>
@@ -31,10 +31,10 @@
         </div>
       </div>
 
-      {% if saved %}
+      {% if saved or pw_saved %}
       <p class="saved show">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        Your details have been saved.
+        {{ 'Your new password is set. Use it the next time you log in.' if pw_saved else 'Your details have been saved.' }}
       </p>
       {% endif %}
 
@@ -101,48 +101,112 @@
       </form>
 
       <!-- ---------- security ----------
-           The password itself is never shown, not even to its owner: only
-           the hash is kept. Changing it goes through the same emailed link
-           as forgetting it, so a stolen session cannot set a new one. -->
-      <section class="card" id="security-card">
-        <div class="card-head">
-          <div>
-            <h2>Security</h2>
-            <p>Your reports are in here, so keep this password to yourself.</p>
+           The old password is never shown, not even to its owner: only its
+           hash was ever kept. The new one is typed in the box beside it, and
+           the rules underneath turn blue one by one as they are met. The
+           server reads the same rules again when Save is pressed. -->
+      <form method="post" action="/profile-patient/password" novalidate>
+        <section class="card{{ ' editing' if pw_failed }}" id="security-card">
+          <div class="card-head">
+            <div>
+              <h2>Security</h2>
+              <p>Your reports are in here, so keep this password to yourself.</p>
+            </div>
+            <button class="btn-edit" type="button" data-edit="security-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              Change password
+            </button>
           </div>
-          <a class="btn-edit" href="/forgot-password">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            Change password
-          </a>
-        </div>
 
-        <div class="grid">
-          <div class="field locked">
-            <label for="password">Password</label>
-            <input type="text" id="password" value="••••••••••••" readonly disabled />
-            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+          <div class="grid">
+            <div class="field locked">
+              <label for="password">Current password</label>
+              <input type="text" id="password" value="••••••••••••" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+
+            <div class="field{{ ' bad' if pw_failed }}">
+              <label for="new-password">New password</label>
+              <input type="password" id="new-password" name="new_password" maxlength="20"
+                     autocomplete="new-password" {% if not pw_failed %}disabled{% endif %} />
+            </div>
           </div>
-        </div>
-      </section>
+
+          {# A password nobody has touched for a long time is worth noticing,
+             so the day it was last set is kept beside it. #}
+          {% if password_changed %}
+          <p class="pw-when">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M10 5.8V10l2.7 1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            Last changed {{ password_changed }}
+          </p>
+          {% endif %}
+
+          {# grey while a rule is unmet, blue once it is met, red when Save
+             was pressed and the server found it still missing #}
+          <ul class="pw-rules" id="pw-rules">
+            <li data-rule="length" class="{{ 'is-bad' if 'length' in pw_failed }}">8 to 20 characters</li>
+            <li data-rule="upper" class="{{ 'is-bad' if 'upper' in pw_failed }}">One uppercase letter</li>
+            <li data-rule="lower" class="{{ 'is-bad' if 'lower' in pw_failed }}">One lowercase letter</li>
+            <li data-rule="digit" class="{{ 'is-bad' if 'digit' in pw_failed }}">One number</li>
+            <li data-rule="symbol" class="{{ 'is-bad' if 'symbol' in pw_failed }}">One special character</li>
+            <li data-rule="different" class="{{ 'is-bad' if 'different' in pw_failed }}">Not your current password</li>
+          </ul>
+
+          <div class="actions">
+            <button class="btn-save" type="submit">Save new password</button>
+            <a class="btn-cancel" href="/profile-patient">Cancel</a>
+          </div>
+        </section>
+      </form>
 
     </div>
   </main>
 
   <script>
-    // Edit mode: unlock the boxes that may be changed. The national ID
-    // carries .locked and is left alone, and so is the password box in the
-    // card below, which is not inside this card at all.
-    // Saving is an ordinary form submit, so the server has the last word.
-    const card = document.getElementById('contact-card');
-
-    function editable() {
+    // ---------- Edit mode ----------
+    // Both cards work the same way: the Edit button unlocks every box in
+    // that card except the ones marked .locked (the national ID, and the
+    // dots standing in for the current password). Saving is an ordinary
+    // form submit, so the server still has the last word.
+    function boxesIn(card) {
       return [...card.querySelectorAll('.field:not(.locked) input, .field:not(.locked) select')];
     }
 
-    document.querySelector('[data-edit]').addEventListener('click', function () {
-      editable().forEach(function (f) { f.disabled = false; });
-      card.classList.add('editing');
-      editable()[0].focus();
+    document.querySelectorAll('[data-edit]').forEach(function (button) {
+      const card = document.getElementById(button.dataset.edit);
+      button.addEventListener('click', function () {
+        const boxes = boxesIn(card);
+        boxes.forEach(function (box) { box.disabled = false; });
+        card.classList.add('editing');
+        if (boxes[0]) { boxes[0].focus(); }
+      });
+    });
+
+    // ---------- The password rules ----------
+    // Each rule is grey until it is met and blue once it is. Red is the
+    // server's word, set when the page was drawn, so typing clears it.
+    // "Not your current password" is the one rule the page cannot answer
+    // by itself - only the server holds the old password's hash - so it
+    // stays grey here and goes red only if the server sends it back.
+    const RULES = {
+      length: function (v) { return v.length >= 8 && v.length <= 20; },
+      upper: function (v) { return /[A-Z]/.test(v); },
+      lower: function (v) { return /[a-z]/.test(v); },
+      digit: function (v) { return /[0-9]/.test(v); },
+      symbol: function (v) { return /[^A-Za-z0-9]/.test(v); }
+    };
+
+    const newPassword = document.getElementById('new-password');
+    const ruleList = document.getElementById('pw-rules');
+
+    newPassword.addEventListener('input', function () {
+      const value = newPassword.value;
+      ruleList.querySelectorAll('li').forEach(function (item) {
+        const rule = RULES[item.dataset.rule];
+        item.classList.remove('is-bad');          // their turn again, not the server's
+        item.classList.toggle('is-met', Boolean(rule) && rule(value));
+      });
+      newPassword.closest('.field').classList.remove('bad');
     });
   </script>
 

@@ -7,6 +7,9 @@ Every function opens its own connection, runs one question and gives
 back plain rows - no page logic, no HTML.
 """
 from db import get_connection
+# the one place in the project that hashes and checks passwords, so the
+# profile page cannot grow a second way of doing it
+from queries_accounts import check_password, hash_password
 
 # A patient may report a delay only after this many days of waiting.
 # It matches DELAY_DAYS in queries_delays.py, which checks it again
@@ -146,7 +149,7 @@ def get_profile(user_id):
     with get_connection() as conn:
         return conn.execute(
             """
-            SELECT u.full_name, u.email, u.national_id,
+            SELECT u.full_name, u.email, u.national_id, u.password_changed_at,
                    p.date_of_birth, p.gender
             FROM users u
             JOIN patients p ON p.user_id = u.user_id
@@ -187,6 +190,33 @@ def update_profile(user_id, full_name, email, date_of_birth, gender):
         conn.execute(
             "UPDATE patients SET date_of_birth = %s, gender = %s WHERE user_id = %s",
             (date_of_birth, gender, user_id),
+        )
+
+
+def password_is_the_current_one(user_id, password):
+    """True when this is the password the account already has.
+
+    The old password is not stored anywhere, only its hash, so the new one
+    is hashed the same way and the two hashes are compared.
+    """
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT password_hash FROM users WHERE user_id = %s", (user_id,)
+        ).fetchone()
+    return bool(row) and check_password(password, row["password_hash"])
+
+
+def set_password(user_id, new_password):
+    """Replace the password with a fresh hash of the new one, and note the
+    day it happened, which is what the profile shows underneath it."""
+    with get_connection() as conn:
+        conn.execute(
+            """
+            UPDATE users
+            SET password_hash = %s, password_changed_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s
+            """,
+            (hash_password(new_password), user_id),
         )
 
 

@@ -48,6 +48,29 @@ def password_error(password):
     return None
 
 
+# The same rules password_error reads, but one entry per rule instead of one
+# code for all of them, so a page can show them as a list and say which line
+# is still missing. The profile page's checklist is built from these keys.
+PASSWORD_RULES = {
+    "length": lambda p: 8 <= len(p) <= 20,
+    "upper":  lambda p: re.search("[A-Z]", p) is not None,
+    "lower":  lambda p: re.search("[a-z]", p) is not None,
+    "digit":  lambda p: re.search("[0-9]", p) is not None,
+    "symbol": lambda p: re.search("[^A-Za-z0-9]", p) is not None,
+}
+
+
+def password_rule_failures(password):
+    """The keys of every rule this password does not meet.
+
+    An empty list means password_error is happy with it too: both read the
+    same five rules, so the list and the message can never disagree.
+    """
+    if not isinstance(password, str):
+        password = ""
+    return [key for key, passes in PASSWORD_RULES.items() if not passes(password)]
+
+
 def national_id_error(national_id):
     return None if NATIONAL_ID_RE.match(clean(national_id)) else "national_id_invalid"
 

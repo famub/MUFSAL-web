@@ -37,7 +37,8 @@ from psycopg import errors as pg_errors
 import routes_support           # only to hand the other roles their own page
 # the same age and sex rules sign-up uses, so the profile cannot save
 # something a new account would have been refused for
-from auth_rules import MIN_AGE, dob_error, gender_error
+from auth_rules import (MIN_AGE, dob_error, gender_error,
+                        password_rule_failures)
 # The checks for a new case were already written and work well, so they are
 # used as they are instead of being written a second time. Only the page
 # itself is new here.
@@ -50,7 +51,9 @@ from queries_patient import (create_support_request, email_belongs_to_someone_el
                              get_all_cases, get_case_choices, get_latest_case,
                              get_delay_complaints, get_open_case,
                              get_patient_header, get_profile,
-                             get_written_support_requests, update_profile)
+                             get_written_support_requests,
+                             password_is_the_current_one, set_password,
+                             update_profile)
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
@@ -306,9 +309,12 @@ def oldest_allowed_birthday(today=None):
         return today.replace(year=today.year - MIN_AGE, day=28)
 
 
-def profile_page(request, user_id, form=None, errors=None, saved=False, status_code=200):
-    """Draw the profile. Used by both the plain page and a failed save,
-    so the patient always sees their own words back in the boxes."""
+def profile_page(request, user_id, form=None, errors=None, saved=False,
+                 pw_failed=None, pw_saved=False, status_code=200):
+    """Draw the profile. Used by the plain page and by a save the server
+    turned down, so the patient always sees their own words back in the
+    boxes. pw_failed carries the keys of the password rules that were not
+    met, which the checklist in the security card paints red."""
     row = get_profile(user_id)
     if row is None:
         return RedirectResponse("/login", status_code=303)
@@ -335,17 +341,21 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
             # the last birthday that still makes the patient 18, so the date
             # box cannot even offer a day the database would turn down
             "dob_max": oldest_allowed_birthday().isoformat(),
+            "pw_failed": pw_failed or [],
+            "pw_saved": pw_saved,
+            # the day the password was last set, for the small note beside it
+            "password_changed": long_date(row["password_changed_at"]),
         }),
         status_code=status_code,
     )
 
 
 @router.get("/profile-patient", include_in_schema=False)
-def profile(request: Request, saved: int = 0):
+def profile(request: Request, saved: int = 0, changed: int = 0):
     user_id, redirect = patient_or_redirect(request)
     if redirect:
         return redirect
-    return profile_page(request, user_id, saved=bool(saved))
+    return profile_page(request, user_id, saved=bool(saved), pw_saved=bool(changed))
 
 
 @router.post("/profile-patient", include_in_schema=False)
@@ -395,6 +405,37 @@ async def save_profile(request: Request):
 
     # redirect after saving, so refreshing the page does not save it twice
     return RedirectResponse("/profile-patient?saved=1", status_code=303)
+
+
+@router.post("/profile-patient/password", include_in_schema=False)
+async def change_password(request: Request):
+    """Set a new password from the profile page.
+
+    The page paints the list of rules as they are met, but that list is a
+    courtesy: the rules are read again here, on the server, where they
+    cannot be switched off. "Not the old one" can only be answered here
+    anyway, because the old password itself was never stored.
+    """
+    user_id, redirect = patient_or_redirect(request)
+    if redirect:
+        return redirect
+
+    data = await request.form()
+    new_password = data.get("new_password") or ""
+
+    failed = password_rule_failures(new_password)
+    # Only worth asking once the password is a legal one at all, and the
+    # answer costs a hash, so it is left until last.
+    if not failed and password_is_the_current_one(user_id, new_password):
+        failed = ["different"]
+
+    if failed:
+        return profile_page(request, user_id, pw_failed=failed, status_code=400)
+
+    set_password(user_id, new_password)
+
+    # redirect after saving, so refreshing does not post the password again
+    return RedirectResponse("/profile-patient?changed=1", status_code=303)
 
 
 # ------------------------------------------------------------ support requests

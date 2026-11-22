@@ -24,6 +24,10 @@ CREATE TABLE users (
     full_name     VARCHAR(100) NOT NULL,
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    -- The day the password was last set, so a profile page can say how long
+    -- ago that was. A new account's password is set the moment the row is
+    -- written, which is exactly what the default records.
+    password_changed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     national_id   CHAR(10)     NOT NULL UNIQUE,
     CONSTRAINT users_role_valid CHECK (role IN ('patient','doctor','radiologist')),
     CONSTRAINT users_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
@@ -100,6 +104,8 @@ CREATE TABLE admins (
     full_name     VARCHAR(100) NOT NULL,
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    -- as in users above: the day this password was last set
+    password_changed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT admins_email_format CHECK (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$')
 );
 
