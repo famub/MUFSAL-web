@@ -25,6 +25,7 @@ Still on the old pages (we move them one by one):
 """
 import re
 import uuid
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -34,6 +35,9 @@ from fastapi.templating import Jinja2Templates
 from psycopg import errors as pg_errors
 
 import routes_support           # only to hand the other roles their own page
+# the same age and sex rules sign-up uses, so the profile cannot save
+# something a new account would have been refused for
+from auth_rules import MIN_AGE, dob_error, gender_error
 # The checks for a new case were already written and work well, so they are
 # used as they are instead of being written a second time. Only the page
 # itself is new here.
@@ -71,10 +75,11 @@ BODY_MAX = 2000          # a safety net in characters, so nothing huge is posted
 # How a support request's status is shown. 'pending' and 'resolved' come from
 # the support requests table, 'pending' and 'handled' from delay complaints.
 COMPLAINT_TAGS = {
-    "pending":  ("tag-wait", "Waiting for the team"),
-    "resolved": ("tag-done", "Answered"),
+    "pending":  ("tag-wait", "Pending"),
+    "resolved": ("tag-done", "Handled"),
     "handled":  ("tag-done", "Handled"),
 }
+DEFAULT_COMPLAINT_TAG = ("tag-wait", "Pending")
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -287,6 +292,20 @@ def mask_national_id(value):
     return value[:2] + "•" * (len(value) - 4) + value[-2:]
 
 
+def oldest_allowed_birthday(today=None):
+    """The newest date of birth that still makes someone 18 today.
+
+    Written out rather than taken off a library, and 29 February steps
+    back to the 28th, which is the day the law counts the birthday on in
+    a year that has no 29th.
+    """
+    today = today or date.today()
+    try:
+        return today.replace(year=today.year - MIN_AGE)
+    except ValueError:
+        return today.replace(year=today.year - MIN_AGE, day=28)
+
+
 def profile_page(request, user_id, form=None, errors=None, saved=False, status_code=200):
     """Draw the profile. Used by both the plain page and a failed save,
     so the patient always sees their own words back in the boxes."""
@@ -295,7 +314,13 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
         return RedirectResponse("/login", status_code=303)
 
     if form is None:
-        form = {"full_name": row["full_name"], "email": row["email"]}
+        form = {
+            "full_name": row["full_name"],
+            "email": row["email"],
+            # a date box reads and writes YYYY-MM-DD, which isoformat gives
+            "date_of_birth": row["date_of_birth"].isoformat() if row["date_of_birth"] else "",
+            "gender": (row["gender"] or "").lower(),
+        }
 
     header = get_patient_header(user_id)
 
@@ -307,8 +332,9 @@ def profile_page(request, user_id, form=None, errors=None, saved=False, status_c
             "errors": errors or {},
             "saved": saved,
             "national_id": mask_national_id(row["national_id"]),
-            "date_of_birth": long_date(row["date_of_birth"]),
-            "gender": (row["gender"] or "").capitalize(),
+            # the last birthday that still makes the patient 18, so the date
+            # box cannot even offer a day the database would turn down
+            "dob_max": oldest_allowed_birthday().isoformat(),
         }),
         status_code=status_code,
     )
@@ -324,10 +350,13 @@ def profile(request: Request, saved: int = 0):
 
 @router.post("/profile-patient", include_in_schema=False)
 async def save_profile(request: Request):
-    """Save the name and the email address.
+    """Save the name, the email address, the date of birth and the sex.
 
     Everything is checked again here: the page's own checks can be
     switched off in the browser, so they are a convenience, not a rule.
+    The date of birth and the sex are checked with the same two rules
+    that sign-up uses, so a profile can never hold something a new
+    account would have been refused for.
     """
     user_id, redirect = patient_or_redirect(request)
     if redirect:
@@ -337,6 +366,8 @@ async def save_profile(request: Request):
     form = {
         "full_name": (data.get("full_name") or "").strip(),
         "email": (data.get("email") or "").strip(),
+        "date_of_birth": (data.get("date_of_birth") or "").strip(),
+        "gender": (data.get("gender") or "").strip().lower(),
     }
 
     errors = {}
@@ -347,10 +378,20 @@ async def save_profile(request: Request):
     elif email_belongs_to_someone_else(form["email"], user_id):
         errors["email"] = "Another account already uses this email address."
 
+    dob_code = dob_error(form["date_of_birth"])
+    if dob_code == "min_age":
+        errors["date_of_birth"] = "MUFSAL is for adults, so this has to be 18 years ago or earlier."
+    elif dob_code:
+        errors["date_of_birth"] = "Please choose your date of birth."
+
+    if gender_error(form["gender"]):
+        errors["gender"] = "Please choose female or male."
+
     if errors:
         return profile_page(request, user_id, form=form, errors=errors, status_code=400)
 
-    update_profile(user_id, form["full_name"], form["email"])
+    update_profile(user_id, form["full_name"], form["email"],
+                   form["date_of_birth"], form["gender"])
 
     # redirect after saving, so refreshing the page does not save it twice
     return RedirectResponse("/profile-patient?saved=1", status_code=303)
@@ -364,7 +405,7 @@ def support_rows(user_id):
     rows = []
 
     for c in get_written_support_requests(user_id):
-        tag, label = COMPLAINT_TAGS.get(c["status"], ("tag-wait", "Waiting for the team"))
+        tag, label = COMPLAINT_TAGS.get(c["status"], DEFAULT_COMPLAINT_TAG)
         rows.append({
             # the title is worked out for the page, not stored: the request
             # itself no longer carries one, so the case it is about names it.
@@ -382,7 +423,7 @@ def support_rows(user_id):
         })
 
     for d in get_delay_complaints(user_id):
-        tag, label = COMPLAINT_TAGS.get(d["status"], ("tag-wait", "Waiting for the team"))
+        tag, label = COMPLAINT_TAGS.get(d["status"], DEFAULT_COMPLAINT_TAG)
         rows.append({
             "title": "Report is late",
             "body": "",

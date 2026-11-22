@@ -170,16 +170,23 @@ def email_belongs_to_someone_else(email, user_id):
     return row is not None
 
 
-def update_profile(user_id, full_name, email):
-    """Save the three details a patient is allowed to change.
+def update_profile(user_id, full_name, email, date_of_birth, gender):
+    """Save the details a patient is allowed to change.
 
-    The national ID, the date of birth and the sex are left out on
-    purpose: the doctor reads the X-ray against them.
+    The national ID is left out on purpose: it is what the account was
+    opened against, so only an administrator can touch it. The name and
+    the email live on the account row, the date of birth and the sex on
+    the patient row, so both rows are written in the same transaction -
+    the connection commits once, at the end of the block.
     """
     with get_connection() as conn:
         conn.execute(
             "UPDATE users SET full_name = %s, email = %s WHERE user_id = %s",
             (full_name, email, user_id),
+        )
+        conn.execute(
+            "UPDATE patients SET date_of_birth = %s, gender = %s WHERE user_id = %s",
+            (date_of_birth, gender, user_id),
         )
 
 

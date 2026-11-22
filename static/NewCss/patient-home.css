@@ -54,11 +54,20 @@
 .new-case .cta:hover { transform: translateY(-2px); }
 .new-case .cta svg { width: 18px; height: 18px; transition: transform .18s ease; }
 .new-case .cta:hover svg { transform: translateX(3px); }
-/* when a case is already open, the button is out of reach */
-.new-case.is-locked { background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
+/* When a case is already open the button is out of reach, and the card says
+   so by its colour: the same blue as the open card, read the other way round.
+   Open, it runs from navy into brand blue; locked, it starts pale and only
+   deepens towards the far corner, so the card reads as resting, not as new. */
+.new-case.is-locked {
+    background: linear-gradient(135deg, #f4f9ff, var(--brand-soft) 50%, #bed7fa);
+    color: var(--ink); box-shadow: var(--shadow);
+  }
 .new-case.is-locked::after { display: none; }
-.new-case.is-locked p { color: var(--grey); }
-.new-case.is-locked .cta { background: var(--line); color: var(--grey); box-shadow: none; cursor: not-allowed; }
+.new-case.is-locked p { color: var(--body); }
+.new-case.is-locked .cta {
+    background: rgba(255, 255, 255, .7); color: var(--brand-dark);
+    box-shadow: none; cursor: not-allowed;
+  }
 .new-case.is-locked .cta:hover { transform: none; }
 /* ---------- section heads ---------- */
 .sec-head { display: flex; align-items: baseline; gap: 12px; margin: 44px 0 16px; }
@@ -126,10 +135,16 @@
 .wait span { display: block; color: var(--grey); font-size: .82rem; }
 .btn-delay {
     margin-inline-start: auto; background: var(--white); color: var(--grey);
-    border: 1px solid var(--line); border-radius: 999px; padding: 11px 20px; font-size: .9rem;
+    border: 1px solid var(--line); border-radius: 999px; padding: 9px 20px; font-size: .9rem;
     display: inline-flex; align-items: center; gap: 9px; cursor: not-allowed;
+    text-align: start;
   }
-.btn-delay svg { width: 16px; height: 16px; }
+.btn-delay svg { width: 16px; height: 16px; flex: none; }
+/* While the button is still out of reach it says two things: what it does,
+   and the day it opens. The day is the quieter of the two, so it sits on
+   its own line underneath in a smaller size. */
+.btn-delay .delay-label { display: flex; flex-direction: column; line-height: 1.25; }
+.btn-delay .delay-label small { font-size: .76rem; color: var(--grey); opacity: .85; }
 .btn-delay.is-on {
     color: var(--red); border-color: rgba(228, 76, 76, .4); background: var(--red-pale);
     cursor: pointer;

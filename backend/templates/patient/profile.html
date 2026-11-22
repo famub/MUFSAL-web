@@ -13,7 +13,7 @@
   <!-- shared across every MUFSAL page -->
   <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=7" />
   <!-- only what this page needs on top of it -->
-  <link rel="stylesheet" href="/static/NewCss/profile-patient.css?v=7" />
+  <link rel="stylesheet" href="/static/NewCss/profile-patient.css?v=8" />
 </head>
 
 <body>
@@ -27,7 +27,7 @@
       <div class="topbar">
         <div>
           <h1>My profile</h1>
-          <p>Your account details. Your medical answers are asked with each new X-ray.</p>
+          <p>Your account details.</p>
         </div>
       </div>
 
@@ -39,15 +39,15 @@
       {% endif %}
 
       <!-- ---------- contact details ----------
-           The three boxes at the top can be changed. The three below them
-           were checked when the account was made and the doctor reads the
-           X-ray against them, so they are locked. -->
+           Everything here can be corrected by the patient. Only the national
+           ID is locked: it is what the account was opened against, so only
+           an administrator can change it. -->
       <form method="post" action="/profile-patient" novalidate>
         <section class="card{{ ' editing' if errors }}" id="contact-card">
           <div class="card-head">
             <div>
               <h2>Personal information</h2>
-              <p>Your name and contact details. The rest was checked when you signed up.</p>
+              <p>Your details. Keep them right, because the doctor reads your X-ray against them.</p>
             </div>
             <button class="btn-edit" type="button" data-edit="contact-card">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 112.8 2.8L11.8 15H9v-2.8l8.6-8.6z" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -76,16 +76,20 @@
               <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
             </div>
 
-            <div class="field locked">
+            <div class="field{{ ' bad' if errors.date_of_birth }}">
               <label for="dob">Date of birth</label>
-              <input type="text" id="dob" value="{{ date_of_birth }}" readonly disabled />
-              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+              <input type="date" id="dob" name="date_of_birth" value="{{ form.date_of_birth }}"
+                     max="{{ dob_max }}" {% if not errors %}disabled{% endif %} />
+              {% if errors.date_of_birth %}<p class="err">{{ errors.date_of_birth }}</p>{% endif %}
             </div>
 
-            <div class="field locked">
+            <div class="field{{ ' bad' if errors.gender }}">
               <label for="sex">Sex</label>
-              <input type="text" id="sex" value="{{ gender }}" readonly disabled />
-              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+              <select id="sex" name="gender" {% if not errors %}disabled{% endif %}>
+                <option value="female" {{ 'selected' if form.gender == 'female' }}>Female</option>
+                <option value="male" {{ 'selected' if form.gender == 'male' }}>Male</option>
+              </select>
+              {% if errors.gender %}<p class="err">{{ errors.gender }}</p>{% endif %}
             </div>
           </div>
 
@@ -96,17 +100,43 @@
         </section>
       </form>
 
+      <!-- ---------- security ----------
+           The password itself is never shown, not even to its owner: only
+           the hash is kept. Changing it goes through the same emailed link
+           as forgetting it, so a stolen session cannot set a new one. -->
+      <section class="card" id="security-card">
+        <div class="card-head">
+          <div>
+            <h2>Security</h2>
+            <p>Your reports are in here, so keep this password to yourself.</p>
+          </div>
+          <a class="btn-edit" href="/forgot-password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            Change password
+          </a>
+        </div>
+
+        <div class="grid">
+          <div class="field locked">
+            <label for="password">Password</label>
+            <input type="text" id="password" value="••••••••••••" readonly disabled />
+            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+          </div>
+        </div>
+      </section>
+
     </div>
   </main>
 
   <script>
-    // Edit mode: unlock the three boxes that may be changed, then lock them
-    // again on cancel. The locked boxes carry .locked and are left alone.
+    // Edit mode: unlock the boxes that may be changed. The national ID
+    // carries .locked and is left alone, and so is the password box in the
+    // card below, which is not inside this card at all.
     // Saving is an ordinary form submit, so the server has the last word.
     const card = document.getElementById('contact-card');
 
     function editable() {
-      return [...card.querySelectorAll('.field:not(.locked) input')];
+      return [...card.querySelectorAll('.field:not(.locked) input, .field:not(.locked) select')];
     }
 
     document.querySelector('[data-edit]').addEventListener('click', function () {

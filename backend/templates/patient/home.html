@@ -13,7 +13,7 @@
   <!-- shared across every MUFSAL page -->
   <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=7" />
   <!-- only what this page needs on top of it -->
-  <link rel="stylesheet" href="/static/NewCss/patient-home.css?v=7" />
+  <link rel="stylesheet" href="/static/NewCss/patient-home.css?v=8" />
 </head>
 
 <body>
@@ -28,7 +28,6 @@
       <div class="topbar">
         <div class="hello">
           <h1>Welcome back, {{ first_name }}</h1>
-          <p>Here is where your knee case stands today.</p>
         </div>
       </div>
 
@@ -53,7 +52,8 @@
         <div class="text">
           <h2>Start a new case</h2>
           {% if waiting_on_a_case %}
-          <p>You already have a case with a doctor. You can upload another X-ray once that report is ready.</p>
+          <p>You already have a case with a doctor. You can upload</p>
+          <p>another X-ray once that report is ready.</p>
           {% else %}
           <p>Upload one knee X-ray and answer a few questions. A doctor reads it before you get anything back.</p>
           {% endif %}
@@ -80,7 +80,6 @@
       <!-- ---------- the newest case ---------- -->
       <div class="sec-head">
         <h2>{{ 'Your latest report' if latest and latest.done else 'In progress' }}</h2>
-        <a href="/patient-cases">See all my cases &rarr;</a>
       </div>
 
       {% if latest %}
@@ -182,11 +181,16 @@
               <path d="M10 2.5 18.5 17h-17L10 2.5Z" stroke-linejoin="round" />
               <path d="M10 8v3.5M10 14.2v.1" stroke-linecap="round" />
             </svg>
-            {% if latest.delay_open %}
-            Delay reported &mdash; with the team
-            {% else %}
-            Report a delay &mdash; available {{ latest.delay_date }}
-            {% endif %}
+            {# the main words on top, when it becomes possible underneath them #}
+            <span class="delay-label">
+              {% if latest.delay_open %}
+              Delay reported
+              <small>with the team</small>
+              {% else %}
+              Report a delay
+              <small>available {{ latest.delay_date }}</small>
+              {% endif %}
+            </span>
           </button>
           {% endif %}
           {% endif %}
