@@ -319,3 +319,16 @@ CREATE TABLE delay_complaints (
 -- Only one open delay complaint per case at a time
 CREATE UNIQUE INDEX delay_one_open_per_case
     ON delay_complaints (case_id) WHERE status = 'pending';
+
+-- A safety copy of every uploaded image, kept for hosts that clear their disk
+-- between restarts (the free Render plan does). The image itself still lives as
+-- a file under backend/, and cases.xray_image_path still holds its path; this
+-- table only lets filestore.py put a missing file back. It is not an entity of
+-- the system, so it does not appear in the ER diagram. filestore.py also
+-- creates it with CREATE TABLE IF NOT EXISTS, so a database built from an older
+-- copy of this file keeps working.
+CREATE TABLE IF NOT EXISTS stored_files (
+    path       TEXT        PRIMARY KEY,
+    data       BYTEA       NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
