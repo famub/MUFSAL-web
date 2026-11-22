@@ -26,6 +26,23 @@ PROFILE_TEXT = {
         "save": "Save Changes",
         "cancel": "Cancel",
 
+        "security_title": "Security",
+        "security_sub": "Your patients' reports are in here, so keep this password to yourself.",
+        "change_pw": "Change password",
+        "current_pw": "Current password",
+        "new_pw": "New password",
+        "save_pw": "Save new password",
+        "last_changed": "Last changed",
+        "pw_saved_msg": "Your new password is set. Use it the next time you log in.",
+        "pw_rules": {
+            "length": "8 to 20 characters",
+            "upper": "One uppercase letter",
+            "lower": "One lowercase letter",
+            "digit": "One number",
+            "symbol": "One special character",
+            "different": "Not your current password",
+        },
+
         "saved_msg": "Your details have been saved.",
         "err": {
             "email_taken": "That email address is already used by another account.",
@@ -57,6 +74,23 @@ PROFILE_TEXT = {
         "protected": "معرّف محمي",
         "save": "حفظ التغييرات",
         "cancel": "إلغاء",
+
+        "security_title": "الأمان",
+        "security_sub": "تقارير مرضاك هنا، فلا تشارك كلمة المرور مع أحد.",
+        "change_pw": "تغيير كلمة المرور",
+        "current_pw": "كلمة المرور الحالية",
+        "new_pw": "كلمة المرور الجديدة",
+        "save_pw": "حفظ كلمة المرور",
+        "last_changed": "آخر تغيير",
+        "pw_saved_msg": "تم تعيين كلمة المرور الجديدة. استخدمها في تسجيل الدخول القادم.",
+        "pw_rules": {
+            "length": "من 8 إلى 20 حرفًا",
+            "upper": "حرف إنجليزي كبير",
+            "lower": "حرف إنجليزي صغير",
+            "digit": "رقم واحد",
+            "symbol": "رمز خاص واحد",
+            "different": "غير كلمة المرور الحالية",
+        },
 
         "saved_msg": "تم حفظ بياناتك.",
         "err": {
