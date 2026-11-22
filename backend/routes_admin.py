@@ -124,7 +124,66 @@ async def delete_account(request: Request):
     if admin_id(request) is None:
         return FORBIDDEN
     user_id = _int(request, "user_id")
-    if not user_id or not await run_in_threadpool(db.deactivate_professional_account, user_id):
+    moved = await run_in_threadpool(db.deactivate_professional_account, user_id) if user_id else None
+    if moved is None:
+        return _not_found()
+    return {"ok": True, "moved": moved}
+
+
+# ---------------------------------------------------------------- licence requests (registration + renewal)
+
+@router.get("/api/admin/license-requests")
+async def license_requests(request: Request):
+    return await _list(request, db.list_license_requests, "requests")
+
+
+async def _decide_license(request, decision):
+    admin = admin_id(request)
+    if admin is None:
+        return FORBIDDEN
+    user_id = _int(request, "user_id")
+    reason = (await read_json(request)).get("reason")
+    if decision == "rejected" and not (reason or "").strip():
+        return JSONResponse({"ok": False, "error": "reason_required"}, status_code=400)
+    if not user_id or not await run_in_threadpool(db.decide_license_request, user_id, admin, decision, reason):
+        return _not_found()
+    return {"ok": True}
+
+
+@router.post("/api/admin/license-requests/{user_id}/approve")
+async def approve_license(request: Request):
+    return await _decide_license(request, "approved")
+
+
+@router.post("/api/admin/license-requests/{user_id}/reject")
+async def reject_license(request: Request):
+    return await _decide_license(request, "rejected")
+
+
+# ---------------------------------------------------------------- account deletion requests
+
+@router.get("/api/admin/deletion-requests")
+async def deletion_requests(request: Request):
+    return await _list(request, db.list_deletion_requests, "requests")
+
+
+@router.post("/api/admin/deletion-requests/{user_id}/approve")
+async def approve_deletion(request: Request):
+    if admin_id(request) is None:
+        return FORBIDDEN
+    user_id = _int(request, "user_id")
+    moved = await run_in_threadpool(db.deactivate_professional_account, user_id, True) if user_id else None
+    if moved is None:
+        return _not_found()
+    return {"ok": True, "moved": moved}
+
+
+@router.post("/api/admin/deletion-requests/{user_id}/decline")
+async def decline_deletion(request: Request):
+    if admin_id(request) is None:
+        return FORBIDDEN
+    user_id = _int(request, "user_id")
+    if not user_id or not await run_in_threadpool(db.decline_deletion_request, user_id):
         return _not_found()
     return {"ok": True}
 
@@ -133,7 +192,7 @@ async def delete_account(request: Request):
 
 @router.get("/api/admin/support")
 async def support_requests(request: Request):
-    return await _list(request, db.list_support_requests, "support_requests")
+    return await _list(request, db.list_support_requests, "support")
 
 
 @router.post("/api/admin/support/{request_id}/respond")
