@@ -89,6 +89,50 @@
         </section>
       </form>
 
+      <!-- ---------- card 3: security - same look and rules as the patient's page ---------- -->
+      <form method="post" action="/profile-doctor/password" novalidate>
+        <section class="card{{ ' editing' if pw_failed }}" id="security-card">
+          <div class="card-head">
+            <div>
+              <h2>{{ t.security_title }}</h2>
+              <p>{{ t.security_sub }}</p>
+            </div>
+            <button type="button" class="btn btn-soft btn-sm" id="pw-btn"{% if pw_failed %} hidden{% endif %}>{{ t.change_pw }}</button>
+          </div>
+
+          <div class="grid-2">
+            <div class="field locked">
+              <label for="password">{{ t.current_pw }}</label>
+              <input type="text" id="password" value="••••••••••••" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+            <div class="field{{ ' bad' if pw_failed }}">
+              <label for="new-password">{{ t.new_pw }}</label>
+              <input type="password" id="new-password" name="new_password" maxlength="20"
+                     autocomplete="new-password" {% if not pw_failed %}disabled{% endif %} />
+            </div>
+          </div>
+
+          {% if password_changed %}
+          <p class="pw-when">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M10 5.8V10l2.7 1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            {{ t.last_changed }}: {{ password_changed }}
+          </p>
+          {% endif %}
+
+          <ul class="pw-rules" id="pw-rules">
+            {% for key, label in t.pw_rules.items() %}
+            <li data-rule="{{ key }}" class="{{ 'is-bad' if key in pw_failed }}">{{ label }}</li>
+            {% endfor %}
+          </ul>
+
+          <div class="decision-foot" id="pw-actions"{% if not pw_failed %} hidden{% endif %}>
+            <button type="submit" class="btn btn-primary">{{ t.save_pw }}</button>
+            <a class="btn btn-ghost" href="/profile-doctor">{{ t.cancel }}</a>
+          </div>
+        </section>
+      </form>
+
       {% include "_delete-account.html" %}
       {% include "_page-foot.html" %}
     </div>
@@ -102,6 +146,37 @@
       document.getElementById('actions').hidden = false;
       this.hidden = true;
       box.focus();
+    });
+
+    // ---------- Change password ----------
+    // Grey = not yet, blue = met, red = the server sent it back.
+    // "Not your current password" can only be checked by the server.
+    const RULES = {
+      length: function (v) { return v.length >= 8 && v.length <= 20; },
+      upper: function (v) { return /[A-Z]/.test(v); },
+      lower: function (v) { return /[a-z]/.test(v); },
+      digit: function (v) { return /[0-9]/.test(v); },
+      symbol: function (v) { return /[^A-Za-z0-9]/.test(v); }
+    };
+    const pwCard = document.getElementById('security-card');
+    const newPassword = document.getElementById('new-password');
+
+    document.getElementById('pw-btn').addEventListener('click', function () {
+      newPassword.disabled = false;
+      pwCard.classList.add('editing');
+      document.getElementById('pw-actions').hidden = false;
+      this.hidden = true;
+      newPassword.focus();
+    });
+
+    newPassword.addEventListener('input', function () {
+      const value = newPassword.value;
+      document.querySelectorAll('#pw-rules li').forEach(function (item) {
+        const rule = RULES[item.dataset.rule];
+        item.classList.remove('is-bad');
+        item.classList.toggle('is-met', Boolean(rule) && rule(value));
+      });
+      newPassword.closest('.field').classList.remove('bad');
     });
   </script>
 
