@@ -178,3 +178,5 @@ bdi { unicode-bidi: isolate; }
 .pw-rules li.is-bad { color: var(--red); }
 #security-card .decision-foot { margin-top: 18px; }
 @media (max-width: 620px) { .pw-rules { grid-template-columns: 1fr; } }
+
+form + form, form + .card, form + section { margin-top: 20px; }   /* space between the profile cards */
