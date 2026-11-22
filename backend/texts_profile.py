@@ -9,8 +9,7 @@ PROFILE_TEXT = {
         "page_subtitle": "View your professional credentials and manage your account details.",
 
         "prof_title": "Professional Information",
-        "prof_subtitle": "Verified by the administrator during registration. "
-                         "Contact the administrator to request a change.",
+        "prof_subtitle": "Verified by the administrator during registration.",
         "verified": "Verified by the administrator",
         "role_label": "Professional Role",
         "role_doctor": "Orthopedic Doctor",
@@ -59,7 +58,7 @@ PROFILE_TEXT = {
         "page_subtitle": "اطّلع على بياناتك المهنية وعدّل بيانات حسابك.",
 
         "prof_title": "البيانات المهنية",
-        "prof_subtitle": "تحقّق منها المسؤول عند التسجيل. لتعديلها تواصل مع المسؤول.",
+        "prof_subtitle": "تحقّق منها المسؤول عند التسجيل.",
         "verified": "تحقّق منها المسؤول",
         "role_label": "الدور المهني",
         "role_doctor": "طبيب عظام",
