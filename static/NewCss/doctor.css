@@ -180,3 +180,12 @@ bdi { unicode-bidi: isolate; }
 @media (max-width: 620px) { .pw-rules { grid-template-columns: 1fr; } }
 
 form + form, form + .card, form + section { margin-top: 20px; }   /* space between the profile cards */
+/* ---------- eye button inside the new password box ---------- */
+.pw-field { position: relative; }
+.pw-field input { padding-inline-end: 50px; }
+.pw-toggle { position: absolute; inset-inline-end: 12px; bottom: 7px; display: inline-flex; padding: 6px; background: none; border: none; border-radius: 8px; color: var(--grey); cursor: pointer; }
+.pw-toggle:hover, .pw-toggle[aria-pressed="true"] { color: var(--brand); }
+.pw-toggle svg { width: 20px; height: 20px; }
+.pw-toggle .eye-on, .pw-toggle[aria-pressed="true"] .eye-off { display: none; }
+.pw-toggle[aria-pressed="true"] .eye-on { display: block; }
+.card:not(.editing) .pw-toggle { display: none; }
