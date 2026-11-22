@@ -16,7 +16,7 @@ from fastapi.templating import Jinja2Templates
 from psycopg import errors
 
 from db import get_connection
-from queries_cases import approve_case, get_case
+from queries_cases import get_patient_case_numbers, approve_case, get_case
 from texts_report import REPORT_TEXT
 from texts_review import TEXT
 
@@ -329,6 +329,13 @@ def view_report(request: Request, case_id: int, confirmed: int = 0):
             "home": HOME.get(user["role"], "/"),
             "back": back_link(request, user["role"], lang),
             "case": case,
+            # The patient is shown her own count of her cases, not the real
+            # case_id: hers starts at 1, while case_id counts every case in
+            # MUFSAL and would read to her as if she had sent that many. The
+            # doctor and the radiologist need the real one, since it is what
+            # the whole system files the case under.
+            "case_number": (get_patient_case_numbers(case["patient_id"]).get(case_id, case_id)
+                            if user["role"] == "patient" else case_id),
             "approved": approved,
             "report": report,
             "ai": ai,

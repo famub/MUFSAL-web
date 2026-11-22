@@ -229,6 +229,37 @@ def get_patient_cases(patient_id):
         ).fetchall()
 
 
+def get_patient_case_numbers(patient_id):
+    """What each of this patient's cases is called on the patient's own pages.
+
+    case_id counts every case in MUFSAL, so a patient's very first X-ray can
+    land on #100 and read as though ninety-nine of hers came before it. On
+    her pages a case is numbered among her own instead: her oldest is 1 and
+    each new one takes the next number up, whether she uploaded it herself
+    or a radiologist linked it to her.
+
+    Nothing is stored for this. The order is worked out from the dates every
+    time it is asked for, so the numbers can never drift out of step with the
+    cases. The doctor, the radiologist and the administrator go on seeing the
+    real case_id, which is what the whole system is filed under.
+
+    Returns {real case_id: the number the patient sees}.
+    """
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT case_id
+            FROM cases
+            WHERE patient_id = %s
+            -- case_id breaks the tie, so two X-rays sent in the same second
+            -- keep the same order every time the page is drawn
+            ORDER BY submitted_at, case_id
+            """,
+            (patient_id,),
+        ).fetchall()
+    return {row["case_id"]: place for place, row in enumerate(rows, start=1)}
+
+
 def find_patient_by_national_id(national_id):
     """Used by the radiologist to link an X-ray to a registered patient."""
     with get_connection() as conn:

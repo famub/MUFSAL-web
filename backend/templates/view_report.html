@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MUFSAL — {{ t.case_no }} {{ case.case_id }}</title>
+  <title>MUFSAL — {{ t.case_no }} {{ case_number }}</title>
   {% include "_new-head.html" %}
 </head>
 
@@ -24,7 +24,7 @@
       <div class="topbar">
         <div>
           <div class="title-row">
-            <h1>{{ t.case_no }} {{ case.case_id }}</h1>
+            <h1>{{ t.case_no }} {{ case_number }}</h1>
             <div class="tags">
               <span class="tag {{ 'tag-done' if approved else 'tag-info' }}">{{ t.approved if approved else t.under_review }}</span>
             </div>
@@ -70,7 +70,7 @@
             <div class="card-head">
               <div>
                 <h2>{{ t.r_title }}</h2>
-                <p><bdi>#{{ case.case_id }}</bdi> &middot; {{ approved_on }}</p>
+                <p><bdi>#{{ case_number }}</bdi> &middot; {{ approved_on }}</p>
               </div>
             </div>
 

@@ -65,9 +65,9 @@
       <div class="list" id="list">
 
         {% for c in cases %}
-        <article class="row" data-status="{{ 'done' if c.done else 'review' }}" data-case="{{ c.case_id }}">
+        <article class="row" data-status="{{ 'done' if c.done else 'review' }}" data-case="{{ c.number }}">
           <div class="who">
-            <strong>Case #{{ c.case_id }}</strong>
+            <strong>Case #{{ c.number }}</strong>
             <p>{{ c.knee }} &middot; {{ c.date }}</p>
           </div>
 

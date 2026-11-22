@@ -46,7 +46,7 @@ from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
                              check_file)
 from auth_service import HOME
 from ai_analysis import analyze_case_later
-from queries_cases import create_case
+from queries_cases import create_case, get_patient_case_numbers
 from queries_patient import (create_support_request, email_belongs_to_someone_else,
                              get_all_cases, get_case_choices, get_latest_case,
                              get_delay_complaints, get_open_case,
@@ -149,12 +149,15 @@ def waiting_line(days):
     return f"Waiting {days} days so far"
 
 
-def build_latest_case(row):
+def build_latest_case(row, numbers):
     """Turn the newest case into the handful of values the card prints.
 
     Two shapes come out of here: a case still being read, with how long it
     has waited and the delay button, and a case whose report is signed,
     which carries the way in to that report instead.
+
+    numbers is the patient's own numbering (see get_patient_case_numbers):
+    "number" is what she is shown, "case_id" is what the addresses use.
     """
     if row is None:
         return None
@@ -163,6 +166,7 @@ def build_latest_case(row):
 
     return {
         "case_id": row["case_id"],
+        "number": numbers.get(row["case_id"], row["case_id"]),
         "knee": knee_label(row["knee"]),
         "by_radiologist": row["source"] == "radiologist",     # a radiologist uploaded it for the patient
         "uploader": row["uploaded_by_name"],
@@ -214,7 +218,8 @@ def home(request: Request,
         return redirect
 
     header = get_patient_header(user_id)
-    latest = build_latest_case(get_latest_case(user_id))
+    numbers = get_patient_case_numbers(user_id)
+    latest = build_latest_case(get_latest_case(user_id), numbers)
     # a case still being read is what locks "Start a new case"
     waiting_on_a_case = bool(latest and not latest["done"])
 
@@ -255,11 +260,14 @@ def my_cases(request: Request,
     if redirect:
         return redirect
 
+    numbers = get_patient_case_numbers(user_id)
+
     rows = []
     for case in get_all_cases(user_id):
         done = case["status"] == "approved" and case["final_grade"] is not None
         rows.append({
             "case_id": case["case_id"],
+            "number": numbers.get(case["case_id"], case["case_id"]),
             "knee": knee_label(case["knee"]),
             "by_radiologist": case["source"] == "radiologist",
             "uploader": case["uploaded_by_name"],
@@ -442,7 +450,15 @@ async def change_password(request: Request):
 
 def support_rows(user_id):
     """The written support requests and the one-click delay reports, in one list,
-    newest first."""
+    newest first. A case is named by the patient's own number for it, the same
+    one her home page and her list of cases show."""
+    numbers = get_patient_case_numbers(user_id)
+
+    def case_title(case_id):
+        if not case_id:
+            return "Not about a specific case"
+        return f"Case #{numbers.get(case_id, case_id)}"
+
     rows = []
 
     for c in get_written_support_requests(user_id):
@@ -450,8 +466,7 @@ def support_rows(user_id):
         rows.append({
             # the title is worked out for the page, not stored: the request
             # itself no longer carries one, so the case it is about names it.
-            "title": (f"Case #{c['case_id']}" if c["case_id"]
-                      else "Not about a specific case"),
+            "title": case_title(c["case_id"]),
             "body": c["body"],
             "case_id": c["case_id"],
             "date": long_date(c["created_at"]),
@@ -484,9 +499,11 @@ def support_rows(user_id):
 def support_page(request, user_id, form=None, errors=None, sent=False, status_code=200):
     header = get_patient_header(user_id)
 
+    numbers = get_patient_case_numbers(user_id)
     choices = [{"case_id": c["case_id"],
-                "label": f"Case #{c['case_id']} - {knee_label(c['knee'])} "
-                         f"· uploaded {long_date(c['submitted_at'])}"}
+                "label": f"Case #{numbers.get(c['case_id'], c['case_id'])}"
+                         f" - {knee_label(c['knee'])}"
+                         f" · uploaded {long_date(c['submitted_at'])}"}
                for c in get_case_choices(user_id)]
 
     return templates.TemplateResponse(
