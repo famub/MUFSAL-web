@@ -10,7 +10,7 @@ def get_doctor_profile(user_id):
         return conn.execute(
             """
             SELECT u.user_id, u.role, u.full_name, u.email, u.national_id,
-                   p.scfhs_number
+                   u.password_changed_at, p.scfhs_number
             FROM users u
             JOIN professionals p ON p.user_id = u.user_id
             WHERE u.user_id = %s
