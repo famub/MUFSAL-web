@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ direction }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUFSAL — {{ t.doc_title }}</title>
+  {% include "_new-head.html" %}
+</head>
+
+<body>
+  {# the licence date has passed: every other page sends the doctor / radiologist here (session_guard.py) #}
+  <main class="locked-page">
+    <section class="card wait-card renew-card">
+      <img src="/assets/logo-light.png" alt="MUFSAL" class="locked-logo" />
+
+      {% if waiting %}
+      <!-- ---------- the renewal is with the admin ---------- -->
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" stroke-linecap="round" /></svg></span>
+      <h2>{{ t.waiting_title }}</h2>
+      <p>{{ t.waiting_body }}</p>
+      <dl class="renew-sent">
+        <div><dt>{{ t.sent_number }}</dt><dd><bdi>{{ state.pending_scfhs_number or state.scfhs_number }}</bdi></dd></div>
+        <div><dt>{{ t.sent_date }}</dt><dd>{{ sent_date }}</dd></div>
+      </dl>
+
+      {% else %}
+      <!-- ---------- expired: ask for the renewed licence ---------- -->
+      <span class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 21.5 19h-19L12 3Z" stroke-linejoin="round" /><path d="M12 10v4M12 16.6v.1" stroke-linecap="round" /></svg></span>
+      <h2>{{ t.expired_title }}</h2>
+      <p>{{ t.expired_body.format(date=ended_on) }}</p>
+
+      {% if state.last_decision == 'rejected' and state.last_reason %}
+      <div class="banner banner-bad show" role="status"><span>{{ t.rejected }} {{ state.last_reason }}</span></div>
+      {% endif %}
+      {% if error %}
+      <div class="banner banner-bad show" role="alert"><span>{{ error }}</span></div>
+      {% endif %}
+
+      <form method="post" action="/license-renewal" class="renew-form" novalidate>
+        <div class="field">
+          <label for="scfhs">{{ t.scfhs_label }}</label>
+          <input type="text" id="scfhs" name="scfhs_number" value="{{ number }}" maxlength="20" required />
+        </div>
+        <div class="field">
+          <label for="expiry">{{ t.expiry_label }}</label>
+          <input type="date" id="expiry" name="license_expiry" value="{{ expiry }}" min="{{ today }}" required />
+        </div>
+        <button type="submit" class="btn btn-primary">{{ t.send }}</button>
+      </form>
+      {% endif %}
+
+      <div class="dialog-actions" style="justify-content:center">
+        <form action="/set-lang" method="get">
+          <input type="hidden" name="lang" value="{{ 'en' if lang == 'ar' else 'ar' }}" />
+          <input type="hidden" name="next" value="/license-renewal" />
+          <button type="submit" class="btn btn-ghost">{{ t.other_lang }}</button>
+        </form>
+        <a class="btn btn-dark" href="/logout">{{ t.logout }}</a>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>
