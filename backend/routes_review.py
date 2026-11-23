@@ -294,7 +294,12 @@ def view_report(request: Request, case_id: int, confirmed: int = 0):
     if case is None:
         return error_page(request, 404)
     if not can_view_case(user, case):
-        return error_page(request, 403)
+               return error_page(request, 403)
+
+    # The doctor has just approved this case: it now lives in Approved cases,
+    # so the back link goes there (not to home or pending).
+    if confirmed and user["role"] == "doctor":
+        request.session["back"] = "/approved-cases"
 
     lang = get_lang(request)
     report = case["report"]
