@@ -152,10 +152,11 @@ from typing import Optional
 
 from fastapi import Form
 
-from auth_rules import name_error
+from auth_rules import name_error, password_rule_failures
 from queries_profile import get_doctor_profile, update_name
+from queries_patient import password_is_the_current_one, set_password
 from queries_radiologist import get_radiologist_cases, get_radiologist_stats
-from routes_profile import mask_national_id
+from routes_profile import mask_national_id, pw_date
 from routes_dashboard import get_full_name
 from texts_profile import PROFILE_TEXT
 from texts_radiologist import MONTHS, RADIOLOGIST_TEXT
@@ -205,16 +206,17 @@ def all_cases(request: Request):
          "t": RADIOLOGIST_TEXT[lang], "cases": _case_rows(user_id, lang)})
 
 
-@router.get("/profile-radiologist", include_in_schema=False)
-def profile(request: Request, saved: Optional[int] = None, error: Optional[str] = None):
-    user_id, redirect = radiologist_or_redirect(request)
-    if redirect:
-        return redirect
+def radiologist_profile_page(request, user_id, saved=False, error=None,
+                             pw_failed=None, pw_saved=False, status_code=200):
+    """Draw the page. Also used when a new password is turned down,
+    so the rules that failed come back painted red."""
     lang = _lang(request)
     t = PROFILE_TEXT[lang]
     data = get_doctor_profile(user_id)
     message, message_ok = None, True
-    if saved:
+    if pw_saved:
+        message = t["pw_saved_msg"]
+    elif saved:
         message = t["saved_msg"]
     elif error in t["err"]:
         message, message_ok = t["err"][error], False
@@ -222,7 +224,20 @@ def profile(request: Request, saved: Optional[int] = None, error: Optional[str] 
         request, "radiologist/profile.html",
         {"lang": lang, "direction": "rtl" if lang == "ar" else "ltr", "t": t,
          "profile": data, "masked_id": mask_national_id(data["national_id"]),
-         "message": message, "message_ok": message_ok})
+         "message": message, "message_ok": message_ok,
+         "pw_failed": pw_failed or [],
+         "password_changed": pw_date(data.get("password_changed_at"), lang)},
+        status_code=status_code)
+
+
+@router.get("/profile-radiologist", include_in_schema=False)
+def profile(request: Request, saved: Optional[int] = None,
+            error: Optional[str] = None, changed: Optional[int] = None):
+    user_id, redirect = radiologist_or_redirect(request)
+    if redirect:
+        return redirect
+    return radiologist_profile_page(request, user_id, saved=bool(saved), error=error,
+                                    pw_saved=bool(changed))
 
 
 @router.post("/profile-radiologist", include_in_schema=False)
@@ -235,3 +250,21 @@ def save_profile(request: Request, full_name: str = Form(...)):
         return RedirectResponse(f"/profile-radiologist?error={problem}", status_code=303)
     update_name(user_id, full_name)
     return RedirectResponse("/profile-radiologist?saved=1", status_code=303)
+
+
+@router.post("/profile-radiologist/password", include_in_schema=False)
+def change_password_radiologist(request: Request, new_password: str = Form("")):
+    """Same rules as the doctor's and the patient's pages. The list on the page
+    is only a helper - the server checks every rule again here."""
+    user_id, redirect = radiologist_or_redirect(request)
+    if redirect:
+        return redirect
+
+    failed = password_rule_failures(new_password)
+    if not failed and password_is_the_current_one(user_id, new_password):
+        failed = ["different"]
+    if failed:
+        return radiologist_profile_page(request, user_id, pw_failed=failed, status_code=400)
+
+    set_password(user_id, new_password)
+    return RedirectResponse("/profile-radiologist?changed=1", status_code=303)
