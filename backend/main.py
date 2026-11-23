@@ -19,6 +19,7 @@ import routes_auth
 import routes_support
 import routes_dashboard
 import routes_doctor
+import routes_license
 import routes_new_case
 import routes_pages
 import routes_patient
@@ -62,4 +63,5 @@ app.include_router(routes_new_case.router)    # /new-case (built by the server)
 app.include_router(routes_review.router)      # /cases/{id}/review, /cases/{id}/report, /set-lang ...
 app.include_router(routes_profile.router)    # /profile-doctor (built by the server) 
 app.include_router(routes_account.router)    # /account/delete-request, /account-deletion
+app.include_router(routes_license.router)    # /license-renewal (expired licence)
 app.include_router(routes_pages.router)       # /login, /register ... and every other .html page
