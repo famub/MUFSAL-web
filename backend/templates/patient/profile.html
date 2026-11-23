@@ -63,11 +63,10 @@
               {% if errors.full_name %}<p class="err">{{ errors.full_name }}</p>{% endif %}
             </div>
 
-            <div class="field{{ ' bad' if errors.email }}">
+            <div class="field locked">
               <label for="email">Email address</label>
-              <input type="text" inputmode="email" id="email" name="email" value="{{ form.email }}"
-                     maxlength="255" {% if not errors %}disabled{% endif %} />
-              {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
+              <input type="text" id="email" value="{{ form.email }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
             </div>
 
             <div class="field locked">

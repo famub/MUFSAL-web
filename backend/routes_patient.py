@@ -47,7 +47,7 @@ from routes_new_case import (CHOICES, WARNINGS, XRAYS_DIR, check_answers,
 from auth_service import HOME
 from ai_analysis import analyze_case_later
 from queries_cases import create_case, get_patient_case_numbers
-from queries_patient import (create_support_request, email_belongs_to_someone_else,
+from queries_patient import (create_support_request,
                              get_all_cases, get_case_choices, get_latest_case,
                              get_delay_complaints, get_open_case,
                              get_patient_header, get_profile,
@@ -368,9 +368,14 @@ def profile(request: Request, saved: int = 0, changed: int = 0):
 
 @router.post("/profile-patient", include_in_schema=False)
 async def save_profile(request: Request):
-    """Save the name, the email address, the date of birth and the sex.
+    """Save the name, the date of birth and the sex.
 
-    Everything is checked again here: the page's own checks can be
+    The email address is not among them. It is what the account is known
+    by and what a password-reset link is sent to, so only an administrator
+    changes it - the page shows it locked, and nothing read here could
+    change it even if the page were edited in the browser.
+
+    Everything else is checked again here: the page's own checks can be
     switched off in the browser, so they are a convenience, not a rule.
     The date of birth and the sex are checked with the same two rules
     that sign-up uses, so a profile can never hold something a new
@@ -383,7 +388,6 @@ async def save_profile(request: Request):
     data = await request.form()
     form = {
         "full_name": (data.get("full_name") or "").strip(),
-        "email": (data.get("email") or "").strip(),
         "date_of_birth": (data.get("date_of_birth") or "").strip(),
         "gender": (data.get("gender") or "").strip().lower(),
     }
@@ -391,10 +395,6 @@ async def save_profile(request: Request):
     errors = {}
     if len(form["full_name"]) < 2 or len(form["full_name"]) > 100:
         errors["full_name"] = "Please write your full name."
-    if not EMAIL_PATTERN.match(form["email"]) or len(form["email"]) > 255:
-        errors["email"] = "That does not look like an email address."
-    elif email_belongs_to_someone_else(form["email"], user_id):
-        errors["email"] = "Another account already uses this email address."
 
     dob_code = dob_error(form["date_of_birth"])
     if dob_code == "min_age":
@@ -406,9 +406,11 @@ async def save_profile(request: Request):
         errors["gender"] = "Please choose female or male."
 
     if errors:
+        # the locked box still has to show something when the page comes back
+        form["email"] = get_profile(user_id)["email"]
         return profile_page(request, user_id, form=form, errors=errors, status_code=400)
 
-    update_profile(user_id, form["full_name"], form["email"],
+    update_profile(user_id, form["full_name"],
                    form["date_of_birth"], form["gender"])
 
     # redirect after saving, so refreshing the page does not save it twice
