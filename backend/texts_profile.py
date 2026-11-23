@@ -15,6 +15,8 @@ PROFILE_TEXT = {
         "role_doctor": "Orthopedic Doctor",
         "role_radiologist": "Radiology Specialist",
         "scfhs_label": "SCFHS Registration Number",
+        "lic_soon": "Your license expires in {n} days. Renew it soon.",
+        "lic_today": "Your license expires today. Renew it now.",
 
         "personal_title": "Personal Information",
         "edit": "Edit Profile",
@@ -65,6 +67,8 @@ PROFILE_TEXT = {
         "role_doctor": "طبيب عظام",
         "role_radiologist": "أخصائي أشعة",
         "scfhs_label": "رقم التسجيل المهني",
+        "lic_soon": "متبقي {n} يوم على انتهاء رخصتك، جدّدها قريبًا.",
+        "lic_today": "تنتهي رخصتك اليوم، جدّدها الآن.",
 
         "personal_title": "البيانات الشخصية",
         "edit": "تعديل الملف",
