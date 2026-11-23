@@ -187,3 +187,23 @@ dialog:not(.slide-over) { margin: auto; }
 .a-row .who strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .a-row .who p { white-space: nowrap; }
 .a-row .acts { flex-wrap: nowrap; }
+
+/* ============================================================
+   alignment pass (admin lists + filters)
+   ============================================================ */
+
+/* filter drop-downs: our own arrow, set a little in from the edge instead of glued to the border */
+.filters select {
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  padding-inline: 18px 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-size: 14px 14px; background-position: right 20px center;
+}
+[dir="rtl"] .filters select, html[lang="ar"] .filters select { background-position: left 20px center; }
+
+/* list columns: label and value both centred in their column, and every value the same height,
+   so the small grey labels (SOURCE, STATUS, SUBMITTED ...) sit on one line across the whole row */
+.a-row .cell { text-align: center; }
+.a-row .cell .lbl { text-align: center; margin-bottom: 4px; }
+.a-row .cell .val { justify-content: center; min-height: 34px; }
+.a-row .cell .tag { justify-content: center; min-height: 34px; box-sizing: border-box; }

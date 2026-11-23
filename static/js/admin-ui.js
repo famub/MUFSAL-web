@@ -24,7 +24,7 @@
       applicant: 'Applicant', role: 'Role', scfhs: 'SCFHS no.', nid: 'National ID', email: 'Email',
       decision: 'Decision', reason: 'Reason', date: 'Date', name: 'Name', approved_on: 'Approved on',
       ticket: 'Message', complainant: 'From', type: 'Type', k_reg: 'New registration', k_ren: 'License renewal',
-      lic_expiry: 'License expires', new_date: 'New license date', new_scfhs: 'New SCFHS no.', expired_on: 'Expired', lic_expired: 'License expired',
+      lic_expiry: 'License expires', new_date: 'New license date', expired_on: 'Expired', lic_expired: 'License expired',
       none_delayed: 'No delayed reports. Everything is on schedule.', none_pending: 'No pending requests. All requests have been reviewed.',
       none_match: 'No matching records.', none_acc: 'No matching accounts.', none_cmp: 'No support messages match these filters.', none_del: 'No account deactivation requests.',
       delayed_req: 'Delayed report', reported_by: 'Reported by', patient_l: 'Patient', what: 'What happened',
@@ -69,7 +69,7 @@
       applicant: 'مقدّم الطلب', role: 'الدور', scfhs: 'رقم الهيئة', nid: 'الهوية', email: 'البريد الإلكتروني',
       decision: 'القرار', reason: 'السبب', date: 'التاريخ', name: 'الاسم', approved_on: 'تاريخ القبول',
       ticket: 'الرسالة', complainant: 'المرسل', type: 'النوع', k_reg: 'تسجيل جديد', k_ren: 'تجديد رخصة',
-      lic_expiry: 'تنتهي الرخصة', new_date: 'تاريخ الرخصة الجديد',  new_scfhs: 'رقم الهيئة الجديد', expired_on: 'انتهت', lic_expired: 'الرخصة منتهية',
+      lic_expiry: 'تنتهي الرخصة', new_date: 'تاريخ الرخصة الجديد', expired_on: 'انتهت', lic_expired: 'الرخصة منتهية',
       none_delayed: 'لا توجد تقارير متأخرة. كل شيء في موعده.', none_pending: 'لا توجد طلبات معلّقة. تمت مراجعة كل الطلبات.',
       none_match: 'لا توجد سجلات مطابقة.', none_acc: 'لا توجد حسابات مطابقة.', none_cmp: 'لا توجد رسائل دعم مطابقة لهذه التصفية.', none_del: 'لا توجد طلبات إيقاف حساب.',
       delayed_req: 'تقرير متأخر', reported_by: 'أبلغ عنه', patient_l: 'المريض', what: 'ماذا حدث',
@@ -140,7 +140,7 @@
         return { id: String(r.delay_complaint_id), no: '#' + r.case_id, src: r.source, dr: r.doctor_name || '', at: ts(r.submitted_at), rep: ts(r.reported_at), st: r.status, by: r.raised_by, pt: r.patient_name, log: log.sort((x, y) => x.t - y.t) };
       });
     },
-    async pending() { const d = await api('/api/admin/license-requests'); if (d) DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, nid: r.national_id, email: r.email, kind: r.kind, at: ts(r.since), exp: r.license_expiry, next: r.pending_license_expiry , nextScfhs: r.pending_scfhs_number })); },
+    async pending() { const d = await api('/api/admin/license-requests'); if (d) DB.pending = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: (r.kind === 'renewal' && r.pending_scfhs_number) ? r.pending_scfhs_number : r.scfhs_number, nid: r.national_id, email: r.email, kind: r.kind, at: ts(r.since), exp: r.license_expiry, next: r.pending_license_expiry })); },
     async history() { const d = await api('/api/admin/decisions'); if (d) DB.history = d.decisions.map(r => ({ name: r.applicant_name, role: r.applicant_role, kind: r.kind || 'registration', d: r.decision, why: r.reason || '', at: ts(r.decided_at) })); },
     async accounts() { const d = await api('/api/admin/accounts'); if (d) DB.accounts = d.accounts.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, scfhs: r.scfhs_number, expired: r.expired, at: ts(r.approved_at) })); },
     async deletions() { const d = await api('/api/admin/deletion-requests'); if (d) DB.dels = d.requests.map(r => ({ id: String(r.user_id), name: r.full_name, role: r.role, email: r.email, scfhs: r.scfhs_number, st: r.status, cases: r.open_cases, at: ts(r.requested_at), closed: ts(r.closed_at) })); },
@@ -184,7 +184,7 @@
   const row = (cols, inner) => `<article class="card row a-row" style="--cols:${cols}">${inner}</article>`;
   const empty = m => `<div class="empty"><h3>${esc(m)}</h3></div>`;
 
-  const RD = (r, acts) => row('minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) 90px 110px 200px',
+  const RD = (r, acts) => row('minmax(170px,1.3fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) 90px 110px 200px',
     who(`${T.case} ${r.no}`, r.pt || '', '#') +
     cell(T.source, roleTag(r.src), 'hide-sm') + cell(T.doctor_l, esc(r.dr || T.not_assigned), 'hide-sm') + cell(T.submitted, fmt(r.at), 'hide-sm') +
     cell(T.delay, tag(dur(r.at), r.st === 'handled' ? 'tag-role' : hrs(r.at) > 48 ? 'tag-bad' : 'tag-wait'), 'hide-sm') + cell(T.status, tag(T[DST[r.st][0]], DST[r.st][1])) + `<div class="acts">${acts}</div>`);
@@ -396,7 +396,7 @@
     dhandled: async id => { if (await api(`/api/admin/delayed/${id}/handled`, 'POST', {})) { toast(T.handled_ok); await LOAD.delayed(); openDelayed(id); draw(false); } },
     lview: id => {
       const r = by(DB.pending, id);
-      openPanel(r.name, kv({ [T.type]: T[KIND[r.kind][0]], [T.role]: T[r.role] || r.role, [T.scfhs]: r.scfhs, [T.nid]: r.nid, [T.email]: r.email, ...(r.kind === 'renewal' ? { [T.expired_on]: fmt(r.at), [T.new_date]: fmt(r.next) , [T.new_scfhs]: r.nextScfhs || r.scfhs } : { [T.submitted]: fmt(r.at) }) }) +
+      openPanel(r.name, kv({ [T.type]: T[KIND[r.kind][0]], [T.role]: T[r.role] || r.role, [T.scfhs]: r.scfhs, [T.nid]: r.nid, [T.email]: r.email, ...(r.kind === 'renewal' ? { [T.expired_on]: fmt(r.at), [T.new_date]: fmt(r.next) } : { [T.submitted]: fmt(r.at) }) }) +
         `<div class="panel-actions">${btn('appr', id, T.approve, 'btn-primary')}${btn('rej', id, T.reject, 'btn-danger')}</div>`);
     },
     appr: id => decide(by(DB.pending, id), 'approved'),

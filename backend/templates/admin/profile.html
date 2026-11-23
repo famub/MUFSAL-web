@@ -24,16 +24,16 @@
         </div>
       </div>
 
-      {% if saved %}
+      {% if saved or pw_saved %}
       <p class="saved show">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        {{ 'تم حفظ بياناتك.' if ar else 'Your details have been saved.' }}
+        {% if pw_saved %}{{ 'تم تعيين كلمة المرور الجديدة. استخدمها في المرة القادمة.' if ar else 'Your new password is set. Use it the next time you log in.' }}{% else %}{{ 'تم حفظ بياناتك.' if ar else 'Your details have been saved.' }}{% endif %}
       </p>
       {% endif %}
 
       <!-- ---------- card 1: account information ----------
-           MUFSAL has one kind of administrator, so the role is fixed.
-           Only the name and the email can be edited. -->
+           MUFSAL has one kind of administrator, so the role is fixed, and the email is what
+           the administrator signs in with. Only the name can be edited. -->
       <form method="post" action="/profile-admin" novalidate>
         <section class="card{{ ' editing' if errors }}" id="contact-card">
           <div class="card-head">
@@ -60,10 +60,11 @@
               <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
             </div>
 
-            <div class="field{{ ' bad' if errors.email }}">
+            <!-- the email is locked too -->
+            <div class="field locked">
               <label for="email">{{ 'البريد الإلكتروني' if ar else 'Email Address' }}</label>
-              <input type="text" inputmode="email" id="email" name="email" value="{{ form.email }}" maxlength="255" {% if not errors %}disabled{% endif %} />
-              {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
+              <input type="text" id="email" value="{{ email }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
             </div>
 
           </div>
@@ -76,42 +77,95 @@
       </form>
 
       <!-- ---------- card 2: security ----------
-           This account can approve professionals and delete any user, so its
-           password matters more than anyone else's. The real password is never
-           shown. "Change password" uses the same reset-link page as everyone. -->
-      <section class="card" id="security-card">
-        <div class="card-head">
-          <div>
-            <h2>{{ 'الأمان' if ar else 'Security' }}</h2>
-            <p>{{ 'هذا الحساب يقبل المهنيين ويحذف المستخدمين، فاجعل كلمة مروره قوية.' if ar else 'This account can approve professionals and remove users, so keep its password strong.' }}</p>
+           Same inline form as the patient's profile. This account can approve professionals and delete
+           any user, so its password matters more than anyone else's. The old password is never shown
+           (only its hash is kept); the rules turn blue one by one, and the server reads them again on Save. -->
+      <form method="post" action="/profile-admin/password" novalidate>
+        <section class="card{{ ' editing' if pw_failed }}" id="security-card">
+          <div class="card-head">
+            <div>
+              <h2>{{ 'الأمان' if ar else 'Security' }}</h2>
+              <p>{{ 'هذا الحساب يقبل المهنيين ويحذف المستخدمين، فاجعل كلمة مروره قوية.' if ar else 'This account can approve professionals and remove users, so keep its password strong.' }}</p>
+            </div>
+            <button class="btn-edit" type="button" data-edit="security-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              {{ 'تغيير كلمة المرور' if ar else 'Change Password' }}
+            </button>
           </div>
-          <a class="btn-edit" href="/forgot-password">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            {{ 'تغيير كلمة المرور' if ar else 'Change Password' }}
-          </a>
-        </div>
 
-        <div class="grid">
-          <div class="field locked">
-            <label for="password">{{ 'كلمة المرور' if ar else 'Password' }}</label>
-            <input type="text" id="password" value="••••••••••••" readonly disabled />
-            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+          <div class="grid">
+            <div class="field locked">
+              <label for="password">{{ 'كلمة المرور الحالية' if ar else 'Current password' }}</label>
+              <input type="text" id="password" value="••••••••••••" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+
+            <div class="field{{ ' bad' if pw_failed }}">
+              <label for="new-password">{{ 'كلمة المرور الجديدة' if ar else 'New password' }}</label>
+              <input type="password" id="new-password" name="new_password" maxlength="20"
+                     autocomplete="new-password" {% if not pw_failed %}disabled{% endif %} />
+            </div>
           </div>
-        </div>
-      </section>
+
+          {% if password_changed %}
+          <p class="pw-when">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7.5" /><path d="M10 5.8V10l2.7 1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            {{ 'آخر تغيير: ' if ar else 'Last changed ' }}{{ password_changed }}
+          </p>
+          {% endif %}
+
+          <ul class="pw-rules" id="pw-rules">
+            <li data-rule="length" class="{{ 'is-bad' if 'length' in pw_failed }}">{{ 'من 8 إلى 20 حرفًا' if ar else '8 to 20 characters' }}</li>
+            <li data-rule="upper" class="{{ 'is-bad' if 'upper' in pw_failed }}">{{ 'حرف كبير واحد' if ar else 'One uppercase letter' }}</li>
+            <li data-rule="lower" class="{{ 'is-bad' if 'lower' in pw_failed }}">{{ 'حرف صغير واحد' if ar else 'One lowercase letter' }}</li>
+            <li data-rule="digit" class="{{ 'is-bad' if 'digit' in pw_failed }}">{{ 'رقم واحد' if ar else 'One number' }}</li>
+            <li data-rule="symbol" class="{{ 'is-bad' if 'symbol' in pw_failed }}">{{ 'رمز خاص واحد' if ar else 'One special character' }}</li>
+            <li data-rule="different" class="{{ 'is-bad' if 'different' in pw_failed }}">{{ 'ليست كلمة مرورك الحالية' if ar else 'Not your current password' }}</li>
+          </ul>
+
+          <div class="actions">
+            <button class="btn-save" type="submit">{{ 'حفظ كلمة المرور الجديدة' if ar else 'Save new password' }}</button>
+            <a class="btn-cancel" href="/profile-admin">{{ 'إلغاء' if ar else 'Cancel' }}</a>
+          </div>
+        </section>
+      </form>
 
       {% include "admin/_foot.html" %}
     </div>
   </main>
 
   <script>
-    // Edit mode: unlock the boxes that may be changed. Saving is an ordinary form submit, so the server has the last word.
-    const card = document.getElementById('contact-card');
-    const editable = () => [...card.querySelectorAll('.field:not(.locked) input')];
-    document.querySelector('[data-edit]').addEventListener('click', function () {
-      editable().forEach(f => { f.disabled = false; });
-      card.classList.add('editing');
-      editable()[0].focus();
+    // Edit mode: each card's button unlocks the boxes that may change (not the .locked ones). Saving is an ordinary form submit, so the server has the last word.
+    function boxesIn(card) { return [...card.querySelectorAll('.field:not(.locked) input')]; }
+    document.querySelectorAll('[data-edit]').forEach(function (button) {
+      const card = document.getElementById(button.dataset.edit);
+      button.addEventListener('click', function () {
+        const boxes = boxesIn(card);
+        boxes.forEach(function (b) { b.disabled = false; });
+        card.classList.add('editing');
+        if (boxes[0]) { boxes[0].focus(); }
+      });
+    });
+
+    // The password rules: grey until met, blue once met, red only when the server sent it back.
+    // "Not your current password" can only be answered by the server (it holds the old hash).
+    const RULES = {
+      length: function (v) { return v.length >= 8 && v.length <= 20; },
+      upper: function (v) { return /[A-Z]/.test(v); },
+      lower: function (v) { return /[a-z]/.test(v); },
+      digit: function (v) { return /[0-9]/.test(v); },
+      symbol: function (v) { return /[^A-Za-z0-9]/.test(v); }
+    };
+    const newPassword = document.getElementById('new-password');
+    const ruleList = document.getElementById('pw-rules');
+    newPassword.addEventListener('input', function () {
+      const value = newPassword.value;
+      ruleList.querySelectorAll('li').forEach(function (item) {
+        const rule = RULES[item.dataset.rule];
+        item.classList.remove('is-bad');
+        item.classList.toggle('is-met', Boolean(rule) && rule(value));
+      });
+      newPassword.closest('.field').classList.remove('bad');
     });
   </script>
 
