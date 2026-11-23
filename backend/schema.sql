@@ -69,6 +69,7 @@ CREATE TABLE professionals (
     status                 VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at             TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     pending_license_expiry DATE,
+    pending_scfhs_number   VARCHAR(20),
     delete_requested_at    TIMESTAMP,
     deactivated_at         TIMESTAMP,
     CONSTRAINT professionals_is_a_professional FOREIGN KEY (user_id, role)
