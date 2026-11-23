@@ -122,6 +122,29 @@ button { font: inherit; cursor: pointer; }
 .main { margin-inline-start: var(--rail); padding: 34px 40px 60px; }
 .main-inner { width: min(100%, 1280px); }
 
+/* A page that carries the footer below needs less room under its content;
+   every other page keeps the 60px it always had. */
+.main:has(+ .patient-foot) { padding-bottom: 24px; }
+
+/* ---------- the patient's page footer ----------
+   It sits outside <main>, so it repeats the rail offset and the side padding
+   to line its text up with the content above it. One quiet line: the name,
+   what the system is, and the way to reach a human. */
+.patient-foot {
+  margin-inline-start: var(--rail);
+  padding: 16px 40px 34px;
+  width: min(100%, 1280px);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  font-size: .78rem; color: var(--grey);
+}
+.patient-foot .pf-brand { font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.patient-foot .pf-text { flex: 1; min-width: 240px; }
+.patient-foot .pf-link { color: var(--brand); text-decoration: none; }
+.patient-foot .pf-link:hover { text-decoration: underline; }
+@media (max-width: 900px) {
+  .patient-foot { margin-inline-start: 0; padding-inline: 20px; }
+}
+
 /* page title row */
 .topbar { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 28px; }
 .topbar > div { flex: 1; }

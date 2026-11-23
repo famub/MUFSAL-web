@@ -1,0 +1,24 @@
+{# The patient's page footer: one quiet line under the content.
+
+   It carries its own English and Arabic, so a page only has to include it:
+   {% include "patient/_footer.html" %}. It reads `lang` ('en' or 'ar') and
+   falls back to English when a page does not pass one.
+
+   The language switch is not here on purpose - the side rail already has
+   one, and two of them on the same screen is one too many. #}
+{% set ar = (lang | default('en')) == 'ar' %}
+
+<footer class="patient-foot">
+  <span class="pf-brand">MUFSAL</span>
+
+  <span class="pf-text">
+    &copy; 2027 &middot;
+    {% if ar %}
+      نظام يعمل بالذكاء الاصطناعي. تقريرك يراجعه طبيب دائمًا.
+    {% else %}
+      An AI-powered system. Your report is always reviewed by a doctor.
+    {% endif %}
+  </span>
+
+  <a class="pf-link" href="/support">{{ 'الدعم' if ar else 'Support' }}</a>
+</footer>

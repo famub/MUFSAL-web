@@ -38,8 +38,11 @@
 .tag { border-radius: 999px; padding: 7px 14px; font-size: .82rem; font-weight: 500; white-space: nowrap; }
 .tag-review { background: var(--brand-soft); color: var(--brand-dark); }
 .grade { text-align: center; min-width: 74px; }
+.grade span { display: block; }
+/* the word first, the grade under it - the label says what the number is
+   before the eye gets to the number */
+.grade .grade-label { font-size: .72rem; color: var(--grey); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
 .grade .g { font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
-.grade span { display: block; font-size: .72rem; color: var(--grey); letter-spacing: .08em; text-transform: uppercase; }
 .grade .pending { font-size: 1.25rem; color: var(--line); font-weight: 700; }
 .go {
     display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;

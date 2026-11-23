@@ -11,9 +11,9 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
 
   <!-- shared across every MUFSAL page -->
-  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=7" />
+  <link rel="stylesheet" href="/static/NewCss/mufsal-ui.css?v=11" />
   <!-- only what this page needs on top of it -->
-  <link rel="stylesheet" href="/static/NewCss/my-cases.css?v=7" />
+  <link rel="stylesheet" href="/static/NewCss/my-cases.css?v=11" />
 </head>
 
 <body>
@@ -73,7 +73,7 @@
 
           {% if c.done %}
           <span class="tag tag-done">Report ready</span>
-          <div class="grade"><span class="g g-{{ c.grade }}">KL {{ c.grade }}</span><span>Grade</span></div>
+          <div class="grade"><span class="grade-label">Grade</span><span class="g g-{{ c.grade }}">KL {{ c.grade }}</span></div>
           <a class="go" href="/cases/{{ c.case_id }}/report">
             View report
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -82,7 +82,7 @@
           </a>
           {% else %}
           <span class="tag tag-review">With your doctor</span>
-          <div class="grade"><span class="pending">&mdash;</span><span>Grade</span></div>
+          <div class="grade"><span class="grade-label">Grade</span><span class="pending">&mdash;</span></div>
           <button class="go quiet" type="button">Not ready yet</button>
           {% endif %}
         </article>
@@ -96,6 +96,10 @@
 
     </div>
   </main>
+
+  {# one quiet line under every patient page #}
+  {% include "patient/_footer.html" %}
+
 
   <script>
     // The chips and the search box only hide rows, so this page needs
