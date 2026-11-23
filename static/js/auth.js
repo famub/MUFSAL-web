@@ -55,7 +55,7 @@
       createBtn: "Create account",
       doneTitle: "Account created", doneBody: "Your account is ready. You can now log in.", goLogin: "Go to log in",
       // professional
-      role: "Role", roleSelect: "Select your role", radiologist: "Radiologist", doctor: "Doctor",
+      role: "Role", roleSelect: "Select your role", radiologist: "Radiologist", doctor: "Orthopedic Doctor",
       nationalId: "National ID / Iqama number", nationalIdHint: "10 digits.", scfhs: "SCFHS licence number", licenseExpiry: "Licence expiry date",
       submitRequest: "Submit account request",
       pendingTitle: "Request submitted", pendingBody: "Your registration request is pending admin approval. You can log in now, but your account stays locked until the admin approves it.",
@@ -118,7 +118,7 @@
 
       createBtn: "إنشاء الحساب",
       doneTitle: "تم إنشاء الحساب", doneBody: "حسابك جاهز. يمكنك الآن تسجيل الدخول.", goLogin: "الذهاب إلى تسجيل الدخول",
-      role: "الدور", roleSelect: "اختر دورك", radiologist: "أخصائي أشعة", doctor: "طبيب",
+      role: "الدور", roleSelect: "اختر دورك", radiologist: "أخصائي أشعة", doctor: "طبيب عظام",
       nationalId: "رقم الهوية الوطنية / الإقامة", nationalIdHint: "10 أرقام.", scfhs: "رقم ترخيص هيئة التخصصات الصحية", licenseExpiry: "تاريخ انتهاء الرخصة",
       submitRequest: "إرسال طلب إنشاء الحساب",
       pendingTitle: "تم إرسال الطلب", pendingBody: "طلب تسجيلك بانتظار موافقة المشرف. يمكنك تسجيل الدخول الآن، لكن حسابك يبقى مقفلاً حتى يوافق المشرف.",
