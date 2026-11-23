@@ -10,7 +10,8 @@ def get_doctor_profile(user_id):
         return conn.execute(
             """
             SELECT u.user_id, u.role, u.full_name, u.email, u.national_id,
-                   u.password_changed_at, p.scfhs_number
+                   u.password_changed_at, p.scfhs_number,
+             (p.license_expiry - CURRENT_DATE) AS license_days_left
             FROM users u
             JOIN professionals p ON p.user_id = u.user_id
             WHERE u.user_id = %s
