@@ -31,6 +31,7 @@ WHILE_PENDING = ("/dashboard-doctor", "/dashboard-radiologist", "/", "/logout", 
 WHILE_EXPIRED = ("/license-renewal", "/logout", "/logout.html", "/api/logout", "/api/me",
                  "/set-lang", "/login")
 
+
 def install(app):
     async def idle_timeout(request, call_next):
         path = request.url.path
@@ -54,10 +55,10 @@ def install(app):
                     if path.startswith("/api/"):
                         return JSONResponse({"ok": False, "error": "expired"}, status_code=401)
                     return RedirectResponse("/login", status_code=303)
-                            and path not in WHILE_EXPIRED:
-                        if path.startswith("/api/"):
-                            return JSONResponse({"ok": False, "error": "license_expired"}, status_code=403)
-                        return RedirectResponse("/license-renewal", status_code=303)
+                elif path not in WHILE_PENDING:
+                    if path.startswith("/api/"):
+                        return JSONResponse({"ok": False, "error": "pending"}, status_code=403)
+                    return RedirectResponse(f"/dashboard-{session.get('role')}", status_code=303)
             if session.get("role") in IDLE_ROLES:
                 import queries_accounts
                 state = await run_in_threadpool(queries_accounts.get_access_state, session["user_id"])
@@ -72,13 +73,13 @@ def install(app):
                         session["deleting"] = True
                     else:
                         session.pop("deleting", None)
-                    # a licence whose date has passed: the account can only see the locked home page
-                    # (same list as a request still waiting) until the admin accepts a renewal
+                    # a licence whose date has passed: the account can only renew it
+                    # (/license-renewal) until the admin accepts the renewal
                     if state["expired"] and state["status"] == "approved" and not state["delete_requested"] \
-                            and path not in WHILE_PENDING:
+                            and path not in WHILE_EXPIRED:
                         if path.startswith("/api/"):
                             return JSONResponse({"ok": False, "error": "license_expired"}, status_code=403)
-                        return RedirectResponse(f"/dashboard-{session.get('role')}", status_code=303)
+                        return RedirectResponse("/license-renewal", status_code=303)
             if session.get("deleting") and path not in WHILE_DELETING:
                 if path.startswith("/api/"):
                     return JSONResponse({"ok": False, "error": "deleting"}, status_code=403)
