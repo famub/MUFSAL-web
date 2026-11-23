@@ -143,7 +143,7 @@ def list_license_requests():
         return conn.execute(
             """
             SELECT u.user_id, u.full_name, u.role, u.email, u.national_id, p.scfhs_number,
-                   p.license_expiry, p.pending_license_expiry,
+                   p.license_expiry, p.pending_license_expiry, p.pending_scfhs_number,
                    CASE WHEN p.status = 'pending' THEN 'registration' ELSE 'renewal' END AS kind,
                    p.created_at AS since
             FROM users u JOIN professionals p ON p.user_id = u.user_id
@@ -177,9 +177,11 @@ def decide_license_request(user_id, admin_id, decision, reason=None):
             if decision == "approved":
                 conn.execute(
                     "UPDATE professionals SET license_expiry = pending_license_expiry,"
-                    " pending_license_expiry = NULL WHERE user_id = %s", (user_id,))
+                    " scfhs_number = COALESCE(pending_scfhs_number, scfhs_number),"
+                    " pending_license_expiry = NULL, pending_scfhs_number = NULL WHERE user_id = %s", (user_id,))
             else:
-                conn.execute("UPDATE professionals SET pending_license_expiry = NULL WHERE user_id = %s", (user_id,))
+                conn.execute("UPDATE professionals SET pending_license_expiry = NULL, pending_scfhs_number = NULL"
+                             " WHERE user_id = %s", (user_id,))
         else:
             return False
         conn.execute(
