@@ -49,10 +49,20 @@
             <input type="text" id="role" value="{{ t.role_radiologist }}" readonly disabled />
             <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
           </div>
-          <div class="field locked">
+                  <div class="field locked">
             <label for="scfhs">{{ t.scfhs_label }}</label>
-            <input type="text" id="scfhs" value="{{ profile.scfhs_number }}" readonly disabled />
-            <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            <div class="lock-box">
+              <input type="text" id="scfhs" value="{{ profile.scfhs_number }}" readonly disabled />
+              <svg class="lock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+            </div>
+            {# licence ends within 30 days: red warning under the number #}
+            {% set days = profile.license_days_left %}
+            {% if days is not none and 0 <= days <= 30 %}
+            <p class="lic-warn" role="status">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 21.5 19h-19L12 3Z" stroke-linejoin="round" /><path d="M12 10v4M12 16.6v.1" stroke-linecap="round" /></svg>
+              {{ t.lic_today if days == 0 else t.lic_soon.format(n=days) }}
+            </p>
+            {% endif %}
           </div>
         </div>
       </section>
