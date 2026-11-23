@@ -27,6 +27,9 @@ WHILE_DELETING = ("/account-deletion", "/logout", "/logout.html", "/api/logout",
 WHILE_PENDING = ("/dashboard-doctor", "/dashboard-radiologist", "/", "/logout", "/logout.html",
                  "/api/logout", "/api/me", "/set-lang", "/login")
 
+# A doctor or radiologist whose licence date has passed can only renew it (routes_license.py)
+WHILE_EXPIRED = ("/license-renewal", "/logout", "/logout.html", "/api/logout", "/api/me",
+                 "/set-lang", "/login")
 
 def install(app):
     async def idle_timeout(request, call_next):
@@ -51,10 +54,10 @@ def install(app):
                     if path.startswith("/api/"):
                         return JSONResponse({"ok": False, "error": "expired"}, status_code=401)
                     return RedirectResponse("/login", status_code=303)
-                elif path not in WHILE_PENDING:
-                    if path.startswith("/api/"):
-                        return JSONResponse({"ok": False, "error": "pending"}, status_code=403)
-                    return RedirectResponse(f"/dashboard-{session.get('role')}", status_code=303)
+                            and path not in WHILE_EXPIRED:
+                        if path.startswith("/api/"):
+                            return JSONResponse({"ok": False, "error": "license_expired"}, status_code=403)
+                        return RedirectResponse("/license-renewal", status_code=303)
             if session.get("role") in IDLE_ROLES:
                 import queries_accounts
                 state = await run_in_threadpool(queries_accounts.get_access_state, session["user_id"])
