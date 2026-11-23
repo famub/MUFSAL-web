@@ -130,7 +130,11 @@
     margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line);
     display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
   }
-.wait { display: flex; gap: 12px; color: var(--body); font-size: .92rem; }
+/* The waiting text takes whatever room is left, which puts the delay button
+   hard against the far edge. The button carries an auto margin of its own,
+   but when it is ready it sits inside a <form>, and the margin then only
+   pushes it inside that form - so the room has to be taken here instead. */
+.wait { flex: 1 1 auto; min-width: 240px; display: flex; gap: 12px; color: var(--body); font-size: .92rem; }
 .wait svg { width: 19px; height: 19px; color: var(--brand); flex: none; margin-top: 2px; }
 .wait span { display: block; color: var(--grey); font-size: .82rem; }
 .btn-delay {
@@ -202,6 +206,7 @@
   .new-case { flex-direction: column; align-items: flex-start; }
   .new-case .cta { margin-inline-start: 0; }
   .steps { grid-template-columns: 1fr 1fr; gap: 22px 0; }
+  .wait { flex: 1 1 100%; }
   .case-foot .btn-delay { margin-inline-start: 0; }
 }
 @media (max-width: 560px) {

@@ -126,6 +126,14 @@ button { font: inherit; cursor: pointer; }
    every other page keeps the 60px it always had. */
 .main:has(+ .patient-foot) { padding-bottom: 24px; }
 
+/* A footer belongs at the bottom. On a short page the content does not reach
+   that far, so the page is made a column as tall as the window and the main
+   area takes the slack - which pushes the footer down to meet it. The rail is
+   fixed, so it sits outside this column and is untouched. Only a page that
+   has the footer becomes a column; every other page is left alone. */
+body:has(> .patient-foot) { display: flex; flex-direction: column; min-height: 100vh; }
+body:has(> .patient-foot) .main { flex: 1 0 auto; }
+
 /* ---------- the patient's page footer ----------
    It sits outside <main>, so it repeats the rail offset and the side padding
    to line its text up with the content above it. One quiet line: the name,
