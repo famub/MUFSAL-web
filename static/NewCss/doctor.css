@@ -193,3 +193,66 @@ form + form, form + .card, form + section { margin-top: 20px; }   /* space betwe
 /* ---------- case rows: every middle column centred, so they line up under each other ---------- */
 .case-row .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; }
 .case-row .cell .lbl { margin: 0; }
+/* ---------- brought back: these were lost in an older commit (priority chips, delete-account window, locked pages) ---------- */
+/* Priority buttons on the pending cases page: All / High / Medium / Low */
+.chips { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 10px 22px; border-radius: 999px;
+  background: var(--white); border: 1.5px solid var(--line);
+  color: var(--ink); font-size: .95rem; font-weight: 500; text-decoration: none;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.chip-high .dot { background: var(--red); }
+.chip-medium .dot { background: var(--amber); }
+.chip-low .dot { background: var(--ok); }
+.chip-all:hover { border-color: var(--brand); }
+.chip-high:hover { border-color: var(--red); }
+.chip-medium:hover { border-color: var(--amber); }
+.chip-low:hover { border-color: var(--ok); }
+.chip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* the chosen one is filled with its own colour */
+.chip.is-on { color: var(--white); border-color: transparent; }
+.chip.is-on .dot { background: var(--white); }
+.chip-all.is-on { background: var(--brand); }
+.chip-high.is-on { background: var(--red); }
+.chip-medium.is-on { background: var(--amber); }
+.chip-low.is-on { background: var(--ok); }
+
+/* required field star (clinical notes) */
+.req { color: var(--red); font-weight: 700; }
+
+/* "Delete account" on the doctor and radiologist profile (_delete-account.html) */
+.danger-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-top: 20px; border: 1.5px solid var(--red-pale); }
+.danger-card h2 { font-size: 1.1rem; color: var(--red); }
+.danger-card p { color: var(--grey); font-size: .9rem; margin-top: 4px; max-width: 52ch; }
+.danger-card .btn-danger, .confirm-dialog .btn-danger { background: var(--red); color: #fff; }
+.danger-card .btn-danger:hover, .confirm-dialog .btn-danger:hover { background: #c93a3a; }
+
+/* the "are you sure?" window */
+.confirm-dialog { margin: auto; border: none; border-radius: 24px; padding: 32px; max-width: 440px; width: calc(100% - 40px); text-align: center; box-shadow: var(--shadow-lg, 0 30px 80px -20px rgba(6, 24, 47, .45)); }
+.confirm-dialog::backdrop { background: rgba(6, 24, 47, .55); }
+.confirm-dialog .ico { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center; background: var(--red-pale); color: var(--red); }
+.confirm-dialog .ico svg { width: 26px; height: 26px; }
+.confirm-dialog h3 { font-size: 1.2rem; margin-bottom: 8px; }
+.confirm-dialog p { color: var(--body); font-size: .92rem; }
+.dialog-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+
+/* the page an account sees while the admin decides (account-deletion.html) */
+.locked-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.locked-page .wait-card { max-width: 560px; }
+.locked-page .wait-card p + p { margin-top: -10px; }
+.locked-logo { width: 54px; height: 54px; border-radius: 14px; background: var(--ink); padding: 8px; margin: 0 auto 18px; display: block; }
+
+/* ---------- licence renewal page (license-renewal.html) ---------- */
+.renew-card { max-width: 520px; }
+.wait-card .ico.red { background: var(--red-pale); color: var(--red); }
+.renew-card .banner { text-align: start; margin: 0 0 16px; }
+.renew-form { display: grid; gap: 16px; text-align: start; }
+.renew-form .field { margin: 0; }
+.renew-form .btn { width: 100%; justify-content: center; }
+.renew-sent { display: grid; gap: 10px; margin: 0; text-align: start; }
+.renew-sent div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; }
+.renew-sent dt { color: var(--grey); }
+.renew-sent dd { margin: 0; font-weight: 600; color: var(--ink); }
