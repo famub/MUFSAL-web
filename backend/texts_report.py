@@ -50,6 +50,7 @@ REPORT_TEXT = {
         "r_xray_title": "Your X-ray",
         "r_xray_ph": "X-ray image",
         "r_report_title": "Your report",
+        "r_notes_title": "Doctor's notes",
         "r_words_title": "Words explained",
         "r_words": [
             ("Osteophytes", "Small bony bumps that grow around a worn joint."),
@@ -109,6 +110,7 @@ REPORT_TEXT = {
         "r_xray_title": "صورة الأشعة",
         "r_xray_ph": "صورة الأشعة",
         "r_report_title": "تقريرك",
+        "r_notes_title": "ملاحظات الطبيب",
         "r_words_title": "شرح المصطلحات",
         "r_words": [
             ("النتوءات العظمية (Osteophytes)", "نتوءات صغيرة تنمو حول المفصل المتآكل."),

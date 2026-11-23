@@ -104,6 +104,13 @@
                 {% endif %}
                 <h3 class="sub">{{ t.r_report_title }}</h3>
                 <p class="report-text">{{ report_text }}</p>
+
+                {# The doctor's notes, for the patient. The doctor has them in
+                   the clinical summary beside this, so they are not repeated there. #}
+                {% if role != 'doctor' and report.doctor_notes %}
+                <h3 class="sub">{{ t.r_notes_title }}</h3>
+                <p class="report-text notes-text">{{ report.doctor_notes }}</p>
+                {% endif %}
               </section>
             </div>
 
