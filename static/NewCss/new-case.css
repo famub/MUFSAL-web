@@ -38,6 +38,13 @@
 .drop strong { display: block; font-size: 1rem; }
 .drop p { color: var(--grey); font-size: .86rem; margin-top: 4px; }
 .drop .pick { margin-top: 16px; background: var(--ink); color: #fff; border: none; border-radius: 999px; padding: 11px 22px; font-size: .9rem; }
+/* The patient's box is the button itself, so it carries no black one: the
+   whole area takes the click and the small line below says what it does.
+   The radiologist's page keeps the .pick button above, untouched. */
+.drop-click { cursor: pointer; }
+.drop-click:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+.drop-click .pick-hint { margin-top: 14px; font-size: .82rem; font-weight: 500; color: var(--brand); }
+.drop-click:hover .art { color: var(--brand); }
 /* once a file is chosen */
 .picked { display: none; align-items: center; gap: 16px; background: var(--mint); border-radius: 16px; padding: 16px 18px; }
 .picked.show { display: flex; }
@@ -103,6 +110,10 @@ textarea.in { min-height: 92px; resize: vertical; }
 .q.bad > label, .q.bad > p.q-title { color: var(--red); }
 .q.bad .opt, .q.bad .check { border-color: var(--red); }
 .q.bad .in { border-color: var(--red); background: var(--red-pale); }
+/* a drop box with nothing in it marks itself, the same way a question does */
+.drop.bad { border-color: var(--red); background: var(--red-pale); }
+.drop.bad .art { color: var(--red); }
+.drop.bad .pick-hint { color: var(--red); }
 
 /* while an X-ray is being dragged over the box */
 .drop.over { border-color: var(--brand); background: var(--brand-soft); }
