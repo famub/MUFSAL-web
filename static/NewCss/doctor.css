@@ -256,3 +256,9 @@ form + form, form + .card, form + section { margin-top: 20px; }   /* space betwe
 .renew-sent div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; }
 .renew-sent dt { color: var(--grey); }
 .renew-sent dd { margin: 0; font-weight: 600; color: var(--ink); }
+
+/* ---------- profile: licence ends soon (red line under the SCFHS number) ---------- */
+.lock-box { position: relative; }
+.grid-2 > .field { align-self: start; }   /* a field with a warning under it does not stretch its neighbour */
+.lic-warn { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--red); font-size: .84rem; font-weight: 500; }
+.lic-warn svg { width: 16px; height: 16px; flex: none; }
