@@ -91,12 +91,13 @@ def mark_delay_handled(delay_complaint_id, admin_id):
 
 
 def list_doctors():
-    """Approved doctors - the choices in the reassign dialog."""
+    """Approved doctors with an open account - the choices in the reassign dialog
+    (the same rule reassign_case applies, so the dialog never offers someone it would refuse)."""
     with get_connection() as conn:
         return conn.execute(
             "SELECT u.user_id, u.full_name FROM users u"
             " JOIN professionals p ON p.user_id = u.user_id"
-            " WHERE u.role = 'doctor' AND p.status = 'approved' ORDER BY u.full_name"
+            " WHERE u.role = 'doctor' AND p.status = 'approved' AND p.deactivated_at IS NULL ORDER BY u.full_name"
         ).fetchall()
 
 
