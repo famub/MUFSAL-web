@@ -30,6 +30,15 @@ INSERT INTO users (user_id, role, full_name, email, password_hash, national_id) 
 (14, 'doctor',      'Sultan Alghamdi',   'sultan@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1015151515'),
 (15, 'radiologist', 'Amal Alqahtani',    'amal@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1016161616');
 
+-- ---------- accounts whose licence has run out ----------
+-- 16 to 19 are only for trying the renewal page. They are their own accounts so
+-- the logins above keep working, and so 14 keeps telling the two-tries story.
+INSERT INTO users (user_id, role, full_name, email, password_hash, national_id) VALUES
+(16, 'doctor',      'Faisal Alharbi',    'faisal@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1017171717'),
+(17, 'radiologist', 'Nouf Albarrak',     'nouf@mufsal.test',     '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1018181818'),
+(18, 'doctor',      'Tariq Alshamrani',  'tariq@mufsal.test',    '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1019191919'),
+(19, 'radiologist', 'Shaden Aldosari',   'shaden@mufsal.test',   '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.', '1020202020');
+
 -- ---------- the admin, in its own table ----------
 INSERT INTO admins (admin_id, full_name, email, password_hash) VALUES
 (1, 'MUFSAL Admin', 'admin@mufsal.test', '$2b$12$X8wlVJ1IUoITjh5DYvr0Cee2CxdVlwiG4.BtF.cXefhvSBJcoIfS.');
@@ -66,6 +75,28 @@ INSERT INTO professionals (user_id, role, scfhs_number, license_expiry, status,
 (15, 'radiologist', '16-R-55471', CURRENT_DATE + INTERVAL '2 years', 'approved',
                     NULL, CURRENT_TIMESTAMP - INTERVAL '10 days');
 
+-- ---------- the four expired licences ----------
+-- Its own statement because these rows need pending_scfhs_number as well, and
+-- the six rows above are left exactly as they are.
+--
+-- All four are 'approved'. That is not decoration: session_guard.py only sends
+-- an account to /license-renewal when status is 'approved', and
+-- queries_license.request_renewal only writes for an approved account, so a
+-- row with any other status can never reach the page at all.
+--   16  ran out 12 days ago  -> the renewal form, nothing sent yet
+--   17  ran out 3 days ago   -> the same form, from the radiologist's side
+--   18  ran out 40 days ago  -> a renewal already sent and waiting for the admin,
+--                              so it also shows in the admin's licence queue
+--   19  ran out 25 days ago  -> a renewal the admin refused: the page shows his
+--                              reason, and she can send a new one
+INSERT INTO professionals (user_id, role, scfhs_number, license_expiry, status,
+                           pending_scfhs_number, pending_license_expiry) VALUES
+(16, 'doctor',      '13-H-44216', CURRENT_DATE - INTERVAL '12 days', 'approved', NULL, NULL),
+(17, 'radiologist', '10-R-33820', CURRENT_DATE - INTERVAL '3 days',  'approved', NULL, NULL),
+(18, 'doctor',      '08-H-29135', CURRENT_DATE - INTERVAL '40 days', 'approved',
+                    '08-H-29135-2', CURRENT_DATE + INTERVAL '2 years'),
+(19, 'radiologist', '19-R-66740', CURRENT_DATE - INTERVAL '25 days', 'approved', NULL, NULL);
+
 -- ---------- admin decisions ----------
 -- 7 and 13 are left out on purpose: they are the two licences still waiting.
 --
@@ -86,6 +117,17 @@ INSERT INTO registration_decisions (professional_id, admin_id, kind, decision, r
 (14, 1, 'registration', 'rejected', 'The licence photograph was unreadable.',  CURRENT_TIMESTAMP - INTERVAL '400 days'),
 (14, 1, 'registration', 'approved', NULL,                                      CURRENT_TIMESTAMP - INTERVAL '390 days'),
 (14, 1, 'renewal',      'rejected', 'The renewal certificate had no stamp.',   CURRENT_TIMESTAMP - INTERVAL '5 days');
+
+-- The four expired accounts were all let in when they applied, years before
+-- their licence ran out. Shaden is the one whose renewal was refused, which is
+-- the reason her page shows below the form.
+INSERT INTO registration_decisions (professional_id, admin_id, kind, decision, reason, decided_at) VALUES
+(16, 1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '900 days'),
+(17, 1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '820 days'),
+(18, 1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '760 days'),
+(19, 1, 'registration', 'approved', NULL, CURRENT_TIMESTAMP - INTERVAL '640 days'),
+(19, 1, 'renewal',      'rejected', 'The licence certificate had already expired on the day it was sent.',
+                                               CURRENT_TIMESTAMP - INTERVAL '4 days');
 
 -- =====================================================================
 -- CASES
