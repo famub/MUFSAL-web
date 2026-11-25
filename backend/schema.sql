@@ -215,8 +215,8 @@ CREATE TABLE case_history (
     CONSTRAINT history_stiffness_valid CHECK (stiffness_duration IN ('none','le30','gt30')),
     CONSTRAINT history_stairs_valid CHECK (stairs_pain IN ('none','mild','moderate','severe','extreme')),
     CONSTRAINT history_rising_valid CHECK (rising_difficulty IN ('none','mild','moderate','severe','extreme')),
-    CONSTRAINT history_height_range CHECK (height_cm BETWEEN 50 AND 250),
-    CONSTRAINT history_weight_range CHECK (weight_kg BETWEEN 10 AND 400)
+    CONSTRAINT history_height_range CHECK (height_cm BETWEEN 50 AND 270),
+    CONSTRAINT history_weight_range CHECK (weight_kg BETWEEN 10 AND 600)
 );
 
 CREATE TABLE ai_results (

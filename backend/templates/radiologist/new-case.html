@@ -222,8 +222,8 @@
           <div class="q{{ ' bad' if 'height_cm' in errors or 'weight_kg' in errors }}">
             <p class="q-title">Height and weight <span class="req" aria-hidden="true">*</span> <span class="note">Used to work out the patient's BMI.</span></p>
             <div class="two">
-              <input class="in" type="number" name="height_cm" min="50" max="250" step="1" value="{{ a.height_cm }}" placeholder="Height in cm" aria-label="Height in cm" />
-              <input class="in" type="number" name="weight_kg" min="10" max="400" step="0.1" value="{{ a.weight_kg }}" placeholder="Weight in kg" aria-label="Weight in kg" />
+              <input class="in" type="number" name="height_cm" min="50" max="270" step="1" value="{{ a.height_cm }}" placeholder="Height in cm" aria-label="Height in cm" />
+              <input class="in" type="number" name="weight_kg" min="10" max="600" step="0.1" value="{{ a.weight_kg }}" placeholder="Weight in kg" aria-label="Weight in kg" />
             </div>
           </div>
 

@@ -44,8 +44,8 @@ CHOICES = {
 }
 WARNINGS = ("warning_injury", "warning_hot_swollen", "warning_fever",
             "warning_rapid_worsening", "warning_night_pain")
-HEIGHT_RANGE = (50, 250)   # same as history_height_range in schema.sql
-WEIGHT_RANGE = (10, 400)    # same as history_weight_range
+HEIGHT_RANGE = (50, 270)   # same as history_height_range in schema.sql
+WEIGHT_RANGE = (10, 600)    # same as history_weight_range
 TEXT_MAX = 500              # medications / other symptoms
 
 

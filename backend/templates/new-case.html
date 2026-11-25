@@ -142,12 +142,12 @@
           <div class="measurements-row">
             <div class="question-group {{ 'question-group--error' if 'height_cm' in errors }}" data-question="height_cm">
               <label class="question-label" for="height">{{ t.q_height }} *</label>
-              <input type="number" id="height" name="height_cm" class="form-input" min="50" max="250" step="1"
+              <input type="number" id="height" name="height_cm" class="form-input" min="50" max="270" step="1"
                      placeholder="{{ t.height_ph }}" value="{{ a.get('height_cm', '') }}" />
             </div>
             <div class="question-group {{ 'question-group--error' if 'weight_kg' in errors }}" data-question="weight_kg">
               <label class="question-label" for="weight">{{ t.q_weight }} *</label>
-              <input type="number" id="weight" name="weight_kg" class="form-input" min="10" max="400" step="any"
+              <input type="number" id="weight" name="weight_kg" class="form-input" min="10" max="600" step="any"
                      placeholder="{{ t.weight_ph }}" value="{{ a.get('weight_kg', '') }}" />
             </div>
           </div>
@@ -292,8 +292,8 @@
         listSep: {{ ('، ' if lang == 'ar' else ', ') | tojson }},
       };
       const MAX_BYTES = 20 * 1024 * 1024;
-      const HEIGHT = [50, 250];   // the same limits as the database
-      const WEIGHT = [10, 400];
+      const HEIGHT = [50, 270];   // the same limits as the database
+      const WEIGHT = [10, 600];
 
       const steps = { 1: document.getElementById('step-1'),
                       2: document.getElementById('step-2'),
