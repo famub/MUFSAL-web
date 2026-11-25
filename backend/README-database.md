@@ -119,8 +119,8 @@ history = {
     "warning_rapid_worsening": False,
     "warning_night_pain": False,
     "other_symptoms": "Mild swelling in the evening",  # optional
-    "height_cm": 162,                # 100 to 250
-    "weight_kg": 78,                 # 20 to 400
+    "height_cm": 162,                # 50 to 250
+    "weight_kg": 78,                 # 10 to 400
     "prior_injury": "no",            # yes | no
 }
 
