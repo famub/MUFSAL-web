@@ -62,7 +62,7 @@ INSERT INTO patients (user_id, date_of_birth, gender) VALUES
 --   14            licence ran out, a renewal is waiting for the admin
 --                 (users.status is 'pending', so he cannot log in meanwhile)
 --   15            licence in force, but the account was taken out of service
-INSERT INTO professionals (user_id, role, scfhs_number, license_expiry, status,
+INSERT INTO healthcare_professionals (user_id, role, scfhs_number, license_expiry, status,
                            pending_license_expiry, deactivated_at) VALUES
 (4,  'doctor',      '12-H-48213', CURRENT_DATE + INTERVAL '2 years', 'approved',   NULL, NULL),
 (5,  'doctor',      '15-H-52090', CURRENT_DATE + INTERVAL '18 months', 'approved', NULL, NULL),
@@ -89,7 +89,7 @@ INSERT INTO professionals (user_id, role, scfhs_number, license_expiry, status,
 --                              so it also shows in the admin's licence queue
 --   19  ran out 25 days ago  -> a renewal the admin refused: the page shows his
 --                              reason, and she can send a new one
-INSERT INTO professionals (user_id, role, scfhs_number, license_expiry, status,
+INSERT INTO healthcare_professionals (user_id, role, scfhs_number, license_expiry, status,
                            pending_scfhs_number, pending_license_expiry) VALUES
 (16, 'doctor',      '13-H-44216', CURRENT_DATE - INTERVAL '12 days', 'approved', NULL, NULL),
 (17, 'radiologist', '10-R-33820', CURRENT_DATE - INTERVAL '3 days',  'approved', NULL, NULL),

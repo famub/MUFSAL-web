@@ -7,12 +7,12 @@
 -- reports, a radiologist uploads X-rays and a patient owns the case
 -- itself, so deleting the row would leave a medical record with no
 -- author or no owner. A professional who wants to leave is marked in
--- professionals.deactivated_at and keeps everything already written.
+-- healthcare_professionals.deactivated_at and keeps everything already written.
 --
 -- That rule is not left to us to remember: every foreign key pointing
 -- at users is ON DELETE RESTRICT, so the database refuses the deletion.
 -- Two are not, on purpose:
---   patients.user_id and professionals.user_id are CASCADE, because
+--   patients.user_id and healthcare_professionals.user_id are CASCADE, because
 --     those rows are parts of the same person, not references to one;
 --   password_resets.user_id is CASCADE, because a one-hour token is
 --     worth nothing once its account is gone.
@@ -58,11 +58,11 @@ CREATE TABLE patients (
     CONSTRAINT patients_age_18_plus CHECK (date_of_birth <= CURRENT_DATE - INTERVAL '18 years')
 );
 
-CREATE TABLE professionals (
+CREATE TABLE healthcare_professionals (
     user_id                INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     -- as in patients above, but here two roles are allowed
     role                   VARCHAR(20) NOT NULL
-                           CONSTRAINT professionals_role_valid
+                           CONSTRAINT healthcare_professionals_role_valid
                            CHECK (role IN ('doctor','radiologist')),
     scfhs_number           VARCHAR(20) NOT NULL UNIQUE,
     license_expiry         DATE        NOT NULL,
@@ -72,27 +72,27 @@ CREATE TABLE professionals (
     pending_scfhs_number   VARCHAR(20),
     delete_requested_at    TIMESTAMP,
     deactivated_at         TIMESTAMP,
-    CONSTRAINT professionals_is_a_professional FOREIGN KEY (user_id, role)
+    CONSTRAINT healthcare_professionals_is_a_professional FOREIGN KEY (user_id, role)
         REFERENCES users(user_id, role) ON DELETE CASCADE,
-    CONSTRAINT professionals_status_valid CHECK (status IN ('pending','approved','rejected'))
+    CONSTRAINT healthcare_professionals_status_valid CHECK (status IN ('pending','approved','rejected'))
 );
 
-COMMENT ON COLUMN professionals.status IS
+COMMENT ON COLUMN healthcare_professionals.status IS
     'Where the application has got to: pending while the admin has not looked at it, then approved or rejected. It is here and not in users because only a doctor or a radiologist is ever approved: a patient account is live the moment it is made, and the one admin account is not applied for. In users the column would read ''approved'' for every patient and every admin for good, which is a column that says nothing.';
 
-COMMENT ON COLUMN professionals.created_at IS
+COMMENT ON COLUMN healthcare_professionals.created_at IS
     'When the application was made. The admin''s list is ordered by it so the oldest request is dealt with first, and it is the fallback date for when an account was approved. It sits here for the same reason as the column above: for a patient the date was never looked at anywhere in the system.';
 
-COMMENT ON COLUMN professionals.license_expiry IS
+COMMENT ON COLUMN healthcare_professionals.license_expiry IS
     'The day the practising licence runs out, given by the professional when registering. There is no "suspended" column: whether an account is suspended is read from this date (license_expiry < CURRENT_DATE), so the answer is right at every moment and no nightly job has to keep it so. What time alone decides is not stored.';
 
-COMMENT ON COLUMN professionals.pending_license_expiry IS
+COMMENT ON COLUMN healthcare_professionals.pending_license_expiry IS
     'A renewal date waiting for the admin to accept it; empty when no renewal is in hand. The new date waits here instead of overwriting license_expiry, so a licence is never in force before the admin has said so. Accepted, it moves to license_expiry and is emptied; refused, it is emptied and the old date stands.';
 
-COMMENT ON COLUMN professionals.delete_requested_at IS
+COMMENT ON COLUMN healthcare_professionals.delete_requested_at IS
     'When the professional asked for the account to be closed, empty while no such request is in hand. It is here and not in users because only a doctor or a radiologist can ask, so in users it would stay empty for every patient and every admin for good. It is also the first half of one act whose second half is the column below, and keeping them together lets one row answer where a request has got to.';
 
-COMMENT ON COLUMN professionals.deactivated_at IS
+COMMENT ON COLUMN healthcare_professionals.deactivated_at IS
     'When the account was taken out of service, empty while it is in service. This is the admin acting on the request above: the asking is recorded there, the decision here, so a request still waiting is one column filled and the other empty. The row is never deleted, because a doctor signs reports and a radiologist uploads X-rays, and removing it would leave medical records with no author.';
 
 -- The admin is not a user of the clinical system but the account that runs it:

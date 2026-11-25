@@ -1,7 +1,7 @@
 """MUFSAL - licence renewal for a doctor / radiologist whose licence date has passed.
 
 The professional sends a new SCFHS number and a new expiry date. Both wait in
-professionals.pending_scfhs_number / pending_license_expiry until the admin decides
+healthcare_professionals.pending_scfhs_number / pending_license_expiry until the admin decides
 (queries_admin.decide_license_request moves them in, or empties them on a refusal).
 """
 import psycopg
@@ -18,7 +18,7 @@ def get_license_state(user_id):
                    p.pending_scfhs_number, p.pending_license_expiry,
                    (p.license_expiry < CURRENT_DATE) AS expired,
                    d.decision AS last_decision, d.reason AS last_reason
-            FROM professionals p
+            FROM healthcare_professionals p
             LEFT JOIN LATERAL (
                 SELECT decision, reason FROM registration_decisions
                 WHERE professional_id = p.user_id AND kind = 'renewal'
@@ -35,7 +35,7 @@ def scfhs_taken(user_id, number):
     """True when another professional already has (or is waiting for) this SCFHS number."""
     with get_connection() as conn:
         row = conn.execute(
-            "SELECT 1 FROM professionals WHERE user_id <> %s"
+            "SELECT 1 FROM healthcare_professionals WHERE user_id <> %s"
             " AND (scfhs_number = %s OR pending_scfhs_number = %s)",
             (user_id, number, number),
         ).fetchone()
@@ -47,7 +47,7 @@ def request_renewal(user_id, number, expiry):
     try:
         with get_connection() as conn:
             conn.execute(
-                "UPDATE professionals SET pending_scfhs_number = %s, pending_license_expiry = %s"
+                "UPDATE healthcare_professionals SET pending_scfhs_number = %s, pending_license_expiry = %s"
                 " WHERE user_id = %s AND status = 'approved'",
                 (number, expiry, user_id),
             )

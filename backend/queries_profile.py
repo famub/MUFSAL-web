@@ -13,7 +13,7 @@ def get_doctor_profile(user_id):
                    u.password_changed_at, p.scfhs_number,
              (p.license_expiry - CURRENT_DATE) AS license_days_left
             FROM users u
-            JOIN professionals p ON p.user_id = u.user_id
+            JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE u.user_id = %s
             """,
             (user_id,),

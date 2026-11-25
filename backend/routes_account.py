@@ -4,14 +4,14 @@
     GET  /account-deletion         the only page the account can see until the admin decides
 
 The request does not close anything. It saves the time of the request in
-professionals.delete_requested_at and locks the account (session_guard.py sends
+healthcare_professionals.delete_requested_at and locks the account (session_guard.py sends
 every other page here). The admin then closes it from the admin dashboard, with
 the existing DELETE /api/admin/accounts/{id}.
 
 Closing does not remove the row. A doctor signs reports and a radiologist
 uploads X-rays, so deleting the account would leave medical records with no
 author; every foreign key to users is ON DELETE RESTRICT and the database would
-refuse it anyway. What closing does is fill professionals.deactivated_at, which
+refuse it anyway. What closing does is fill healthcare_professionals.deactivated_at, which
 stops the login (queries_accounts.login) and takes the account off the admin's
 list, while everything already written stays where it is.
 """
@@ -33,13 +33,13 @@ CAN_ASK = ("doctor", "radiologist")    # patients and the admin do not have this
 def request_deletion(user_id):
     """Saves the request once (asking twice keeps the first time).
 
-    The column sits on professionals, not users: only a doctor or a radiologist
+    The column sits on healthcare_professionals, not users: only a doctor or a radiologist
     can ask, so it belongs with the table that holds only them. Having a row
     there is itself the check that the asker is one of the two.
     """
     with get_connection() as conn:
         conn.execute(
-            "UPDATE professionals "
+            "UPDATE healthcare_professionals "
             "SET delete_requested_at = COALESCE(delete_requested_at, CURRENT_TIMESTAMP) "
             "WHERE user_id = %s",
             (user_id,),

@@ -53,7 +53,7 @@ def create_professional(full_name, email, password, national_id,
         # role is repeated here only so the composite key can check it, and
         # license_expiry is required of every professional when registering
         conn.execute(
-            "INSERT INTO professionals (user_id, role, scfhs_number, license_expiry)"
+            "INSERT INTO healthcare_professionals (user_id, role, scfhs_number, license_expiry)"
             " VALUES (%s, %s, %s, %s)",
             (row["user_id"], role, scfhs_number, license_expiry),
         )
@@ -88,7 +88,7 @@ def get_user_by_email(email):
         row = conn.execute(
             """
             SELECT u.*, p.status
-            FROM users u LEFT JOIN professionals p ON p.user_id = u.user_id
+            FROM users u LEFT JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE LOWER(u.email) = LOWER(%s)
             """,
             (email,),
@@ -110,7 +110,7 @@ def is_deactivated(user_id):
     """True when an admin has taken this professional's account out of service."""
     with get_connection() as conn:
         row = conn.execute(
-            "SELECT 1 FROM professionals WHERE user_id = %s AND deactivated_at IS NOT NULL",
+            "SELECT 1 FROM healthcare_professionals WHERE user_id = %s AND deactivated_at IS NOT NULL",
             (user_id,),
         ).fetchone()
     return row is not None
@@ -120,7 +120,7 @@ def has_asked_to_delete(user_id):
     """True when this professional pressed "Delete account" and the admin has not closed the account yet."""
     with get_connection() as conn:
         row = conn.execute(
-            "SELECT 1 FROM professionals WHERE user_id = %s AND delete_requested_at IS NOT NULL",
+            "SELECT 1 FROM healthcare_professionals WHERE user_id = %s AND delete_requested_at IS NOT NULL",
             (user_id,),
         ).fetchone()
     return row is not None
@@ -130,7 +130,7 @@ def can_sign_in(user):
     """True when this account is allowed through the door.
 
     Only a doctor or a radiologist is ever approved or rejected, and the
-    status now lives in professionals, so it is NULL for everybody else. A
+    status now lives in healthcare_professionals, so it is NULL for everybody else. A
     patient account is live the moment it is made and the admin account is
     not applied for, so for those two there is nothing to check.
     """
@@ -184,7 +184,7 @@ def scfhs_exists(scfhs_number):
     """True when a professional already uses this SCFHS number."""
     with get_connection() as conn:
         return conn.execute(
-            "SELECT 1 FROM professionals WHERE scfhs_number = %s", (scfhs_number,)
+            "SELECT 1 FROM healthcare_professionals WHERE scfhs_number = %s", (scfhs_number,)
         ).fetchone() is not None
 
 
@@ -216,14 +216,14 @@ def resubmit_professional(user_id, full_name, password, national_id,
             SET full_name = %s, password_hash = %s, national_id = %s, role = %s,
                 password_changed_at = CURRENT_TIMESTAMP
             WHERE u.user_id = %s
-              AND EXISTS (SELECT 1 FROM professionals p
+              AND EXISTS (SELECT 1 FROM healthcare_professionals p
                           WHERE p.user_id = u.user_id AND p.status = 'rejected')
             """,
             (full_name, hash_password(password), national_id, role, user_id),
         )
         # the role is kept in step here too, or the composite key would refuse
         conn.execute(
-            "UPDATE professionals SET role = %s, scfhs_number = %s, license_expiry = %s,"
+            "UPDATE healthcare_professionals SET role = %s, scfhs_number = %s, license_expiry = %s,"
             " status = 'pending' WHERE user_id = %s AND status = 'rejected'",
             (role, scfhs_number, license_expiry, user_id),
         )
@@ -247,7 +247,7 @@ def get_professional_status(user_id):
     """'pending', 'approved' or 'rejected' for a doctor / radiologist, None for anybody else.
     session_guard.py asks this on every request of a professional who is still waiting."""
     with get_connection() as conn:
-        row = conn.execute("SELECT status FROM professionals WHERE user_id = %s", (user_id,)).fetchone()
+        row = conn.execute("SELECT status FROM healthcare_professionals WHERE user_id = %s", (user_id,)).fetchone()
     return row["status"] if row else None
 
 
@@ -260,7 +260,7 @@ def get_access_state(user_id):
             "SELECT status, (delete_requested_at IS NOT NULL) AS delete_requested,"
             "       (deactivated_at IS NOT NULL) AS deactivated,"
             "       (license_expiry < CURRENT_DATE) AS expired "
-            "FROM professionals WHERE user_id = %s",
+            "FROM healthcare_professionals WHERE user_id = %s",
             (user_id,),
         ).fetchone()
 
@@ -272,7 +272,7 @@ def list_pending_professionals():
             """
             SELECT u.user_id, u.full_name, u.role, u.email, u.national_id,
                    p.scfhs_number, p.created_at
-            FROM users u JOIN professionals p ON p.user_id = u.user_id
+            FROM users u JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE p.status = 'pending'
             ORDER BY p.created_at, u.user_id
             """
@@ -290,7 +290,7 @@ def decide_professional(user_id, admin_id, decision, reason=None):
         row = conn.execute(
             """
             SELECT u.full_name, u.role FROM users u
-            JOIN professionals p ON p.user_id = u.user_id
+            JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE u.user_id = %s AND p.status = 'pending'
             FOR UPDATE OF p
             """,
@@ -298,7 +298,7 @@ def decide_professional(user_id, admin_id, decision, reason=None):
         ).fetchone()
         if row is None:
             return False
-        conn.execute("UPDATE professionals SET status = %s WHERE user_id = %s", (decision, user_id))
+        conn.execute("UPDATE healthcare_professionals SET status = %s WHERE user_id = %s", (decision, user_id))
         conn.execute(
             """
             INSERT INTO registration_decisions

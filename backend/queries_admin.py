@@ -19,10 +19,10 @@ def get_summary():
             """
             SELECT
               (SELECT COUNT(*) FROM delay_complaints WHERE status = 'pending')::int AS delayed,
-              (SELECT COUNT(*) FROM professionals
+              (SELECT COUNT(*) FROM healthcare_professionals
                 WHERE status = 'pending'
                    OR (status = 'approved' AND pending_license_expiry IS NOT NULL))::int AS licenses,
-              (SELECT COUNT(*) FROM professionals
+              (SELECT COUNT(*) FROM healthcare_professionals
                 WHERE delete_requested_at IS NOT NULL AND deactivated_at IS NULL)::int AS deletions,
               (SELECT COUNT(*) FROM support_requests WHERE status <> 'resolved')::int AS support
             """
@@ -96,7 +96,7 @@ def list_doctors():
     with get_connection() as conn:
         return conn.execute(
             "SELECT u.user_id, u.full_name FROM users u"
-            " JOIN professionals p ON p.user_id = u.user_id"
+            " JOIN healthcare_professionals p ON p.user_id = u.user_id"
             " WHERE u.role = 'doctor' AND p.status = 'approved' AND p.deactivated_at IS NULL ORDER BY u.full_name"
         ).fetchall()
 
@@ -128,7 +128,7 @@ def list_active_accounts():
                        (SELECT MAX(decided_at) FROM registration_decisions r
                         WHERE r.professional_id = u.user_id AND r.decision = 'approved'),
                        p.created_at) AS approved_at
-            FROM users u JOIN professionals p ON p.user_id = u.user_id
+            FROM users u JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE p.status = 'approved' AND u.role IN ('doctor','radiologist')
               AND p.deactivated_at IS NULL
             ORDER BY u.full_name
@@ -147,7 +147,7 @@ def list_license_requests():
                    p.license_expiry, p.pending_license_expiry, p.pending_scfhs_number,
                    CASE WHEN p.status = 'pending' THEN 'registration' ELSE 'renewal' END AS kind,
                    p.created_at AS since
-            FROM users u JOIN professionals p ON p.user_id = u.user_id
+            FROM users u JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE p.deactivated_at IS NULL
               AND (p.status = 'pending'
                    OR (p.status = 'approved' AND p.pending_license_expiry IS NOT NULL))
@@ -159,12 +159,12 @@ def list_license_requests():
 def decide_license_request(user_id, admin_id, decision, reason=None):
     """Approve or reject a registration or a renewal. False when nothing is waiting for this user.
 
-    A registration is decided like before (professionals.status). A renewal moves
+    A registration is decided like before (healthcare_professionals.status). A renewal moves
     pending_license_expiry into license_expiry when accepted and is emptied when refused;
     a refused renewal does not count against the two tries of a first application."""
     with get_connection() as conn:
         row = conn.execute(
-            "SELECT status, pending_license_expiry FROM professionals"
+            "SELECT status, pending_license_expiry FROM healthcare_professionals"
             " WHERE user_id = %s AND deactivated_at IS NULL FOR UPDATE",
             (user_id,),
         ).fetchone()
@@ -172,16 +172,16 @@ def decide_license_request(user_id, admin_id, decision, reason=None):
             return False
         if row["status"] == "pending":
             kind = "registration"
-            conn.execute("UPDATE professionals SET status = %s WHERE user_id = %s", (decision, user_id))
+            conn.execute("UPDATE healthcare_professionals SET status = %s WHERE user_id = %s", (decision, user_id))
         elif row["status"] == "approved" and row["pending_license_expiry"] is not None:
             kind = "renewal"
             if decision == "approved":
                 conn.execute(
-                    "UPDATE professionals SET license_expiry = pending_license_expiry,"
+                    "UPDATE healthcare_professionals SET license_expiry = pending_license_expiry,"
                     " scfhs_number = COALESCE(pending_scfhs_number, scfhs_number),"
                     " pending_license_expiry = NULL, pending_scfhs_number = NULL WHERE user_id = %s", (user_id,))
             else:
-                conn.execute("UPDATE professionals SET pending_license_expiry = NULL, pending_scfhs_number = NULL"
+                conn.execute("UPDATE healthcare_professionals SET pending_license_expiry = NULL, pending_scfhs_number = NULL"
                              " WHERE user_id = %s", (user_id,))
         else:
             return False
@@ -204,7 +204,7 @@ def list_deletion_requests():
                    p.delete_requested_at AS requested_at, p.deactivated_at AS closed_at,
                    (SELECT COUNT(*) FROM cases c
                      WHERE c.assigned_doctor_id = u.user_id AND c.status = 'under_review')::int AS open_cases
-            FROM users u JOIN professionals p ON p.user_id = u.user_id
+            FROM users u JOIN healthcare_professionals p ON p.user_id = u.user_id
             WHERE p.delete_requested_at IS NOT NULL
             ORDER BY (p.deactivated_at IS NOT NULL), p.delete_requested_at, u.user_id
             """
@@ -215,7 +215,7 @@ def decline_deletion_request(user_id):
     """The admin says no: the request is cleared and the account works again. False if none is open."""
     with get_connection() as conn:
         row = conn.execute(
-            "UPDATE professionals SET delete_requested_at = NULL"
+            "UPDATE healthcare_professionals SET delete_requested_at = NULL"
             " WHERE user_id = %s AND delete_requested_at IS NOT NULL AND deactivated_at IS NULL"
             " RETURNING user_id",
             (user_id,),
@@ -239,7 +239,7 @@ def deactivate_professional_account(user_id, only_if_requested=False):
     with get_connection() as conn:
         row = conn.execute(
             """
-            UPDATE professionals SET deactivated_at = CURRENT_TIMESTAMP
+            UPDATE healthcare_professionals SET deactivated_at = CURRENT_TIMESTAMP
             WHERE user_id = %s AND deactivated_at IS NULL
               AND (NOT %s OR delete_requested_at IS NOT NULL)
             RETURNING user_id, role
@@ -256,7 +256,7 @@ def deactivate_professional_account(user_id, only_if_requested=False):
             for c in cases:
                 target = conn.execute(
                     """
-                    SELECT u.user_id FROM users u JOIN professionals p ON p.user_id = u.user_id
+                    SELECT u.user_id FROM users u JOIN healthcare_professionals p ON p.user_id = u.user_id
                     WHERE u.role = 'doctor' AND p.status = 'approved' AND p.deactivated_at IS NULL
                       AND p.delete_requested_at IS NULL AND p.license_expiry >= CURRENT_DATE
                       AND u.user_id <> %s

@@ -93,7 +93,7 @@ def reassign_case(case_id, new_doctor_id, admin_id):
     with get_connection() as conn:
         # only that such a doctor exists; the name is no longer copied anywhere
         doctor = conn.execute(
-            "SELECT 1 FROM users u JOIN professionals p ON p.user_id = u.user_id"
+            "SELECT 1 FROM users u JOIN healthcare_professionals p ON p.user_id = u.user_id"
             " WHERE u.user_id = %s AND u.role = 'doctor'"
             "   AND p.status = 'approved' AND p.deactivated_at IS NULL",
             (new_doctor_id,),

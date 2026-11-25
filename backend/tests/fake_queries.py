@@ -42,7 +42,7 @@ def _unique(email=None, national_id=None, scfhs=None, skip=None):
         if email and u["email"].lower() == email.lower(): raise Dup("users_email_key")
         if national_id and u["national_id"] == national_id: raise Dup("users_national_id_key")
     for uid, p in professionals.items():
-        if uid != skip and scfhs and p == scfhs: raise Dup("professionals_scfhs_number_key")
+        if uid != skip and scfhs and p == scfhs: raise Dup("healthcare_professionals_scfhs_number_key")
 
 
 def _add(role, status, name, email, password, phone, national_id):
