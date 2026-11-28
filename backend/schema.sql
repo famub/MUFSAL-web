@@ -43,7 +43,8 @@ CREATE TABLE users (
 CREATE UNIQUE INDEX users_email_lower_unique ON users (lower(email));
 
 CREATE TABLE patients (
-    user_id       INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id       INTEGER PRIMARY KEY
+        CONSTRAINT patient_is_a_user REFERENCES users(user_id) ON DELETE CASCADE,
     -- Carried only so the key below can check it. Without it the row says it
     -- belongs to a user, not that the user is a patient, and a doctor could be
     -- written in here. The DEFAULT and the CHECK keep it from ever being
@@ -59,7 +60,8 @@ CREATE TABLE patients (
 );
 
 CREATE TABLE healthcare_professionals (
-    user_id                INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id                INTEGER PRIMARY KEY
+        CONSTRAINT professional_is_a_user REFERENCES users(user_id) ON DELETE CASCADE,
     -- as in patients above, but here two roles are allowed
     role                   VARCHAR(20) NOT NULL
                            CONSTRAINT healthcare_professionals_role_valid
@@ -142,8 +144,10 @@ CREATE TABLE registration_decisions (
     decision_id     SERIAL PRIMARY KEY,
     -- the applicant's name and role are not copied here either: both are read
     -- through professional_id, for the same reason as reports.doctor_id above.
-    professional_id INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
-    admin_id        INTEGER      NOT NULL REFERENCES admins(admin_id) ON DELETE RESTRICT,
+    professional_id INTEGER      NOT NULL
+        CONSTRAINT decision_about_a_professional REFERENCES users(user_id) ON DELETE RESTRICT,
+    admin_id        INTEGER      NOT NULL
+        CONSTRAINT decision_made_by_an_admin REFERENCES admins(admin_id) ON DELETE RESTRICT,
     kind            VARCHAR(15)  NOT NULL DEFAULT 'registration',
     decision        VARCHAR(10)  NOT NULL,
     reason          TEXT,
@@ -158,7 +162,8 @@ COMMENT ON COLUMN registration_decisions.kind IS
 
 CREATE TABLE cases (
     case_id            SERIAL PRIMARY KEY,
-    patient_id         INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    patient_id         INTEGER      NOT NULL
+        CONSTRAINT case_belongs_to_a_patient REFERENCES users(user_id) ON DELETE RESTRICT,
     -- There is no "source" column saying whether the patient or a radiologist
     -- sent the X-ray in. It is these two columns compared: the same person on
     -- both sides means the patient sent her own, a different one means a
@@ -166,8 +171,10 @@ CREATE TABLE cases (
     -- fact written twice, and two copies can come to disagree. No account is
     -- ever deleted (see the note at the top of this file), so uploaded_by is
     -- always there to answer with.
-    uploaded_by        INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
-    assigned_doctor_id INTEGER      REFERENCES users(user_id) ON DELETE RESTRICT,
+    uploaded_by        INTEGER      NOT NULL
+        CONSTRAINT case_uploaded_by_a_user REFERENCES users(user_id) ON DELETE RESTRICT,
+    assigned_doctor_id INTEGER
+        CONSTRAINT case_assigned_to_a_doctor REFERENCES users(user_id) ON DELETE RESTRICT,
     xray_image_path    VARCHAR(255) NOT NULL UNIQUE,
     -- The language the patient wants her own report written in. It belongs to
     -- the case, not to the account, because the report is written once for
@@ -192,7 +199,8 @@ COMMENT ON COLUMN cases.xray_image_path IS
     'Where the file sits under backend/uploads. The file name is a random id, never the case number, so one patient cannot reach another patient''s X-ray by changing a number in the address.';
 
 CREATE TABLE case_history (
-    case_id                 INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
+    case_id                 INTEGER      PRIMARY KEY
+        CONSTRAINT history_belongs_to_a_case REFERENCES cases(case_id) ON DELETE CASCADE,
     -- the question is optional, so nothing written is NULL, not a dash
     medications             TEXT,
     knee                    VARCHAR(10)  NOT NULL,
@@ -220,7 +228,8 @@ CREATE TABLE case_history (
 );
 
 CREATE TABLE ai_results (
-    case_id            INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
+    case_id            INTEGER      PRIMARY KEY
+        CONSTRAINT ai_result_belongs_to_a_case REFERENCES cases(case_id) ON DELETE CASCADE,
     predicted_grade    SMALLINT     NOT NULL,
     confidence         NUMERIC(4,3) NOT NULL,
     prob_grade_0       NUMERIC(4,3) NOT NULL,
@@ -247,11 +256,13 @@ COMMENT ON COLUMN ai_results.priority IS
     'Stored, not worked out on the fly: it is the triage decision taken under the rule in force when the X-ray was read. Recomputing it later would quietly rewrite decisions already made. The rule itself lives in priority.py.';
 
 CREATE TABLE reports (
-    case_id      INTEGER      PRIMARY KEY REFERENCES cases(case_id) ON DELETE CASCADE,
+    case_id      INTEGER      PRIMARY KEY
+        CONSTRAINT report_belongs_to_a_case REFERENCES cases(case_id) ON DELETE CASCADE,
     -- the doctor's name is not copied here: it is read through this id. No
     -- account is ever deleted, so the name is always reachable, and one copy
     -- cannot drift from the other.
-    doctor_id    INTEGER      NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    doctor_id    INTEGER      NOT NULL
+        CONSTRAINT report_signed_by_a_doctor REFERENCES users(user_id) ON DELETE RESTRICT,
     final_grade  SMALLINT     NOT NULL,
     doctor_notes TEXT         NOT NULL,
     -- One report, in one language: the one asked for in cases.report_language.
@@ -267,11 +278,13 @@ COMMENT ON COLUMN reports.report_text IS
 
 CREATE TABLE case_activity (
     activity_id SERIAL      PRIMARY KEY,
-    case_id     INTEGER     NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    case_id     INTEGER     NOT NULL
+        CONSTRAINT activity_belongs_to_a_case REFERENCES cases(case_id) ON DELETE CASCADE,
     event_type  VARCHAR(20) NOT NULL,
     -- the doctor the event is about, by id and not by name. Two doctors can
     -- share a name, and then a name alone cannot say which one acted.
-    doctor_id   INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    doctor_id   INTEGER     NOT NULL
+        CONSTRAINT activity_about_a_doctor REFERENCES users(user_id) ON DELETE RESTRICT,
     note        TEXT,
     created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT activity_event_valid CHECK (event_type IN ('assigned','reassigned','approved'))
@@ -279,10 +292,12 @@ CREATE TABLE case_activity (
 
 CREATE TABLE support_requests (
     request_id SERIAL      PRIMARY KEY,
-    user_id    INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    user_id    INTEGER     NOT NULL
+        CONSTRAINT support_sent_by_a_user REFERENCES users(user_id) ON DELETE RESTRICT,
     -- which case the request is about, when it is about one at all.
     -- The request survives the case, so the admin can still read it.
-    case_id    INTEGER     REFERENCES cases(case_id) ON DELETE SET NULL,
+    case_id    INTEGER
+        CONSTRAINT support_about_a_case REFERENCES cases(case_id) ON DELETE SET NULL,
     body       TEXT        NOT NULL,
     status     VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -291,8 +306,10 @@ CREATE TABLE support_requests (
 
 CREATE TABLE support_replies (
     reply_id   SERIAL    PRIMARY KEY,
-    request_id INTEGER   NOT NULL REFERENCES support_requests(request_id) ON DELETE CASCADE,
-    admin_id   INTEGER   NOT NULL REFERENCES admins(admin_id) ON DELETE RESTRICT,
+    request_id INTEGER   NOT NULL
+        CONSTRAINT reply_answers_a_request REFERENCES support_requests(request_id) ON DELETE CASCADE,
+    admin_id   INTEGER   NOT NULL
+        CONSTRAINT reply_written_by_an_admin REFERENCES admins(admin_id) ON DELETE RESTRICT,
     body       TEXT      NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -302,8 +319,10 @@ CREATE TABLE support_replies (
 -- without it a row could name nobody, or name a user and an admin at once.
 CREATE TABLE password_resets (
     reset_id   SERIAL       PRIMARY KEY,
-    user_id    INTEGER      REFERENCES users(user_id)   ON DELETE CASCADE,
-    admin_id   INTEGER      REFERENCES admins(admin_id) ON DELETE CASCADE,
+    user_id    INTEGER
+        CONSTRAINT reset_for_a_user REFERENCES users(user_id)   ON DELETE CASCADE,
+    admin_id   INTEGER
+        CONSTRAINT reset_for_an_admin REFERENCES admins(admin_id) ON DELETE CASCADE,
     token      VARCHAR(255) NOT NULL UNIQUE,
     expires_at TIMESTAMP    NOT NULL,
     used       BOOLEAN      NOT NULL DEFAULT FALSE,
@@ -314,12 +333,15 @@ CREATE TABLE password_resets (
 
 CREATE TABLE delay_complaints (
     delay_complaint_id SERIAL      PRIMARY KEY,
-    case_id            INTEGER     NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
-    user_id            INTEGER     NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+    case_id            INTEGER     NOT NULL
+        CONSTRAINT delay_about_a_case REFERENCES cases(case_id) ON DELETE CASCADE,
+    user_id            INTEGER     NOT NULL
+        CONSTRAINT delay_reported_by_a_user REFERENCES users(user_id) ON DELETE RESTRICT,
     status             VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     handled_at         TIMESTAMP,
-    handled_by         INTEGER     REFERENCES admins(admin_id) ON DELETE RESTRICT,
+    handled_by         INTEGER
+        CONSTRAINT delay_handled_by_an_admin REFERENCES admins(admin_id) ON DELETE RESTRICT,
     CONSTRAINT delay_status_valid CHECK (status IN ('pending','handled'))
 );
 
